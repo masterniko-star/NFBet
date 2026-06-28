@@ -3,3 +3,6 @@
 
 # Local backups and snapshots
 backups/
+
+# Local Claude settings
+.claude/
