@@ -528,7 +528,13 @@ function calcMatch(m){if(m&&m.id&&_cmCache[m.id])return _cmCache[m.id];var pool=
   function _refund(){res.refunded=true;for(var kr in b)res.payouts[kr]=Number(b[kr].stake)||0;res.coef=1;}
   if(m.settled){
     if(m.winner==="VOID"){_refund();}
-    else if(m.winner==="A"||m.winner==="B"||m.winner==="X"){var sw=m.winner==="A"?sA:(m.winner==="B"?sB:sX);if(sw<=0){_refund();}else{res.coef=pool/sw;for(var k3 in b){res.payouts[k3]=(b[k3].team===m.winner)?pool*((Number(b[k3].stake)||0)/sw):0;}}}
+    else if(m.winner==="A"||m.winner==="B"||m.winner==="X"){var sw=m.winner==="A"?sA:(m.winner==="B"?sB:sX);if(sw<=0){_refund();}else{res.coef=pool/sw;
+      // выплаты в ЦЕЛЫХ שקלים: метод наибольшего остатка (Гамильтон). Σвыплат==касса точно, без дробных хвостов.
+      // pool/stake/sw — целые (ставки целочисленны), так что арифметика точная; ничьи дробной части разбиваем по id ставки (детерминированно, идентично серверу).
+      var _wk=[];for(var k3 in b){res.payouts[k3]=0;if(b[k3].team===m.winner){var _q=pool*(Number(b[k3].stake)||0);_wk.push({k:k3,base:Math.floor(_q/sw),rem:_q%sw});}}
+      var _asg=0;for(var _i=0;_i<_wk.length;_i++){res.payouts[_wk[_i].k]=_wk[_i].base;_asg+=_wk[_i].base;}
+      var _left=pool-_asg;_wk.sort(function(x,y){return (y.rem-x.rem)||(x.k<y.k?-1:(x.k>y.k?1:0));});
+      for(var _j=0;_j<_left;_j++){res.payouts[_wk[_j].k]+=1;}}}
   }
   if(m&&m.id)_cmCache[m.id]=res;return res;}
 function detectDrawOK(txt){txt=String(txt||"").toLowerCase();

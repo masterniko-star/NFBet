@@ -7,7 +7,8 @@ function ok(c,m){tests++;if(!c){fails++;console.log('FAIL:',m);}else console.log
 const seed={meta:{fee:100,bank:100,minBet:1,maxBet:10,cur:'₪'},
   players:{r1:{name:'Ann',feePaid:true,t:1},r2:{name:'Bob',feePaid:true,t:2},r3:{name:'Cy',feePaid:true,t:3}},
   matches:{m1:{round:'R32',order:0,t:1,teamA:'USA',teamB:'Iran',settled:true,winner:'A'}},
-  // реальный пул=8, sw(A)=3 -> r1 net=8*(1/3)-1=1.6667 (-> "1.7"), r2 net=8*(2/3)-2=3.3333 (-> "3.3")
+  // пул=8, sw(A)=3. Выплаты в ЦЕЛЫХ שקлим (метод наибольшего остатка):
+  //   r1: floor(8*1/3)=2 + остаток 1 = 3 -> net +2 ; r2: floor(8*2/3)=5 -> net +3. Дробных нетто больше нет.
   bets:{m1:{r1:{team:'A',stake:1},r2:{team:'A',stake:2},r3:{team:'B',stake:5}}}};
 
 let H=loadApp(seed,{});H.sandbox.buildState(H.state.tree);
@@ -16,9 +17,9 @@ let e=null;try{H.sandbox.renderActive();}catch(x){e=x;}
 ok(!e,'renderActive(hist) без ошибки');
 let html=H.mainHTML();
 
-console.log('== округление до десятых ==');
-ok(html.indexOf('1.7')>=0,'нетто r1 показано как 1.7');
-ok(html.indexOf('1.67')<0&&html.indexOf('1.6667')<0,'двух знаков после точки нет (1.67/1.6667)');
+console.log('== целые שקלים, без дробных хвостов ==');
+ok(html.indexOf('>2</span>')>=0,'нетто r1 показано как целое +2');
+ok(html.indexOf('1.67')<0&&html.indexOf('1.6667')<0&&html.indexOf('1.7')<0,'дробного нетто нет (выплаты целочисленны)');
 
 console.log('== две строки ==');
 ok((html.match(/display:block;white-space:nowrap/g)||[]).length>=2,'название игры в две строки (два блока) даже для коротких имён');

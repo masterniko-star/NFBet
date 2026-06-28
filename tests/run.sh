@@ -2,7 +2,7 @@
 # Полный набор тестов NF PlayOff (bash/WSL). Кросс-платформенная альтернатива: node run.mjs
 # Запуск:  bash tests/run.sh   (или: cd tests && bash run.sh)
 cd "$(dirname "$0")" || exit 1
-CLIENT="appharness sorttest rtltest journey revtest edgetests drawtest drawbig autofill loginstest leaguetest fxfilter clientsched seasontests deltests logtest logfix seentest admintest archivetest cashlogtest statstest automarktest noticetest integritytest maxplayerstest intgautotest critpopuptest xsstest logunifytest legacyclient betcoltest dash365test betmathtest features2test drawpubtest histtest moneyfuzz datalink demoscan feecur resettest resetbaltest logcopytest badgetest owneriotest cachetest demotetest tgtest demobet betrowtest demohltest"
+CLIENT="appharness sorttest rtltest journey revtest edgetests drawtest drawbig autofill loginstest leaguetest fxfilter clientsched seasontests deltests logtest logfix seentest admintest archivetest cashlogtest statstest automarktest noticetest integritytest maxplayerstest intgautotest critpopuptest xsstest logunifytest legacyclient betcoltest dash365test betmathtest features2test drawpubtest histtest moneyfuzz datalink demoscan feecur resettest resetbaltest logcopytest badgetest owneriotest cachetest demotetest tgtest demobet betrowtest demohltest roundpayout"
 SRV="schedtest paritytest legacytest srvlog drawpubsrv srvfuzz srvpurge srvidle srvdemote srvoverbet demobet"
 EXTRA_CLIENT="$1"
 EXTRA_SRV="$2"
