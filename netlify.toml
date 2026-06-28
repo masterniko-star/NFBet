@@ -1,0 +1,11 @@
+# NF PlayOff — конфигурация Netlify
+# Сайт статический (index.html в корне). Серверная автопроверка/автодобавка живёт в
+# netlify/functions/check-results.mjs и запускается по «пульсу» каждую минуту
+# (export const config = { schedule: "* * * * *" }); реальные времена — в приложении,
+# Настройки → «עדכון אוטומטי». Результаты заполняются за 30 мин до добавления новых игр.
+
+[build]
+  publish = "."
+
+[functions]
+  directory = "netlify/functions"
