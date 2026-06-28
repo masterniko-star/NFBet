@@ -373,7 +373,7 @@ function fbUpd(p,v){return fbWrite("PATCH",p,v);}
 function fbDel(p){return fbWrite("DELETE",p);}
 
 /* ===================== ДИАГНОСТИКА / ЛОГ ОШИБОК ===================== */
-var APP_VER="2026-06-29j";var AC_DEF_TIMES=["08:00","20:00"];
+var APP_VER="2026-06-29k";var AC_DEF_TIMES=["08:00","20:00"];
 var LOG_KEY="nfp_log",LOG_MAX=250,_diagSeen={},_diagBuf=[],_diagT=null,_clientCrits=[];
 function devId(){try{var d=localStorage.getItem("nfp_dev");if(!d){d=Date.now().toString(36)+Math.random().toString(36).slice(2,6);localStorage.setItem("nfp_dev",d);}return d;}catch(e){return "dev";}}
 function logRead(){try{return JSON.parse(localStorage.getItem(LOG_KEY)||"[]");}catch(e){return [];}}
@@ -1633,22 +1633,39 @@ function renderUsage(){
   }).catch(function(){if(box)box.innerHTML='<div class="tiny" style="color:var(--red)">לא ניתן לקרוא נתונים מהבסיס.</div>';if(mini)mini.innerHTML='';});
 }
 window.renderUsage=renderUsage;
-var _enteredThisSession=false;
+// כניסת משתתף → /seen/{id}. Раньше: флаг ставился ДО асинхронной записи, запись шла сырым fetch
+// без ретрая, а все ошибки глотались — одна осечка сети/5xx = игрок «לא נכנס» (красный), хотя вошёл и
+// поставил. Теперь: помечаем выполненным ТОЛЬКО после успешного PUT; при сбое — лог + авто-повтор;
+// ключ по id игрока (не глобальный bool), чтобы переключение аккаунта в одной сессии тоже записывалось.
+var _entryMarked=null,_entryTryId=null,_entryTries=0,ENTRY_MAX=6;
 function markEntry(){
-  if(_enteredThisSession||!ME||!DB||!/^https?:/.test(DB))return;
-  _enteredThisSession=true;
-  var u=fbUrl("/seen/"+ME);
-  fetch(u).then(function(r){return r.ok?r.json():null;}).then(function(prev){
+  if(!ME||!DB||!/^https?:/.test(DB))return;
+  if(_entryMarked===ME)return;                                  // этот игрок уже записан в этой сессии
+  if(_entryTryId!==ME){_entryTryId=ME;_entryTries=0;}           // сменился игрок — сбросить счётчик попыток
+  if(_entryTries>=ENTRY_MAX)return;                             // предохранитель от бесконечных повторов (сброс при перезагрузке)
+  var attempt=++_entryTries,meId=ME,u=fbUrl("/seen/"+meId);
+  fetch(u).then(function(r){if(!r.ok)throw new Error("GET "+r.status);return r.json();}).then(function(prev){
     prev=prev||{}; var now=Date.now(); var nm=(me()&&me().name)||prev.n||"";
     var rec={t:now,c:(prev.c||0)+1,f:prev.f||now,n:nm};
-    try{fetch(u,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(rec)}).catch(function(){});}catch(e){}
-  }).catch(function(){});
+    return fetch(u,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(rec)}).then(function(r2){
+      if(!r2||!r2.ok)throw new Error("PUT "+(r2&&r2.status));
+      if(_entryMarked!==meId){_entryMarked=meId;logInfo("entry","כניסה נרשמה: "+nm,{pid:meId});}
+    });
+  }).catch(function(e){
+    var nm=(me()&&me().name)||meId;
+    logWarn("entry","רישום כניסה (/seen) נכשל ל"+nm+" — ניסיון "+attempt+"/"+ENTRY_MAX+": "+((e&&e.message)||e),{pid:meId,attempt:attempt});
+    if(attempt>=ENTRY_MAX)logErr("entry","כניסת משתתף לא נרשמה אחרי "+ENTRY_MAX+" נסיונות — "+nm+" יופיע כ'לא נכנס' למרות שנכנס/הימר",{pid:meId});
+    else if(ME===meId)setTimeout(function(){markEntry();},2500); // авто-повтор, пока игрок не сменился
+  });
 }
 window.markEntry=markEntry;
 function renderLogins(){
   var box=$("#loginsBox"); if(!box)return;
   fbGet("/seen").then(function(seen){var b=$("#loginsBox");if(!b)return;seen=seen||{};
     var now=Date.now(),DAY=864e5;
+    // диагностика рассинхрона: игрок без записи /seen («לא נכנס», красный), но со ставкой — значит markEntry не записал вход. Логируем (раз на игрока за сессию).
+    var betPids={};(S.matches||[]).forEach(function(m){var bb=m.bets||{};for(var pid in bb)betPids[pid]=1;});
+    S.players.forEach(function(pl){var sv=seen[pl.id]||{};if(!(sv.t>0)&&betPids[pl.id]){once("entrymiss-"+pl.id,function(){logWarn("entry","‏"+(pl.name||pl.id)+" מסומן 'לא נכנס' אך יש לו הימור — רישום /seen כנראה נכשל",{pid:pl.id});});}});
     var rows=S.players.map(function(pl){var sv=seen[pl.id]||{};return {name:pl.name,t:sv.t||0,c:sv.c||0};});
     var entered=rows.filter(function(r){return r.t>0;}).length;
     var today=rows.filter(function(r){return r.t&&(now-r.t)<DAY;}).length;

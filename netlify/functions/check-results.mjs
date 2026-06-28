@@ -65,7 +65,7 @@ function fmtIsrael(iso) {
 }
 
 /* ---------- серверный лог ошибок -> /diag/server (виден в админском логе) ---------- */
-const SRV_VER="srv-2026-06-29a";
+const SRV_VER="srv-2026-06-29b";
 async function slog(lvl,cat,msg,x){
   const entry={ts:Date.now(),lvl,cat,msg:String(msg||"").slice(0,400),ver:SRV_VER};
   if(x!==undefined){try{entry.x=JSON.parse(JSON.stringify(x));}catch(_){}}
