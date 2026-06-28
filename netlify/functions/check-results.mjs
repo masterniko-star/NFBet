@@ -30,7 +30,16 @@ export function calcMatch(m, betsForM) {
   if (w === "VOID") { ref(); return { sumA: sA, sumB: sB, sumX: sX, pool, payouts, refunded }; }
   if (w === "A" || w === "B" || w === "X") {
     const sw = w === "A" ? sA : (w === "B" ? sB : sX);
-    if (!sw) { ref(); } else { for (const k in bets) payouts[k] = bets[k].team === w ? (Number(bets[k].stake) || 0) * (pool / sw) : 0; }
+    if (!sw) { ref(); } else {
+      // выплаты в ЦЕЛЫХ שקלים: метод наибольшего остатка (Гамильтон). Σвыплат==pool точно, без дробных хвостов.
+      // ИДЕНТИЧНО клиенту (index.html calcMatch): целочисленно, ничьи остатка разбиваем по id ставки.
+      const wk = [];
+      for (const k in bets) { payouts[k] = 0; if (bets[k].team === w) { const q = pool * (Number(bets[k].stake) || 0); wk.push({ k, base: Math.floor(q / sw), rem: q % sw }); } }
+      let asg = 0; for (const e of wk) { payouts[e.k] = e.base; asg += e.base; }
+      const left = pool - asg;
+      wk.sort((x, y) => (y.rem - x.rem) || (x.k < y.k ? -1 : (x.k > y.k ? 1 : 0)));
+      for (let i = 0; i < left; i++) payouts[wk[i].k] += 1;
+    }
   }
   return { sumA: sA, sumB: sB, sumX: sX, pool, payouts, refunded };
 }
@@ -53,7 +62,7 @@ function fmtIsrael(iso) {
 }
 
 /* ---------- серверный лог ошибок -> /diag/server (виден в админском логе) ---------- */
-const SRV_VER="srv-2026-06-27a";
+const SRV_VER="srv-2026-06-28a";
 async function slog(lvl,cat,msg,x){
   const entry={ts:Date.now(),lvl,cat,msg:String(msg||"").slice(0,400),ver:SRV_VER};
   if(x!==undefined){try{entry.x=JSON.parse(JSON.stringify(x));}catch(_){}}

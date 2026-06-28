@@ -65,9 +65,11 @@ const near=(a,b,e)=>Math.abs(a-b)<(e||1e-6);
   const A=loadApp(seed,{});A.sandbox.buildState(A.state.tree);
   const c=A.sandbox.calcMatch(A.sandbox.S.matches.find(m=>m.id==='m'));
   ok(near(c.pool,50)&&near(c.sumA,30)&&near(c.sumB,20),'4: pool50 sumA30 sumB20');
-  ok(near(c.payouts.a1,50*10/30)&&near(c.payouts.b1,0),'4: A payout=16.67 each, B=0');
+  // целые выплаты (метод наибольшего остатка): a1/a2/a3 = floor(50*10/30)=16, остаток 2 → +1 двум первым по id (a1,a2)
+  ok(c.payouts.a1===17&&c.payouts.a2===17&&c.payouts.a3===16&&c.payouts.b1===0,'4: A payouts целые 17/17/16 (остаток по id), B=0');
   let sum=0;Object.keys(c.payouts).forEach(k=>sum+=c.payouts[k]);
-  ok(near(sum,50),'4: Σpayouts == pool (conserved)');
+  ok(sum===50,'4: Σpayouts == pool (целочисленно, ровно 50)');
+  ok(Object.keys(c.payouts).every(k=>Number.isInteger(c.payouts[k])),'4: все выплаты — целые שקלים');
 }
 
 // ---------- 5. возврат при отсутствии соперников + VOID ----------

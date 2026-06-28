@@ -82,13 +82,12 @@ function multi(matches,bets,players,meta){
   ['a','b','c','d'].forEach(k=>near(c.payouts[k],0,'A wins: B bettor '+k+' = 0'));
   // B wins (favorite/crowd): split 30 across 29 staked -> tiny profit
   c=one({settled:true,winner:'B'},bets).calc();
-  near(c.coef,30/29,'B wins coef=30/29');
-  near(c.payouts.a,30*10/29,'B wins a gross=10.3448');
-  near(c.payouts.a-10,30*10/29-10,'a net ~= +0.345 (with the crowd, tiny)');
-  near(c.payouts.b-5,30*5/29-5,'b net ~= +0.172');
-  near(c.payouts.c-4,30*4/29-4,'c net ~= +0.138');
-  near(c.payouts.niko,0,'B wins: niko (A) = 0');
-  near(c.payouts.a+c.payouts.b+c.payouts.c+c.payouts.d,30,'B payouts sum == pool');
+  near(c.coef,30/29,'B wins coef=30/29 (preview only)');
+  // whole-shekel payouts (largest remainder): base floor(30*s/29) for a/b/c/d = 10/5/4/10 (sum 29), leftover 1 -> +1 to 'a' (max remainder, id tiebreak)
+  eq(c.payouts.a,11,'B wins a=11 (10 + leftover shekel)');
+  eq(c.payouts.b,5,'B wins b=5'); eq(c.payouts.c,4,'B wins c=4'); eq(c.payouts.d,10,'B wins d=10');
+  eq(c.payouts.niko,0,'B wins: niko (A) = 0');
+  eq(c.payouts.a+c.payouts.b+c.payouts.c+c.payouts.d,30,'B payouts sum == pool (exactly 30)');
 }
 
 // ---------- 7. parimutuel is zero-sum (closed pool, no rake) ----------

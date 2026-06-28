@@ -9,7 +9,7 @@ import path from 'node:path';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 
-const CLIENT = "appharness sorttest rtltest journey revtest edgetests drawtest drawbig autofill loginstest leaguetest fxfilter clientsched seasontests deltests logtest logfix seentest admintest archivetest cashlogtest statstest automarktest noticetest integritytest maxplayerstest intgautotest critpopuptest xsstest logunifytest legacyclient betcoltest dash365test betmathtest features2test drawpubtest histtest moneyfuzz datalink demoscan feecur resettest resetbaltest logcopytest badgetest owneriotest cachetest demotetest tgtest demobet betrowtest demohltest authtest betlogictest tztest pweyetest boardalign panelhead statsmini logpanels".split(/\s+/);
+const CLIENT = "appharness sorttest rtltest journey revtest edgetests drawtest drawbig autofill loginstest leaguetest fxfilter clientsched seasontests deltests logtest logfix seentest admintest archivetest cashlogtest statstest automarktest noticetest integritytest maxplayerstest intgautotest critpopuptest xsstest logunifytest legacyclient betcoltest dash365test betmathtest features2test drawpubtest histtest moneyfuzz datalink demoscan feecur resettest resetbaltest logcopytest badgetest owneriotest cachetest demotetest tgtest demobet betrowtest demohltest authtest betlogictest tztest pweyetest boardalign panelhead statsmini logpanels roundpayout".split(/\s+/);
 const SRV = "schedtest paritytest legacytest srvlog drawpubsrv srvfuzz srvpurge srvidle srvdemote srvoverbet demobet resetnewgames".split(/\s+/);
 
 // доп. тесты из CLI (extra client .js, extra server .mjs)
