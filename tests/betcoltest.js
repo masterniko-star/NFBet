@@ -26,10 +26,11 @@ ok(/📥<\/span>0/.test(h),'demo player deposited=0');
 ok(/📥<\/span>150/.test(h)&&/📤<\/span>30/.test(h),'explicit dep=150 / wd=30 rendered');
 ok(/class="nmtxt"[\s\S]*?class="io dep"[\s\S]*?class="io wd"[\s\S]*?class="bal"/.test(h),'order: name -> deposited -> withdrawn -> balance');
 ok(/<div class="lbwrap">[\s\S]*?class="lb/.test(h),'rows wrapped in .lbwrap subgrid (columns align across rows)');
-// «$» active-bet indicator sits right after the balance number, in a reserved fixed slot (one aligned column)
-ok((h.match(/<span class="hb">\$<\/span>/g)||[]).length===1,'$ shows for exactly 1 active bettor (p1 open bet)');
-ok((h.match(/<span class="hb"><\/span>/g)||[]).length===2,'reserved empty $ slot for 2 non-bettors (column alignment)');
-ok(/class="bal"[^>]*>[^<]*<span class="cur">[^<]*<\/span><span class="hb">\$<\/span>/.test(h),'balance shows: number then ₪ then $ marker');
+// pending (деньги в ставках) -> «(+N)» зелёным в своей выровненной колонке (.hbamt); значок $ убран
+ok(!/class="hb"/.test(h)&&!/>\$</.test(h),'значок $ убран полностью');
+ok((h.match(/<span class="hbamt">\(\+5\)<\/span>/g)||[]).length===1,'pending (+5) у ровно 1 игрока с открытой ставкой');
+ok((h.match(/<span class="hbamt"><\/span>/g)||[]).length===2,'пустой слот pending у 2 без ставок (колонка зарезервирована)');
+ok(/class="bal"[^>]*>[^<]*<span class="cur">[^<]*<\/span><\/span>/.test(h),'баланс: число затем ₪ (без $)');
 ok((h.match(/<span class="cur">/g)||[]).length===3,'₪ currency shown next to every balance (all 3 rows)');
 
 console.log('\n'+(fails?('FAILED '+fails+'/'+tests):('ALL PASS '+tests+'/'+tests)));process.exit(fails?1:0);

@@ -75,8 +75,8 @@ for(let T=0;T<TRIALS;T++){
   // --- ranking: покрытие, сортировка, ранги ---
   const rk=S.ranking();
   ok(rk.length===N,'ranking покрывает всех ('+rk.length+'/'+N+' T'+T+')');
-  let sortedOK=true; for(let i=1;i<rk.length;i++){if(rk[i-1].s.balance<rk[i].s.balance-1e-9)sortedOK=false;}
-  ok(sortedOK,'ranking по балансу убыв. (T'+T+')');
+  let sortedOK=true; for(let i=1;i<rk.length;i++){if((rk[i-1].s.balance+rk[i-1].s.pending)<(rk[i].s.balance+rk[i].s.pending)-1e-9)sortedOK=false;}
+  ok(sortedOK,'ranking по (баланс+pending) убыв. (T'+T+')');
   let ranksOK=true; for(let i=0;i<rk.length;i++){if(rk[i].rank!==i+1)ranksOK=false;}
   ok(ranksOK,'ранги 1..N подряд (T'+T+')');
 }
