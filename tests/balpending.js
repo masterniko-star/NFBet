@@ -12,8 +12,8 @@ A.sandbox.buildState(A.state.tree);
 A.sandbox.ME='u';A.sandbox.TAB='all';
 A.sandbox.renderAllView();
 const html=A.mainHTML()||'';
-ok(/class="bal"[^>]*>93\+7=100<span class="cur">/.test(html),'формат «93+7=100» (баланс+ставки=итого) в .bal');
-ok(/93\+7=100<span class="cur">₪<\/span>/.test(html),'₪ один раз в конце');
+ok(/class="bal"[^>]*>93\+7=\s\s100<span class="cur">/.test(html),'формат «93+7=  100» (баланс+ставки=итого, 2 пробела после =) в .bal');
+ok(/93\+7=\s\s100<span class="cur">₪<\/span>/.test(html),'₪ один раз в конце');
 ok(html.indexOf('$')<0&&!/class="hbamt"/.test(html),'значок $ убран; отдельной колонки .hbamt больше нет');
 
 // без ставки — только баланс «100₪», без «+»/«=»
