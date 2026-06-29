@@ -14,10 +14,12 @@ let o=allView('n');
 ok(o.own===true,'isOwnerView true for ניקולאי פלדמן');
 ok(/📥/.test(o.h)&&/📤/.test(o.h),'owner: deposit/withdraw arrows visible');
 ok(!/lbwrap noio/.test(o.h),'owner: full 7-col grid (no noio class)');
+ok((o.h.match(/class="nmtxt"/g)||[]).length===4,'админ: имена в 2 строки (имя/фамилия) — 2×2 nmtxt');
 let p=allView('a');
 ok(p.own===false,'isOwnerView false for a normal participant');
 ok(!/📥/.test(p.h)&&!/📤/.test(p.h),'participant: deposit/withdraw arrows HIDDEN');
 ok(/lbwrap noio/.test(p.h),'participant: 5-col noio grid (alignment preserved)');
+ok((p.h.match(/class="nmtxt"/g)||[]).length===2,'участник: имена в 1 строку — 2 nmtxt');
 // second Niko account also owner
 let A2=loadApp({meta:{bank:100},players:{n2:{name:'ניקולאי פלדמן 2',feePaid:true,dep:100}}},{hash:''});
 A2.sandbox.buildState(A2.state.tree);A2.sandbox.ME='n2';

@@ -28,7 +28,7 @@ ok(/class="nmtxt"[\s\S]*?class="io dep"[\s\S]*?class="io wd"[\s\S]*?class="bal"/
 ok(/<div class="lbwrap">[\s\S]*?class="lb/.test(h),'rows wrapped in .lbwrap subgrid (columns align across rows)');
 // pending (деньги в ставках) -> «(+N)» зелёным в своей выровненной колонке (.hbamt); значок $ убран
 ok(!/class="hb"/.test(h)&&!/>\$</.test(h),'значок $ убран полностью');
-ok((h.match(/<span class="hbamt">\(\+5\)<\/span>/g)||[]).length===1,'pending (+5) у ровно 1 игрока с открытой ставкой');
+ok((h.match(/<span class="hbamt">\(\+5 ₪\)<\/span>/g)||[]).length===1,'pending (+5 ₪) у ровно 1 игрока с открытой ставкой');
 ok((h.match(/<span class="hbamt"><\/span>/g)||[]).length===2,'пустой слот pending у 2 без ставок (колонка зарезервирована)');
 ok(/class="bal"[^>]*>[^<]*<span class="cur">[^<]*<\/span><\/span>/.test(h),'баланс: число затем ₪ (без $)');
 ok((h.match(/<span class="cur">/g)||[]).length===3,'₪ currency shown next to every balance (all 3 rows)');

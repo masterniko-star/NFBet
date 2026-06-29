@@ -41,10 +41,10 @@ let tests=0,fails=0; const ok=(c,m)=>{tests++;if(!c){fails++;console.log('FAIL:'
   // --- БЕЙДЖ «מצב דמו» в РЕНДЕРЕ: таблица (טבלה) + экран ставок (להמר) ---
   const DEMO='\u05de\u05e6\u05d1 \u05d3\u05de\u05d5'; // מצב דמו
   const mkAll=(paid)=>{const s={meta:{bank:100,cur:'\u20aa'},players:{u:{name:'Uri',feePaid:paid,t:1}},matches:{},bets:{}};const X=loadApp(s);X.sandbox.buildState(s);X.sandbox.renderAllView();return X.mainHTML();};
-  ok(mkAll(false).indexOf(DEMO)>=0,'таблица: неоплативший показывает бейдж מצב דמו (под именем)');
-  ok(mkAll(true).indexOf(DEMO)<0,'  оплативший — БЕЗ бейджа в таблице');
-  ok(new RegExp('<span class="unpaid">'+DEMO+'<\\/span>').test(mkAll(false)),'  бейдж в .unpaid под именем');
-  ok(!/<span class="unpaid">/.test(mkAll(true)),'  у оплатившего нет бейджа .unpaid');
+  ok(/class="unpaidName">Uri<\/span>/.test(mkAll(false)),'таблица: имя неоплатившего подсвечено жёлтым (unpaidName)');
+  ok(!/class="unpaidName"/.test(mkAll(true)),'  оплативший — без подсветки');
+  ok(mkAll(false).indexOf(DEMO)<0,'  бейджа מצב דמו в таблице больше нет');
+  ok(!/class="unpaid"/.test(mkAll(false))&&!/class="dmc"/.test(mkAll(false)),'  класс-бейдж .unpaid и колонка .dmc убраны');
   const mkBet=(paid)=>{const s={meta:{bank:100,cur:'\u20aa'},players:{u:{name:'Uri',feePaid:paid,t:1}},matches:{},bets:{}};const X=loadApp(s);X.sandbox.buildState(s);X.sandbox.ME='u';X.sandbox.MODE='player';X.sandbox.TAB='bet';X.sandbox.renderHeader();return X.q('#hTitle').innerHTML;};
   ok(mkBet(false).indexOf(DEMO)>=0,'шапка להמר: неоплативший видит бейдж מצב דמו в строке имя+יתרה');
   ok(mkBet(false).indexOf('#fde047')>=0,'  бейдж на жёлтой подложке #fde047');
