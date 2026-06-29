@@ -66,7 +66,7 @@ function fmtIsrael(iso) {
 }
 
 /* ---------- серверный лог ошибок -> /diag/server (виден в админском логе) ---------- */
-const SRV_VER="srv-2026-06-29c";
+const SRV_VER="srv-2026-06-29d";
 async function slog(lvl,cat,msg,x){
   const entry={ts:Date.now(),lvl,cat,msg:String(msg||"").slice(0,400),ver:SRV_VER};
   if(x!==undefined){try{entry.x=JSON.parse(JSON.stringify(x));}catch(_){}}
@@ -485,12 +485,13 @@ export async function runCheck() {
   const newgamesDue = dueByCfg(newgamesSchedule(cfg), matches, now);
   if (!resultsDue && !newgamesDue && !endNgDue && !liveDue) { await srvPulse(); return { skipped: true }; }
 
-  // live-время идущих матчей -> /live/{fx} (каждую минуту, пока матч идёт)
-  let liveWrote = 0;
+  // live-время идущих матчей -> /live/{fx}. ts обновляем всегда (свежесть),
+  // но /rev дёргаем (liveChanged) ТОЛЬКО когда минута/статус сменились — чтобы клиент перечитал «когда получает минуту», не каждый прогон.
+  let liveWrote = 0, liveChanged = 0; const prevLive = tree.live || {};
   if (liveDue) {
     try {
       const lv = await fetchLive(liveMatches);
-      for (const m of liveMatches) { const d = lv[m.fx]; if (d) { await fbPut("/live/" + m.fx, { clk: d.clk, per: d.per, st: d.st, desc: d.desc, ts: now }); liveWrote++; } }
+      for (const m of liveMatches) { const d = lv[m.fx]; if (!d) continue; const pv = prevLive[m.fx] || {}; if (pv.clk !== d.clk || pv.st !== d.st) liveChanged++; await fbPut("/live/" + m.fx, { clk: d.clk, per: d.per, st: d.st, desc: d.desc, ts: now }); liveWrote++; }
     } catch (e) { try { await slog("WARN", "live", "fetchLive: " + ((e && e.message) || e)); } catch (_) {} }
   }
 
@@ -535,7 +536,7 @@ export async function runCheck() {
   if (runNew) patch.newgames = { ...cfg.newgames, last: now };
   if (endNgDue) patch.endchk = { ngLast: now }; // отметка «новые игры на конец+5 подгружены», чтобы не дёргать каждую минуту
   try { await fbPatch("/autocfg", patch); } catch (e) {}
-  if (updated || top.added) { try { await fbPut("/rev", Date.now()); } catch (e) {} }
+  if (updated || top.added || liveChanged) { try { await fbPut("/rev", Date.now()); } catch (e) {} }
   try {
     const d = top.dbg || {};
     const settledStr = settledLog.length ? (" {" + settledLog.join(", ") + "}") : "";
