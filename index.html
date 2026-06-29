@@ -373,7 +373,7 @@ function fbUpd(p,v){return fbWrite("PATCH",p,v);}
 function fbDel(p){return fbWrite("DELETE",p);}
 
 /* ===================== ДИАГНОСТИКА / ЛОГ ОШИБОК ===================== */
-var APP_VER="2026-06-29v";var AC_DEF_TIMES=["08:00","20:00"];
+var APP_VER="2026-06-29w";var AC_DEF_TIMES=["08:00","20:00"];
 var LOG_KEY="nfp_log",LOG_MAX=250,_diagSeen={},_diagBuf=[],_diagT=null,_clientCrits=[];
 function devId(){try{var d=localStorage.getItem("nfp_dev");if(!d){d=Date.now().toString(36)+Math.random().toString(36).slice(2,6);localStorage.setItem("nfp_dev",d);}return d;}catch(e){return "dev";}}
 function logRead(){try{return JSON.parse(localStorage.getItem(LOG_KEY)||"[]");}catch(e){return [];}}
@@ -1012,9 +1012,12 @@ function clkP2(n){return (n<10?"0":"")+n;}
 function gameClockState(start,settled,now,overLabel,board){
   if(isNaN(start))return null;
   if(settled||now>=start+CLK_DUR)return {html:overLabel||"הסתיים",color:"var(--red)"};
-  if(now>=start){var e=now-start;var rt=clkP2(Math.floor(e/60000))+":"+clkP2(Math.floor((e%60000)/1000));return {html:board?rt:("⏱ "+rt),color:"var(--red)"};}
+  /* идёт игра: ⏱ + время матча + «זמן המשחק», всё КРАСНОЕ (одинаково на доске и בלהמר) */
+  if(now>=start){var e=now-start;var rt=clkP2(Math.floor(e/60000))+":"+clkP2(Math.floor((e%60000)/1000));
+    return {html:'<span style="display:block;line-height:1.1">⏱ '+rt+'</span><span dir="rtl" style="display:block;font-size:9px;font-weight:600;line-height:1.2;margin-top:1px;white-space:nowrap">זמן המשחק</span>',color:"var(--red)"};}
+  /* за час до старта: ⏱ + обратный отсчёт + «המשחק מתחיל בעוד», всё ЗЕЛЁНОЕ */
   if(now>=start-CLK_PRE){var r=start-now;var ct=clkP2(Math.floor(r/60000))+":"+clkP2(Math.floor((r%60000)/1000));
-    return {html:board?('<span style="display:block;line-height:1.1">'+ct+'</span><span dir="rtl" style="display:block;font-size:9px;font-weight:600;line-height:1.2;margin-top:1px;white-space:nowrap">המשחק מתחיל בעוד</span>'):("⏳ "+ct),color:"var(--pitch-d)"};}
+    return {html:'<span style="display:block;line-height:1.1">⏱ '+ct+'</span><span dir="rtl" style="display:block;font-size:9px;font-weight:600;line-height:1.2;margin-top:1px;white-space:nowrap">המשחק מתחיל בעוד</span>',color:"var(--pitch-d)"};}
   return {html:"",color:"var(--mut)"};
 }
 function gameClockHtml(m,style,overLabel,board){

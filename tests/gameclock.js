@@ -1,32 +1,29 @@
-// gameclock.js — живые часы матча. В להמר иконки на месте: ⏳ обратный отсчёт → ⏱ секундомер.
-// На доске (board=true) иконки нет: в отсчёте под временем подпись «המשחק מתחיל בעוד»,
-// после старта — только время. В обоих режимах «הסתיים» (красный) когда игра окончена.
+// gameclock.js — расчётные часы матча, ЕДИНООБРАЗНО на доске и בלהמר (board не влияет):
+// за час до старта — ⏱ обратный отсчёт ЗЕЛЁНЫЙ + подпись «המשחק מתחיל בעוד»;
+// после старта — ⏱ время матча КРАСНОЕ + подпись «זמן המשחק»; в конце «הסתיים» (красный).
 // На לוח ההימורים дефис убран, часы на островке; в להמר часы в строке ההימור נסגר.
 const {loadApp,flush}=require('./applib.js');
 let pass=0,fail=0;const ok=(c,m)=>{if(c){pass++;}else{fail++;console.log('  FAIL:',m);}};
 const S=loadApp({meta:{}},{}).sandbox;
 const start=1700000000000;
 
-// --- состояния часов (детерминированно по now) ---
+// --- состояния часов (детерминированно по now); board не меняет вид ---
 ok(S.gameClockState(start,false,start-90*60000).html==='','>1ч до старта → пусто (часы не показаны)');
-// --- режим להמר (по умолчанию): иконки ⏳/⏱ на месте, без подписи ---
+// за час до старта: ⏱ зелёный + отсчёт + «המשחק מתחיל בעוד» — одинаково в обоих режимах
 const cd=S.gameClockState(start,false,start-5*60000);
-ok(/⏳ 05:00/.test(cd.html),'להמר: за 5 мин → ⏳ 05:00 (иконка обратного отсчёта)');
-ok(cd.html.indexOf('המשחק מתחיל בעוד')<0,'להמר: подписи «מתחיל בעוד» нет');
-ok(cd.color.indexOf('pitch')>=0,'обратный отсчёт — зелёный (pitch)');
-ok(/⏳ 59:59/.test(S.gameClockState(start,false,start-(59*60000+59000)).html),'להמר: за ~час → ⏳ 59:59');
-const run=S.gameClockState(start,false,start+47*60000+23000);
-ok(/⏱ 47:23/.test(run.html),'להמר: через 47:23 → ⏱ секундомер');
-ok(run.color.indexOf('red')>=0,'идущая игра → красный');
-ok(S.gameClockState(start,false,start).html.indexOf('⏱ 00:00')>=0,'להמר: в момент старта → ⏱ 00:00');
-
-// --- режим доски (board=true): без иконки, в отсчёте подпись «המשחק מתחיל בעוד» под временем ---
+ok(/⏱ 05:00/.test(cd.html),'отсчёт: ⏱ 05:00 (иконка-таймер)');
+ok(cd.html.indexOf('המשחק מתחיל בעוד')>=0,'отсчёт: подпись «המשחק מתחיל בעוד»');
+ok(cd.color.indexOf('pitch')>=0,'отсчёт — зелёный (pitch)');
 const cdB=S.gameClockState(start,false,start-5*60000,undefined,true);
-ok(/05:00/.test(cdB.html)&&!/⏳|⏱/.test(cdB.html),'доска: за 5 мин → 05:00 без иконки');
-ok(cdB.html.indexOf('המשחק מתחיל בעוד')>=0,'доска: обратный отсчёт — подпись «המשחק מתחיל בעוד»');
+ok(cdB.html===cd.html&&cdB.color===cd.color,'отсчёт: доска и להמר одинаковы (board не влияет)');
+ok(/⏱ 59:59/.test(S.gameClockState(start,false,start-(59*60000+59000)).html),'за ~час → ⏱ 59:59');
+// после старта: ⏱ красный + время + «זמן המשחק»
+const run=S.gameClockState(start,false,start+47*60000+23000);
+ok(/⏱ 47:23/.test(run.html)&&run.html.indexOf('זמן המשחק')>=0,'идёт игра → ⏱ 47:23 + «זמן המשחק»');
+ok(run.color.indexOf('red')>=0,'идущая игра → красный');
 const runB=S.gameClockState(start,false,start+47*60000+23000,undefined,true);
-ok(/47:23/.test(runB.html)&&!/⏱/.test(runB.html),'доска: секундомер 47:23 без иконки');
-ok(runB.html.indexOf('המשחק מתחיל בעוד')<0,'доска: идёт игра → подписи нет');
+ok(runB.html===run.html,'идёт игра: доска и להמר одинаковы (board не влияет)');
+ok(S.gameClockState(start,false,start).html.indexOf('⏱ 00:00')>=0,'в момент старта → ⏱ 00:00');
 
 const ov=S.gameClockState(start,false,start+200*60000);
 ok(ov.html==='הסתיים'&&ov.color.indexOf('red')>=0,'после длительности → «הסתיים» красный (доска)');
