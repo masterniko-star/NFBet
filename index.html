@@ -372,7 +372,7 @@ function fbUpd(p,v){return fbWrite("PATCH",p,v);}
 function fbDel(p){return fbWrite("DELETE",p);}
 
 /* ===================== ДИАГНОСТИКА / ЛОГ ОШИБОК ===================== */
-var APP_VER="2026-06-29z";var AC_DEF_TIMES=["08:00","20:00"];
+var APP_VER="2026-06-29z1";var AC_DEF_TIMES=["08:00","20:00"];
 var LOG_KEY="nfp_log",LOG_MAX=250,_diagSeen={},_diagBuf=[],_diagT=null,_clientCrits=[];
 function devId(){try{var d=localStorage.getItem("nfp_dev");if(!d){d=Date.now().toString(36)+Math.random().toString(36).slice(2,6);localStorage.setItem("nfp_dev",d);}return d;}catch(e){return "dev";}}
 function logRead(){try{return JSON.parse(localStorage.getItem(LOG_KEY)||"[]");}catch(e){return [];}}
@@ -1035,10 +1035,14 @@ function tickClocks(){try{var now=Date.now();
 /* ===== РЕАЛЬНОЕ ВРЕМЯ МАТЧА (ESPN /live) ===== сервер пишет /live/{fx}={clk:"45'+4'",per,st,ts} раз в минуту.
    Если данные свежие (моложе LIVE_TTL) — показываем реальную минуту/перерыв/конец; иначе fallback на расчётный секундомер. */
 var LIVE_TTL=4*60000;
+var LIVE_CAL=24; /* калибровка (сек): вычитаем задержку записи минуты (ESPN+cron), чтобы время совпадало с реальным табло */
 function liveSecs(ts,now){var s=Math.floor(((now||Date.now())-(+ts))/1000);return s<0?0:(s>59?59:s);} /* докрут 0..59 от момента получения минуты */
-function liveMin(clk){var s=String(clk||"").replace(/'/g,"");if(!s)return "—";
-  if(s.indexOf("+")>=0)return s; /* добавленное время «45+4» — как есть */
-  var n=parseInt(s,10);return isNaN(n)?s:String(n>0?n-1:0);} /* ESPN «61'» = идёт 61-я мин = секундомер 60:xx -> показываем минуту−1 */
+function liveTimeText(clk,ts,now){var s=String(clk||"").replace(/'/g,"");if(!s)return "—";
+  var sec=liveSecs(ts,now);
+  if(s.indexOf("+")>=0)return s+":"+clkP2(sec); /* добавленное «45+4:SS» — без минуты−1 и без калибровки */
+  var n=parseInt(s,10);if(isNaN(n))return s;
+  var total=(n>0?n-1:0)*60+sec-LIVE_CAL;if(total<0)total=0; /* минута−1 (ESPN «61'»=секундомер 60:xx) минус калибровка */
+  return clkP2(Math.floor(total/60))+":"+clkP2(total%60);}
 function liveStatic(st){ /* статусы без секундомера -> готовый текст; null = идёт игра (минута:секунды) */
   if(/HALFTIME/.test(st))return {html:"מחצית",color:"var(--pitch-d)"};
   if(/END_PERIOD/.test(st))return {html:"סוף מחצית",color:"var(--pitch-d)"};
@@ -1048,7 +1052,7 @@ function liveStatic(st){ /* статусы без секундомера -> го
 function liveLabel(lv,now){var s=liveStatic(String(lv.st||""));
   if(s)return {html:s.html,color:s.color,live:false}; /* перерыв/конец: статичный текст, секунды НЕ докручиваем */
   /* идёт игра: ⏱ минута от ESPN + локальные секунды (0..59), под временем подпись «זמן המשחק» */
-  var t="⏱ "+esc(liveMin(lv.clk))+":"+clkP2(liveSecs(lv.ts,now));
+  var t="⏱ "+esc(liveTimeText(lv.clk,lv.ts,now));
   return {html:'<span style="display:block;line-height:1.1">'+t+'</span><span dir="rtl" style="display:block;font-size:9px;font-weight:600;line-height:1.2;margin-top:1px;white-space:nowrap">זמן המשחק</span>',color:"var(--red)",live:true};}
 function liveClockHtml(m,style,board){var lv=m&&m.live;
   if(lv&&lv.ts&&(Date.now()-(+lv.ts))<LIVE_TTL&&!m.settled){var L=liveLabel(lv);

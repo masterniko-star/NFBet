@@ -16,13 +16,13 @@ ok(hl.html.indexOf('זמן המשחק')<0,'перерыв: подписи «זמ
 // --- liveLabel: идёт игра → «минута:секунды» + подпись «זמן המשחק» (live:true), секунды докручиваются локально ---
 const now0=1700000000000;
 const li=S.liveLabel({st:'STATUS_FIRST_HALF',clk:"23'",ts:now0},now0);
-// ESPN «23'» = идёт 23-я минута = секундомер 22:xx -> показываем минуту−1 (22)
-ok(li.html.indexOf('⏱')>=0&&li.html.indexOf('22:00')>=0&&li.color.indexOf('red')>=0&&li.live===true,'идёт игра → ⏱ 22:00 (минута−1) красным (live)');
+// ESPN «23'» = секундомер 22:xx (минута−1), минус калибровка 24с -> 22:00−24с = 21:36
+ok(li.html.indexOf('⏱')>=0&&li.html.indexOf('21:36')>=0&&li.color.indexOf('red')>=0&&li.live===true,'идёт игра → ⏱ 21:36 (минута−1 − калибровка) красным (live)');
 ok(li.html.indexOf('זמן המשחק')>=0,'под игровым временем подпись «זמן המשחק»');
 const li5=S.liveLabel({st:'STATUS_FIRST_HALF',clk:"23'",ts:now0},now0+5000);
-ok(li5.html.indexOf('22:05')>=0,'докрут секунд: +5с → 22:05');
+ok(li5.html.indexOf('21:41')>=0,'докрут секунд: +5с → 21:41');
 const li59=S.liveLabel({st:'STATUS_FIRST_HALF',clk:"23'",ts:now0},now0+90000);
-ok(li59.html.indexOf('22:59')>=0,'докрут секунд ограничен 59 (ждём следующую минуту от ESPN)');
+ok(li59.html.indexOf('22:35')>=0,'докрут секунд ограничен 59 -> 22:59−24с = 22:35 (ждём следующую минуту)');
 const li2=S.liveLabel({st:'STATUS_SECOND_HALF',clk:"90'+6'",ts:now0},now0);
 ok(li2.html.indexOf('90+6:00')>=0,'добавленное время — как есть, без −1 (90+6:00)');
 // конец игры (FULL_TIME) -> «הסתiים», часы стоят
@@ -32,7 +32,7 @@ ok(S.liveLabel({st:'STATUS_FULL_TIME',clk:"90'+6'"}).html==='הסתיים'&&S.li
 const dt='2020-01-01T22:00';
 const freshM={dt:dt,settled:false,live:{st:'STATUS_FIRST_HALF',clk:"30'",ts:Date.now()}};
 const fh=S.liveClockHtml(freshM,'');
-ok(/class="liveclk"/.test(fh)&&fh.indexOf('29:')>=0,'свежий live → liveclk с минутой 29:SS (30−1)');
+ok(/class="liveclk"/.test(fh)&&fh.indexOf('28:')>=0,'свежий live → liveclk 28:SS (30−1 минута − калибровка 24с)');
 ok(/data-clk=/.test(fh)&&/data-ts=/.test(fh)&&/data-st=/.test(fh),'liveclk: data-атрибуты для живого тика секунд');
 ok(fh.indexOf('זמן המשחק')>=0,'свежий live (идёт) → подпись «זמן המשחק» под временем');
 const oldM={dt:dt,settled:false,live:{st:'STATUS_FIRST_HALF',clk:"30'",ts:Date.now()-10*60000}};
@@ -64,7 +64,7 @@ const B=loadApp({meta:{fee:100,bank:100,cur:'₪'},players:{},
   bets:{},live:{espn1:{st:'STATUS_SECOND_HALF',clk:"67'",per:2,ts:Date.now()}}},{});
 B.sandbox.buildState(B.state.tree);B.sandbox.renderBoardView();
 const bh2=B.mainHTML()||'';
-ok(/class="liveclk"/.test(bh2)&&bh2.indexOf('66:')>=0&&bh2.indexOf('זמן המשחק')>=0,'доска: идёт игра → 66:SS (67−1) + זמן המשחק');
+ok(/class="liveclk"/.test(bh2)&&bh2.indexOf('65:')>=0&&bh2.indexOf('זמן המשחק')>=0,'доска: идёт игра → 65:SS (67−1 − калибровка) + זמן המשחק');
 
 console.log((fail?'❌':'✅')+' liveclock: '+pass+' passed, '+fail+' failed');
 process.exit(fail?1:0);
