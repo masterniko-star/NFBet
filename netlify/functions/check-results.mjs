@@ -66,7 +66,7 @@ function fmtIsrael(iso) {
 }
 
 /* ---------- серверный лог ошибок -> /diag/server (виден в админском логе) ---------- */
-const SRV_VER="srv-2026-06-29d";
+const SRV_VER="srv-2026-06-29e";
 async function slog(lvl,cat,msg,x){
   const entry={ts:Date.now(),lvl,cat,msg:String(msg||"").slice(0,400),ver:SRV_VER};
   if(x!==undefined){try{entry.x=JSON.parse(JSON.stringify(x));}catch(_){}}
@@ -450,7 +450,7 @@ async function fetchLive(live) {
       const r = await fetch(url); if (!r.ok) continue; const j = await r.json();
       for (const e of ((j && j.events) || [])) {
         const s = e.status || {}, t = s.type || {};
-        if (t.state !== "in") continue; // только идущие матчи
+        if (t.state !== "in" && t.state !== "post") continue; // идущие + только что завершённые (post -> статус FULL_TIME, клиент покажет «הסתiים» и остановит часы)
         out["espn" + e.id] = { clk: String(s.displayClock || ""), per: Number(s.period) || 0, st: String(t.name || ""), desc: String(t.description || "") };
       }
     } catch (e) { try { await slog("WARN", "espn", "ESPN live fail: " + ((e && e.message) || e)); } catch (_) {} }
