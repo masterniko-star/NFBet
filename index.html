@@ -235,7 +235,7 @@
   .lb .io.wd{color:var(--ink)}
   .lb .bal{direction:ltr;text-align:right;font-weight:800;font-size:15px;white-space:nowrap}
   .lb .bal .cur{margin-inline-start:3px}
-  .lb .hbamt{direction:ltr;text-align:left;color:var(--pitch-d);font-weight:800;font-size:15px;white-space:nowrap}
+  .lb .hbamt{direction:ltr;text-align:right;color:var(--pitch-d);font-weight:800;font-size:15px;white-space:nowrap}
   .lb.me-row{border-radius:10px}
   .copyrow{display:flex;gap:6px;align-items:stretch;margin-top:6px}
   .copyrow .input{flex:1}
@@ -368,7 +368,7 @@ function fbUpd(p,v){return fbWrite("PATCH",p,v);}
 function fbDel(p){return fbWrite("DELETE",p);}
 
 /* ===================== ДИАГНОСТИКА / ЛОГ ОШИБОК ===================== */
-var APP_VER="2026-06-29g";var AC_DEF_TIMES=["08:00","20:00"];
+var APP_VER="2026-06-29h";var AC_DEF_TIMES=["08:00","20:00"];
 var LOG_KEY="nfp_log",LOG_MAX=250,_diagSeen={},_diagBuf=[],_diagT=null,_clientCrits=[];
 function devId(){try{var d=localStorage.getItem("nfp_dev");if(!d){d=Date.now().toString(36)+Math.random().toString(36).slice(2,6);localStorage.setItem("nfp_dev",d);}return d;}catch(e){return "dev";}}
 function logRead(){try{return JSON.parse(localStorage.getItem(LOG_KEY)||"[]");}catch(e){return [];}}

@@ -26,6 +26,19 @@ ok(A2.sandbox.isOwnerView()===true,'ניקולאי פלדמן 2 is also owner');
 let adm=loadApp({meta:{bank:100},players:{a:{name:'דנה לוי',feePaid:true,dep:100}}},{hash:'ctrl7'});
 adm.sandbox.buildState(adm.state.tree);
 ok(adm.sandbox.isOwnerView()===true,'admin mode is owner too');
+
+// колонка (+N) (ожидающие ставки) выровнена по ПРАВОЙ скобке (text-align:right), а не по левой
+const _src=require('fs').readFileSync(require('path').join(__dirname,'..','index.html'),'utf8');
+ok(/\.lb \.hbamt\{[^}]*text-align:right/.test(_src),'таблица: колонка (+N) выровнена по правой скобке (text-align:right)');
+ok(!/\.lb \.hbamt\{[^}]*text-align:left/.test(_src),'нет старого text-align:left у .hbamt (регрессия выравнивания)');
+// (+N) реально рендерится для игрока с открытой ставкой
+let pend=loadApp({meta:{bank:100,minBet:1,maxBet:10,cur:'₪'},
+  players:{a:{name:'דנה לוי',feePaid:true,dep:100}},
+  matches:{m1:{teamA:'H',teamB:'A',round:'R32',order:1,settled:false,t:1}},
+  bets:{m1:{a:{team:'A',stake:5}}}},{hash:'ctrl7'});
+pend.sandbox.buildState(pend.state.tree);pend.sandbox.ME='a';pend.sandbox.TAB='all';pend.sandbox.renderAllView();
+ok(/hbamt">\(\+5\)/.test(pend.q('#main').innerHTML||''),'открытая ставка ₪5 -> (+5) в колонке hbamt');
+
 console.log((fail?'❌':'✅')+' owneriotest: '+pass+' passed, '+fail+' failed');
 process.exit(fail?1:0);
 })();
