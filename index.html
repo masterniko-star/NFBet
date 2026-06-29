@@ -373,7 +373,7 @@ function fbUpd(p,v){return fbWrite("PATCH",p,v);}
 function fbDel(p){return fbWrite("DELETE",p);}
 
 /* ===================== ДИАГНОСТИКА / ЛОГ ОШИБОК ===================== */
-var APP_VER="2026-06-29w";var AC_DEF_TIMES=["08:00","20:00"];
+var APP_VER="2026-06-29x";var AC_DEF_TIMES=["08:00","20:00"];
 var LOG_KEY="nfp_log",LOG_MAX=250,_diagSeen={},_diagBuf=[],_diagT=null,_clientCrits=[];
 function devId(){try{var d=localStorage.getItem("nfp_dev");if(!d){d=Date.now().toString(36)+Math.random().toString(36).slice(2,6);localStorage.setItem("nfp_dev",d);}return d;}catch(e){return "dev";}}
 function logRead(){try{return JSON.parse(localStorage.getItem(LOG_KEY)||"[]");}catch(e){return [];}}
@@ -1089,8 +1089,11 @@ function renderBoardView(){
     var c=calcMatch(m);
     var dOK=!!m.drawOK;
     var ri=0;
-    var rows=S.players.map(function(pl){
-      var b=(m.bets||{})[pl.id];if(!b)return "";
+    var _tOrd={A:0,X:1,B:2}; /* сортировка таблицы по колонке ניחוש: 1 (A) → X (תיקו) → 2 (B); внутри группы — порядок игроков сохраняется */
+    var _betters=S.players.filter(function(pl){return (m.bets||{})[pl.id];});
+    _betters.sort(function(x,y){return _tOrd[(m.bets||{})[x.id].team]-_tOrd[(m.bets||{})[y.id].team];});
+    var rows=_betters.map(function(pl){
+      var b=(m.bets||{})[pl.id];
       var coef=b.team==="A"?c.coefA:(b.team==="B"?c.coefB:c.coefX);var net=coef?(b.stake*coef-b.stake):0;
       var otherSum=c.pool-(b.team==="A"?c.sumA:(b.team==="B"?c.sumB:c.sumX));var hasOpp=otherSum>0;
       var pickNum=b.team==="A"?"1":(b.team==="B"?"2":"X");var zc=(ri%2===0)?" row-y":"";ri++;
