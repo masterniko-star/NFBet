@@ -193,7 +193,7 @@
   .xbtn{position:absolute;top:3px;right:3px;width:21px;height:21px;border-radius:50%;background:var(--bg);color:var(--tx);font-size:14px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);z-index:2}
   .madd{position:absolute;top:7px;right:27px;font-size:9.5px;color:var(--mut2);font-weight:600;direction:ltr;white-space:nowrap;z-index:1}
   .okbet{margin-top:10px;background:color-mix(in srgb,var(--pitch) 14%,transparent);border:1px solid color-mix(in srgb,var(--pitch) 32%,transparent);color:var(--pitch-d);border-radius:11px;padding:10px 12px;font-weight:700;font-size:15.5px}
-  .brow{display:grid;grid-template-columns:1fr 40px 34px 60px 36px;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--line);font-size:14.5px;line-height:1.15;text-align:center;font-weight:700}
+  .brow{display:grid;grid-template-columns:1fr 40px 34px 60px 36px;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--line);font-size:14.5px;line-height:1.15;text-align:right;font-weight:700}
   .brow span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .brow:last-child{border-bottom:none}
   .brow.bhead{font-weight:800;color:var(--tx);font-size:12px;letter-spacing:.2px;padding:6px 0 9px;border-bottom:1.5px solid var(--line)}
@@ -373,7 +373,7 @@ function fbUpd(p,v){return fbWrite("PATCH",p,v);}
 function fbDel(p){return fbWrite("DELETE",p);}
 
 /* ===================== ДИАГНОСТИКА / ЛОГ ОШИБОК ===================== */
-var APP_VER="2026-06-29t";var AC_DEF_TIMES=["08:00","20:00"];
+var APP_VER="2026-06-29u";var AC_DEF_TIMES=["08:00","20:00"];
 var LOG_KEY="nfp_log",LOG_MAX=250,_diagSeen={},_diagBuf=[],_diagT=null,_clientCrits=[];
 function devId(){try{var d=localStorage.getItem("nfp_dev");if(!d){d=Date.now().toString(36)+Math.random().toString(36).slice(2,6);localStorage.setItem("nfp_dev",d);}return d;}catch(e){return "dev";}}
 function logRead(){try{return JSON.parse(localStorage.getItem(LOG_KEY)||"[]");}catch(e){return [];}}
@@ -976,8 +976,8 @@ function renderBetView(){
     var clkStart=m.dt?ilWallTs(m.dt):NaN;
     var gameOver=!!(m.dt&&!isNaN(clkStart)&&(m.settled||Date.now()>=clkStart+CLK_DUR));
     var lockHtml=(locked&&!gameOver)?'<span style="color:var(--red);font-weight:800;white-space:nowrap">🔒 ההימור נסגר</span>':'';
-    var clockHtml=gameClockHtml(m,'font-size:14px;margin-inline-start:auto','המשחק הסתיים');
-    if(dateHtml||lockHtml||clockHtml) h+='<div class="round betmeta" style="display:flex;justify-content:flex-start;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;font-size:13px;font-weight:700;color:var(--mut)">'+dateHtml+lockHtml+clockHtml+'</div>';
+    var clockHtml=liveClockHtml(m,'font-size:14px',false); /* реальное время матча (ESPN) с иконкой ⏱ — как на доске; fallback на расчётный */
+    if(dateHtml||lockHtml||clockHtml) h+='<div class="round betmeta" style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-bottom:4px;font-size:13px;font-weight:700;color:var(--mut);direction:ltr">'+clockHtml+'<span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;direction:rtl">'+dateHtml+lockHtml+'</span></div>';
     h+='<div class="round betmeta projrow" style="display:flex;align-items:center;justify-content:flex-start;min-height:20px;margin-bottom:8px;font-size:13px;font-weight:700;color:var(--mut)">'+(projInner||'')+'</div>';
     var ctrlOff=locked;var dis=ctrlOff?" disabled":"";
     var stakeInput='<input id="st-'+m.id+'" class="stval num" type="text" value="'+sv+'" readonly tabindex="-1" style="grid-column:1;grid-row:1">';
@@ -1043,13 +1043,14 @@ function liveStatic(st){ /* статусы без секундомера -> го
   return null;}
 function liveLabel(lv,now){var s=liveStatic(String(lv.st||""));
   if(s)return {html:s.html,color:s.color,live:false}; /* перерыв/конец: статичный текст, секунды НЕ докручиваем */
-  /* идёт игра: минута от ESPN + локальные секунды (0..59), под временем подпись «זמן משחק» (как у отсчёта) */
-  var t=esc(liveMin(lv.clk))+":"+clkP2(liveSecs(lv.ts,now));
-  return {html:'<span style="display:block;line-height:1.1">'+t+'</span><span dir="rtl" style="display:block;font-size:9px;font-weight:600;line-height:1.2;margin-top:1px;white-space:nowrap">זמן משחק</span>',color:"var(--red)",live:true};}
-function liveClockHtml(m,style){var lv=m&&m.live;
+  /* идёт игра: ⏱ минута от ESPN + локальные секунды (0..59), под временем подпись «זמן המשחק» */
+  var t="⏱ "+esc(liveMin(lv.clk))+":"+clkP2(liveSecs(lv.ts,now));
+  return {html:'<span style="display:block;line-height:1.1">'+t+'</span><span dir="rtl" style="display:block;font-size:9px;font-weight:600;line-height:1.2;margin-top:1px;white-space:nowrap">זמן המשחק</span>',color:"var(--red)",live:true};}
+function liveClockHtml(m,style,board){var lv=m&&m.live;
   if(lv&&lv.ts&&(Date.now()-(+lv.ts))<LIVE_TTL&&!m.settled){var L=liveLabel(lv);
     return '<span class="liveclk" data-clk="'+esc(String(lv.clk||""))+'" data-ts="'+(+lv.ts)+'" data-st="'+esc(String(lv.st||""))+'" dir="ltr" style="display:inline-block;text-align:center;font-weight:800;white-space:nowrap;color:'+L.color+';'+(style||"")+'">'+L.html+'</span>';}
-  return gameClockHtml(m,style,undefined,true);} /* нет свежих live-данных — расчётный секундомер (board) */
+  /* нет свежих live-данных — расчётный секундомер: доска (board) без иконки; להמר с иконкой ⏱/⏳ и надписью «המשחק הסתיים» */
+  return gameClockHtml(m,style,board?undefined:'המשחק הסתיים',board);}
 window.tickClocks=tickClocks;
 try{if(typeof setInterval!=="undefined")setInterval(tickClocks,1000);}catch(e){}
 var betLockSig="";
@@ -1094,7 +1095,7 @@ function renderBoardView(){
         '<span class="'+(net>0?"pos":"")+' num">'+fmt(net)+'</span>'+
         '<span class="'+(hasOpp?"neg":"")+' num">'+(hasOpp?"−"+fmt(b.stake):"0")+'</span></div>';
     }).join("");
-    return '<div class="card card-p" style="margin-bottom:18px;border:1.5px solid #5b9bd5;box-shadow:0 2px 4px rgba(11,31,58,.07),0 10px 24px rgba(11,31,58,.10)">'+(m.dt?'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-top:-9px;margin-bottom:5px;direction:ltr">'+liveClockHtml(m,'font-size:14px;line-height:1.1')+'<span dir="ltr" style="font-size:14px;line-height:1.1;color:var(--mut);font-weight:800">'+esc(fmtDate(m.dt))+'</span></div>':'')+'<div style="margin-bottom:12px;background:#d6e8fb;border-radius:12px;padding:10px 12px"><div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:4px 8px;direction:ltr"><div class="mstack" style="grid-column:1;justify-self:start"><div class="mtitle" dir="auto" style="text-align:center;font-weight:800;font-size:19px;line-height:1.15">'+teamTitle(1,m.teamA)+'</div><div class="tiny muted" dir="rtl" style="font-weight:700;margin-top:4px">קופה <span class="num">'+fmt(c.sumA)+' '+cur()+'</span></div></div><div class="mstack" style="grid-column:2;align-self:end">'+(dOK?('<span class="tiny muted" dir="rtl" style="font-weight:700;margin-top:1px">תיקו <span class="num">'+fmt(c.sumX)+'</span></span>'):'')+'</div><div class="mstack" style="grid-column:3;justify-self:end"><div class="mtitle" dir="auto" style="text-align:center;font-weight:800;font-size:19px;line-height:1.15">'+teamTitle(2,m.teamB)+'</div><div class="tiny muted" dir="rtl" style="font-weight:700;margin-top:4px">קופה <span class="num">'+fmt(c.sumB)+' '+cur()+'</span></div></div></div></div>'+
+    return '<div class="card card-p" style="margin-bottom:18px;border:1.5px solid #5b9bd5;box-shadow:0 2px 4px rgba(11,31,58,.07),0 10px 24px rgba(11,31,58,.10)">'+(m.dt?'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-top:-9px;margin-bottom:5px;direction:ltr">'+liveClockHtml(m,'font-size:14px;line-height:1.1',true)+'<span dir="ltr" style="font-size:14px;line-height:1.1;color:var(--mut);font-weight:800">'+esc(fmtDate(m.dt))+'</span></div>':'')+'<div style="margin-bottom:12px;background:#d6e8fb;border-radius:12px;padding:10px 12px"><div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:4px 8px;direction:ltr"><div class="mstack" style="grid-column:1;justify-self:start"><div class="mtitle" dir="auto" style="text-align:center;font-weight:800;font-size:19px;line-height:1.15">'+teamTitle(1,m.teamA)+'</div><div class="tiny muted" dir="rtl" style="font-weight:700;margin-top:4px">קופה <span class="num">'+fmt(c.sumA)+' '+cur()+'</span></div></div><div class="mstack" style="grid-column:2;align-self:end">'+(dOK?('<span class="tiny muted" dir="rtl" style="font-weight:700;margin-top:1px">תיקו <span class="num">'+fmt(c.sumX)+'</span></span>'):'')+'</div><div class="mstack" style="grid-column:3;justify-self:end"><div class="mtitle" dir="auto" style="text-align:center;font-weight:800;font-size:19px;line-height:1.15">'+teamTitle(2,m.teamB)+'</div><div class="tiny muted" dir="rtl" style="font-weight:700;margin-top:4px">קופה <span class="num">'+fmt(c.sumB)+' '+cur()+'</span></div></div></div></div>'+
       '<div class="brow bhead"><span class="bname">משתתף</span><span class="bpick">ניחוש</span><span>₪</span><span>זכיה</span><span>הפסד</span></div>'+
       (rows||'<div class="tiny muted" style="padding:8px 2px">עדיין אין הימורים על המשחק.</div>')+'</div>';
   }).join("");
