@@ -218,8 +218,8 @@
   .nitem .nic{font-size:19px;flex:0 0 auto;margin-top:1px}
   .nitem .ntx{flex:1;min-width:0;font-size:14px;font-weight:600;line-height:1.45;color:var(--tx)}
   .nbox .nbtn{margin-top:14px;width:100%}
-  .lbwrap{display:grid;grid-template-columns:auto auto auto 1fr auto auto 2fr auto;column-gap:7px}
-.lbwrap.noio{grid-template-columns:auto auto auto 1fr 2fr auto}
+  .lbwrap{display:grid;grid-template-columns:auto auto auto 1fr auto auto 2fr auto auto;column-gap:7px}
+.lbwrap.noio{grid-template-columns:auto auto auto 1fr 2fr auto auto}
   .lb{display:grid;grid-template-columns:subgrid;grid-column:1/-1;align-items:center;column-gap:7px;padding:2px 0;border-bottom:1px solid var(--line);font-size:15px;font-weight:700}
   .lb:last-child{border-bottom:none}
   .lb.lhead{font-weight:800;color:var(--mut2);font-size:12px;letter-spacing:.2px;padding:6px 0 9px;border-bottom:1.5px solid var(--line)}
@@ -235,7 +235,7 @@
   .lb .io.wd{color:var(--ink)}
   .lb .bal{direction:ltr;text-align:right;font-weight:800;font-size:15px;white-space:nowrap}
   .lb .bal .cur{margin-inline-start:3px}
-  .lb .bal .hb{display:inline-block;min-width:8px;margin-inline-start:5px;text-align:left;color:var(--pitch-d);font-weight:800}
+  .lb .hbamt{direction:ltr;text-align:left;color:var(--pitch-d);font-weight:800;font-size:15px;white-space:nowrap}
   .lb.me-row{border-radius:10px}
   .copyrow{display:flex;gap:6px;align-items:stretch;margin-top:6px}
   .copyrow .input{flex:1}
@@ -368,7 +368,7 @@ function fbUpd(p,v){return fbWrite("PATCH",p,v);}
 function fbDel(p){return fbWrite("DELETE",p);}
 
 /* ===================== ДИАГНОСТИКА / ЛОГ ОШИБОК ===================== */
-var APP_VER="2026-06-28m";var AC_DEF_TIMES=["08:00","20:00"];
+var APP_VER="2026-06-29f";var AC_DEF_TIMES=["08:00","20:00"];
 var LOG_KEY="nfp_log",LOG_MAX=250,_diagSeen={},_diagBuf=[],_diagT=null,_clientCrits=[];
 function devId(){try{var d=localStorage.getItem("nfp_dev");if(!d){d=Date.now().toString(36)+Math.random().toString(36).slice(2,6);localStorage.setItem("nfp_dev",d);}return d;}catch(e){return "dev";}}
 function logRead(){try{return JSON.parse(localStorage.getItem(LOG_KEY)||"[]");}catch(e){return [];}}
@@ -545,7 +545,7 @@ function statsFor(pid){var staked=0,won=0,cor=0,lost=0,push=0,pend=0;
   var bal=startBal(pid)-staked+won;var ss=staked-pend;var roi=ss>0?((won-ss)/ss)*100:0;
   return{balance:bal,staked:staked,won:won,correct:cor,lost:lost,push:push,pending:pend,roi:roi,net:won-ss};}
 function availFor(pid,mid){var staked=0,won=0;S.matches.forEach(function(m){if(m.id===mid)return;var b=(m.bets||{})[pid];if(!b)return;staked+=Number(b.stake)||0;if(m.settled)won+=(calcMatch(m).payouts[pid]||0);});return startBal(pid)-staked+won;}
-function ranking(){var a=S.players.map(function(p){return{p:p,s:statsFor(p.id)};});a.sort(function(x,y){return y.s.balance-x.s.balance||y.s.correct-x.s.correct||y.s.roi-x.s.roi||String(x.p.name).localeCompare(y.p.name,"he");});a.forEach(function(e,i){e.rank=i+1;});return a;}
+function ranking(){var a=S.players.map(function(p){return{p:p,s:statsFor(p.id)};});a.sort(function(x,y){return ((y.s.balance+y.s.pending)-(x.s.balance+x.s.pending))||y.s.correct-x.s.correct||y.s.roi-x.s.roi||String(x.p.name).localeCompare(y.p.name,"he");});a.forEach(function(e,i){e.rank=i+1;});return a;}
 var cur=function(){return S.meta.cur||"₪";};
 function fmt(n){n=Number(n)||0;return Math.abs(n-Math.round(n))<1e-9?String(Math.round(n)):n.toFixed(2);}
 function me(){return ME?S.players.find(function(p){return p.id===ME;}):null;}
@@ -961,8 +961,11 @@ function renderBetView(){
       projInner='<span style="display:inline-flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-start">'+info+poolTxt+'</span>';
     }
     var dateHtml=m.dt?'<span dir="ltr" style="white-space:nowrap">'+esc(fmtDate(m.dt))+'</span>':'';
-    var lockHtml=locked?'<span style="color:var(--red);font-weight:800;white-space:nowrap">🔒 ההימור נסגר</span>':'';
-    if(dateHtml||lockHtml) h+='<div class="round betmeta" style="display:flex;justify-content:flex-start;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;font-size:13px;font-weight:700;color:var(--mut)">'+dateHtml+lockHtml+'</div>';
+    var clkStart=m.dt?ilWallTs(m.dt):NaN;
+    var gameOver=!!(m.dt&&!isNaN(clkStart)&&(m.settled||Date.now()>=clkStart+CLK_DUR));
+    var lockHtml=(locked&&!gameOver)?'<span style="color:var(--red);font-weight:800;white-space:nowrap">🔒 ההימור נסגר</span>':'';
+    var clockHtml=gameClockHtml(m,'font-size:14px','המשחק הסתיים');
+    if(dateHtml||lockHtml||clockHtml) h+='<div class="round betmeta" style="display:flex;justify-content:flex-start;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;font-size:13px;font-weight:700;color:var(--mut)">'+dateHtml+lockHtml+clockHtml+'</div>';
     h+='<div class="round betmeta projrow" style="display:flex;align-items:center;justify-content:flex-start;min-height:20px;margin-bottom:8px;font-size:13px;font-weight:700;color:var(--mut)">'+(projInner||'')+'</div>';
     var ctrlOff=locked;var dis=ctrlOff?" disabled":"";
     var stakeInput='<input id="st-'+m.id+'" class="stval num" type="text" value="'+sv+'" readonly tabindex="-1" style="grid-column:1;grid-row:1">';
@@ -990,6 +993,26 @@ function ilOffMin(ts){var d=new Date(ts);var p=new Intl.DateTimeFormat("en-GB",{
 function ilWallTs(wall){if(!wall)return NaN;var s=String(wall);var Y=+s.slice(0,4),Mo=+s.slice(5,7),D=+s.slice(8,10),H=+s.slice(11,13),Mi=+s.slice(14,16);if(!(Y>0&&Mo>0&&D>0)||isNaN(H)||isNaN(Mi)){var t=new Date(s).getTime();return isNaN(t)?NaN:t;}var asUTC=Date.UTC(Y,Mo-1,D,H,Mi);return asUTC-ilOffMin(asUTC)*60000;}
 function matchLocked(m){if(!m||!m.dt)return false;var t=ilWallTs(m.dt);return !isNaN(t)&&Date.now()>=t;}
 function matchMature(m){if(!m||!m.dt)return false;var t=ilWallTs(m.dt);return !isNaN(t)&&Date.now()>=t+3*36e5;}
+/* ---------- שעון משחק חי: ⏳ ספירה לאחור (שעה לפני) → ⏱ סטופר אדום מתחילת המשחק → "הסתיים" אדום ---------- */
+var CLK_DUR=150*60000;   /* משך משוער של משחק: אחריו השעון הופך ל"הסתיים" (נוקאאוט עם הארכה/פנדלים) */
+var CLK_PRE=60*60000;    /* הספירה לאחור נפתחת שעה לפני שריקת הפתיחה */
+function clkP2(n){return (n<10?"0":"")+n;}
+function gameClockState(start,settled,now,overLabel){
+  if(isNaN(start))return null;
+  if(settled||now>=start+CLK_DUR)return {html:overLabel||"הסתיים",color:"var(--red)"};
+  if(now>=start){var e=now-start;return {html:"⏱ "+clkP2(Math.floor(e/60000))+":"+clkP2(Math.floor((e%60000)/1000)),color:"var(--red)"};}
+  if(now>=start-CLK_PRE){var r=start-now;return {html:"⏳ "+clkP2(Math.floor(r/60000))+":"+clkP2(Math.floor((r%60000)/1000)),color:"var(--pitch-d)"};}
+  return {html:"",color:"var(--mut)"};
+}
+function gameClockHtml(m,style,overLabel){
+  if(!m||!m.dt)return "";
+  var start=ilWallTs(m.dt);if(isNaN(start))return "";
+  var st=gameClockState(start,!!m.settled,Date.now(),overLabel);
+  return '<span class="gameclk" dir="ltr" data-start="'+start+'" data-settled="'+(m.settled?"1":"0")+'"'+(overLabel?(' data-over="'+overLabel+'"'):'')+' style="font-weight:800;white-space:nowrap;color:'+st.color+';'+(style||"")+'">'+st.html+'</span>';
+}
+function tickClocks(){try{var els=document.querySelectorAll(".gameclk");if(!els||!els.length)return;var now=Date.now();for(var i=0;i<els.length;i++){var el=els[i];var st=gameClockState(+el.getAttribute("data-start"),el.getAttribute("data-settled")==="1",now,el.getAttribute("data-over")||undefined);if(!st)continue;el.innerHTML=st.html;el.style.color=st.color;}}catch(e){}}
+window.tickClocks=tickClocks;
+try{if(typeof setInterval!=="undefined")setInterval(tickClocks,1000);}catch(e){}
 var betLockSig="";
 function betLockSignature(){return S.matches.filter(function(m){return !m.settled&&m.teamA&&m.teamB;}).map(function(m){return m.id+(matchLocked(m)?"L":"O");}).join(",");}
 setInterval(function(){try{if(TAB!=="bet"||!me())return;var sig=betLockSignature();if(sig!==betLockSig){betLockSig=sig;renderBetView();}}catch(e){}},20000);
@@ -1029,7 +1052,7 @@ function renderBoardView(){
         '<span class="'+(net>0?"pos":"")+' num">'+fmt(net)+'</span>'+
         '<span class="'+(hasOpp?"neg":"")+' num">'+(hasOpp?"−"+fmt(b.stake):"0")+'</span></div>';
     }).join("");
-    return '<div class="card card-p" style="margin-bottom:18px;border:1.5px solid #5b9bd5;box-shadow:0 2px 4px rgba(11,31,58,.07),0 10px 24px rgba(11,31,58,.10)">'+(m.dt?'<div style="text-align:right;margin-top:-9px;margin-bottom:5px"><span dir="ltr" style="font-size:11px;color:var(--mut);font-weight:800">'+esc(fmtDate(m.dt))+'</span></div>':'')+'<div style="margin-bottom:12px;background:#d6e8fb;border-radius:12px;padding:10px 12px"><div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:4px 8px;direction:ltr"><div class="mtitle" dir="auto" style="grid-row:1;grid-column:1;text-align:center;min-width:0;font-weight:800;font-size:19px;line-height:1.15;overflow-wrap:break-word"><span class="tdot">1</span>'+esc(m.teamA)+'</div><div style="grid-row:1;grid-column:2;text-align:center;font-weight:800;font-size:19px;line-height:1.15">-</div><div class="mtitle" dir="auto" style="grid-row:1;grid-column:3;text-align:center;min-width:0;font-weight:800;font-size:19px;line-height:1.15;overflow-wrap:break-word"><span class="tdot">2</span>'+esc(m.teamB)+'</div><div class="tiny muted" dir="rtl" style="grid-row:2;grid-column:1;text-align:center;font-weight:700">קופה <span class="num">'+fmt(c.sumA)+' '+cur()+'</span></div>'+(dOK?('<div class="tiny muted" dir="rtl" style="grid-row:2;grid-column:2;text-align:center;font-weight:700">תיקו <span class="num">'+fmt(c.sumX)+'</span></div>'):'')+'<div class="tiny muted" dir="rtl" style="grid-row:2;grid-column:3;text-align:center;font-weight:700">קופה <span class="num">'+fmt(c.sumB)+' '+cur()+'</span></div></div></div>'+
+    return '<div class="card card-p" style="margin-bottom:18px;border:1.5px solid #5b9bd5;box-shadow:0 2px 4px rgba(11,31,58,.07),0 10px 24px rgba(11,31,58,.10)">'+(m.dt?'<div style="text-align:right;margin-top:-9px;margin-bottom:5px"><span dir="ltr" style="font-size:11px;color:var(--mut);font-weight:800">'+esc(fmtDate(m.dt))+'</span></div>':'')+'<div style="margin-bottom:12px;background:#d6e8fb;border-radius:12px;padding:10px 12px"><div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:4px 8px;direction:ltr"><div class="mtitle" dir="auto" style="grid-row:1;grid-column:1;text-align:center;min-width:0;font-weight:800;font-size:19px;line-height:1.15;overflow-wrap:break-word"><span class="tdot">1</span>'+esc(m.teamA)+'</div><div class="mtitle" dir="auto" style="grid-row:1;grid-column:3;text-align:center;min-width:0;font-weight:800;font-size:19px;line-height:1.15;overflow-wrap:break-word"><span class="tdot">2</span>'+esc(m.teamB)+'</div><div class="tiny muted" dir="rtl" style="grid-row:2;grid-column:1;text-align:center;font-weight:700">קופה <span class="num">'+fmt(c.sumA)+' '+cur()+'</span></div>'+'<div style="grid-row:2;grid-column:2;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:1px">'+(dOK?('<span class="tiny muted" dir="rtl" style="font-weight:700">תיקו <span class="num">'+fmt(c.sumX)+'</span></span>'):'')+gameClockHtml(m,'font-size:12px')+'</div>'+'<div class="tiny muted" dir="rtl" style="grid-row:2;grid-column:3;text-align:center;font-weight:700">קופה <span class="num">'+fmt(c.sumB)+' '+cur()+'</span></div></div></div>'+
       '<div class="brow bhead"><span class="bname">משתתף</span><span class="bpick">ניחוש</span><span>₪</span><span>זכיה</span><span>הפסד</span></div>'+
       (rows||'<div class="tiny muted" style="padding:8px 2px">עדיין אין הימורים על המשחק.</div>')+'</div>';
   }).join("");
@@ -1057,7 +1080,8 @@ function renderAllView(){
       '<span class="gp"></span>'+
       (own?('<span class="io dep"><span class="ic">📥</span>'+fmt(deposited)+'</span><span class="io wd"><span class="ic">📤</span>'+fmt(withdrawn)+'</span>'):'')+
       '<span class="gp"></span>'+
-      '<span class="bal" style="color:'+bc+'">'+fmt(rbal)+'<span class="cur">'+cur()+'</span><span class="hb">'+(hasBet[e.p.id]?'$':'')+'</span></span>'+
+      '<span class="hbamt">'+(hasBet[e.p.id]?('(+'+fmt(e.s.pending)+')'):'')+'</span>'+
+      '<span class="bal" style="color:'+bc+'">'+fmt(rbal)+'<span class="cur">'+cur()+'</span></span>'+
       '</div>';
   }).join("");
   var inHand=0,inBets=0;rk.forEach(function(e){inHand+=e.s.balance;inBets+=e.s.pending;});var poolTotal=inHand+inBets;

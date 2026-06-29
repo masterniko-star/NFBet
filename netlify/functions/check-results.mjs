@@ -11,6 +11,9 @@ const DB = (process.env.FIREBASE_DB_URL ||
 const ESPN = "https://site.api.espn.com/apis/site/v2/sports/soccer/";
 const AC_DEF_TIMES = ["08:00", "20:00"]; // расписание по умолчанию, если autocfg.times не задан
 const CASH_RETAIN_MS = 365 * 24 * 60 * 60 * 1000; // журнал פיקדון: хранить записи 1 год, старше — авто-удаление
+// «конец игры» — независимый от autocfg-тумблеров механизм:
+const END_RES_MS = 105 * 60 * 1000; // проверять результат каждую минуту начиная со старт+105 мин (до зачёта)
+const END_NG_MS  = 110 * 60 * 1000; // подгружать новые игры через 5 мин после «конца» (старт+110), один раз на игру
 
 /* ---------- Firebase REST ---------- */
 const jurl = (p) => DB + (p.startsWith("/") ? p : "/" + p) + ".json";
@@ -53,7 +56,7 @@ function fmtIsrael(iso) {
 }
 
 /* ---------- серверный лог ошибок -> /diag/server (виден в админском логе) ---------- */
-const SRV_VER="srv-2026-06-27a";
+const SRV_VER="srv-2026-06-29a";
 async function slog(lvl,cat,msg,x){
   const entry={ts:Date.now(),lvl,cat,msg:String(msg||"").slice(0,400),ver:SRV_VER};
   if(x!==undefined){try{entry.x=JSON.parse(JSON.stringify(x));}catch(_){}}
@@ -433,10 +436,16 @@ export async function runCheck() {
   try { await purgeOldCashlog(tree, now); } catch (e) {}
   try { await idleSweep(tree, players, matches, bets, bank, now); } catch (e) { try { await slog("ERROR","idle","idleSweep: "+((e&&e.message)||e)); } catch(_){} }
   try { await overBetSweep(players, matches, bets, bank, now); } catch (e) { try { await slog("ERROR","overbet","overBetSweep: "+((e&&e.message)||e)); } catch(_){} }
-  const resultsDue = dueByCfg(cfg.results, matches, now);
+  // независимый от автоапдейта механизм «конец игры»: проверка результата со старт+105 (каждую минуту до зачёта)
+  // и подгрузка новых игр через 5 мин после конца (старт+110, один раз на игру). Работает даже когда тумблеры выкл.
+  // После איפוס матчей нет -> ни один триггер не срабатывает, игры НЕ возвращаются (защита задачи-7 сохранена).
+  const endResDue = matches.some((m) => !m.settled && m.teamA && m.teamB && Number.isFinite(ilWallToTs(m.dt)) && now >= ilWallToTs(m.dt) + END_RES_MS);
+  const endNgLast = (tree.autocfg && tree.autocfg.endchk && Number(tree.autocfg.endchk.ngLast)) || 0;
+  const endNgDue = matches.some((m) => { const t = ilWallToTs(m.dt); return Number.isFinite(t) && (t + END_NG_MS) <= now && (t + END_NG_MS) > endNgLast; });
+  const resultsDue = dueByCfg(cfg.results, matches, now) || endResDue;
   // טעינת משחקים: לוח הזמנים נגזר תמיד מ"בדיקת תוצאות" + 5 דק' (גם דקות וגם שעות קבועות); הפעלה/כיבוי נפרד
   const newgamesDue = dueByCfg(newgamesSchedule(cfg), matches, now);
-  if (!resultsDue && !newgamesDue) { await srvPulse(); return { skipped: true }; }
+  if (!resultsDue && !newgamesDue && !endNgDue) { await srvPulse(); return { skipped: true }; }
 
   let updated = 0, checked = 0; const settledLog = [];
   if (resultsDue) {
@@ -469,21 +478,22 @@ export async function runCheck() {
   if (resultsDue) { try { await lowBalanceSweep(players, matches, bets, bank, now); } catch (e) { try { await slog("ERROR","demote","lowBalanceSweep: "+((e&&e.message)||e)); } catch(_){} } }
 
   // новые игры: по расписанию ИЛИ если только что освободился слот (что-то сведено) — добираем до 3 несведённых
-  const runNew = newgamesDue || updated > 0;
+  const runNew = newgamesDue || updated > 0 || endNgDue;
   let top = { added: 0, dbg: null };
   if (runNew) { top = await topUp(matches, 3); }
 
   const patch = {};
   if (resultsDue) patch.results = { ...cfg.results, last: now };
   if (runNew) patch.newgames = { ...cfg.newgames, last: now };
+  if (endNgDue) patch.endchk = { ngLast: now }; // отметка «новые игры на конец+5 подгружены», чтобы не дёргать каждую минуту
   try { await fbPatch("/autocfg", patch); } catch (e) {}
   if (updated || top.added) { try { await fbPut("/rev", Date.now()); } catch (e) {} }
   try {
     const d = top.dbg || {};
     const settledStr = settledLog.length ? (" {" + settledLog.join(", ") + "}") : "";
-    let msg = "res=" + (resultsDue ? 1 : 0) + " new=" + (newgamesDue ? 1 : 0) + ((updated && !newgamesDue) ? "+slot" : "") + " | checked=" + checked + " settled=" + updated + settledStr;
+    let msg = "res=" + (resultsDue ? 1 : 0) + (endResDue ? "(end)" : "") + " new=" + (newgamesDue ? 1 : 0) + (endNgDue ? "(end+5)" : "") + ((updated && !newgamesDue && !endNgDue) ? "+slot" : "") + " | checked=" + checked + " settled=" + updated + settledStr;
     if (runNew) msg += " | unsettled=" + (d.unsettled != null ? d.unsettled : "?") + " need=" + (d.need != null ? d.need : "?") + " | src[" + ((d.perSrc || []).join(",")) + "] cands=" + (d.cands != null ? d.cands : "?") + " | added=" + (top.added || 0) + ((d.added && d.added.length) ? (" {" + d.added.join(", ") + "}") : "");
-    await slog("INFO", "run", msg, { res: resultsDue, new: newgamesDue, checked, updated, settled: settledLog, topup: d });
+    await slog("INFO", "run", msg, { res: resultsDue, new: newgamesDue, endRes: endResDue, endNg: endNgDue, checked, updated, settled: settledLog, topup: d });
   } catch (e) {}
   return { updated, checked, added: top.added, results: resultsDue, newgames: newgamesDue, fill: resultsDue, add: runNew };
 }
