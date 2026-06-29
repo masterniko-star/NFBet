@@ -373,7 +373,7 @@ function fbUpd(p,v){return fbWrite("PATCH",p,v);}
 function fbDel(p){return fbWrite("DELETE",p);}
 
 /* ===================== ДИАГНОСТИКА / ЛОГ ОШИБОК ===================== */
-var APP_VER="2026-06-29s";var AC_DEF_TIMES=["08:00","20:00"];
+var APP_VER="2026-06-29t";var AC_DEF_TIMES=["08:00","20:00"];
 var LOG_KEY="nfp_log",LOG_MAX=250,_diagSeen={},_diagBuf=[],_diagT=null,_clientCrits=[];
 function devId(){try{var d=localStorage.getItem("nfp_dev");if(!d){d=Date.now().toString(36)+Math.random().toString(36).slice(2,6);localStorage.setItem("nfp_dev",d);}return d;}catch(e){return "dev";}}
 function logRead(){try{return JSON.parse(localStorage.getItem(LOG_KEY)||"[]");}catch(e){return [];}}
@@ -1023,19 +1023,32 @@ function gameClockHtml(m,style,overLabel,board){
   var st=gameClockState(start,!!m.settled,Date.now(),overLabel,board);
   return '<span class="gameclk" dir="ltr" data-start="'+start+'" data-settled="'+(m.settled?"1":"0")+'"'+(overLabel?(' data-over="'+overLabel+'"'):'')+(board?' data-board="1"':'')+' style="display:inline-block;text-align:center;font-weight:800;white-space:nowrap;color:'+st.color+';'+(style||"")+'">'+st.html+'</span>';
 }
-function tickClocks(){try{var els=document.querySelectorAll(".gameclk");if(!els||!els.length)return;var now=Date.now();for(var i=0;i<els.length;i++){var el=els[i];var st=gameClockState(+el.getAttribute("data-start"),el.getAttribute("data-settled")==="1",now,el.getAttribute("data-over")||undefined,el.getAttribute("data-board")==="1");if(!st)continue;el.innerHTML=st.html;el.style.color=st.color;}}catch(e){}}
+function tickClocks(){try{var now=Date.now();
+  var els=document.querySelectorAll(".gameclk");
+  for(var i=0;i<els.length;i++){var el=els[i];var st=gameClockState(+el.getAttribute("data-start"),el.getAttribute("data-settled")==="1",now,el.getAttribute("data-over")||undefined,el.getAttribute("data-board")==="1");if(!st)continue;el.innerHTML=st.html;el.style.color=st.color;}
+  var lels=document.querySelectorAll(".liveclk"); /* реальное время матча: докрут секунд (идёт игра) либо статичный статус (перерыв/конец) */
+  for(var k=0;k<lels.length;k++){var le=lels[k];var ts=le.getAttribute("data-ts");if(!ts||(now-(+ts))>=LIVE_TTL)continue; /* устарело -> ждём перерисовку (fallback) */
+    var L=liveLabel({clk:le.getAttribute("data-clk"),st:le.getAttribute("data-st"),ts:ts},now);le.innerHTML=L.html;le.style.color=L.color;}
+}catch(e){}}
 /* ===== РЕАЛЬНОЕ ВРЕМЯ МАТЧА (ESPN /live) ===== сервер пишет /live/{fx}={clk:"45'+4'",per,st,ts} раз в минуту.
    Если данные свежие (моложе LIVE_TTL) — показываем реальную минуту/перерыв/конец; иначе fallback на расчётный секундомер. */
 var LIVE_TTL=4*60000;
-function liveLabel(lv){var st=String(lv.st||""),clk=String(lv.clk||"");
+function liveSecs(ts,now){var s=Math.floor(((now||Date.now())-(+ts))/1000);return s<0?0:(s>59?59:s);} /* докрут 0..59 от момента получения минуты */
+function liveMin(clk){return String(clk||"").replace(/'/g,"")||"—";} /* "45'+4'"->"45+4", "61'"->"61" */
+function liveStatic(st){ /* статусы без секундомера -> готовый текст; null = идёт игра (минута:секунды) */
   if(/HALFTIME/.test(st))return {html:"מחצית",color:"var(--pitch-d)"};
   if(/END_PERIOD/.test(st))return {html:"סוף מחצית",color:"var(--pitch-d)"};
   if(/PENALT|SHOOTOUT/.test(st))return {html:"פנדלים",color:"var(--red)"};
   if(/FULL_TIME|FINAL|STATUS_FT|STATUS_END\b/.test(st))return {html:"הסתיים",color:"var(--red)"};
-  return {html:esc(clk||"—"),color:"var(--red)"};} /* идёт игра — реальная минута (с добавленным/доп. временем) */
+  return null;}
+function liveLabel(lv,now){var s=liveStatic(String(lv.st||""));
+  if(s)return {html:s.html,color:s.color,live:false}; /* перерыв/конец: статичный текст, секунды НЕ докручиваем */
+  /* идёт игра: минута от ESPN + локальные секунды (0..59), под временем подпись «זמן משחק» (как у отсчёта) */
+  var t=esc(liveMin(lv.clk))+":"+clkP2(liveSecs(lv.ts,now));
+  return {html:'<span style="display:block;line-height:1.1">'+t+'</span><span dir="rtl" style="display:block;font-size:9px;font-weight:600;line-height:1.2;margin-top:1px;white-space:nowrap">זמן משחק</span>',color:"var(--red)",live:true};}
 function liveClockHtml(m,style){var lv=m&&m.live;
   if(lv&&lv.ts&&(Date.now()-(+lv.ts))<LIVE_TTL&&!m.settled){var L=liveLabel(lv);
-    return '<span class="liveclk" dir="ltr" style="display:inline-block;text-align:center;font-weight:800;white-space:nowrap;color:'+L.color+';'+(style||"")+'">'+L.html+'</span>';}
+    return '<span class="liveclk" data-clk="'+esc(String(lv.clk||""))+'" data-ts="'+(+lv.ts)+'" data-st="'+esc(String(lv.st||""))+'" dir="ltr" style="display:inline-block;text-align:center;font-weight:800;white-space:nowrap;color:'+L.color+';'+(style||"")+'">'+L.html+'</span>';}
   return gameClockHtml(m,style,undefined,true);} /* нет свежих live-данных — расчётный секундомер (board) */
 window.tickClocks=tickClocks;
 try{if(typeof setInterval!=="undefined")setInterval(tickClocks,1000);}catch(e){}
