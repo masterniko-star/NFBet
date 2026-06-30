@@ -451,7 +451,12 @@ async function fetchLive(live) {
       for (const e of ((j && j.events) || [])) {
         const s = e.status || {}, t = s.type || {};
         if (t.state !== "in" && t.state !== "post") continue; // идущие + только что завершённые (post -> статус FULL_TIME, клиент покажет «הסתiים» и остановит часы)
-        out["espn" + e.id] = { clk: String(s.displayClock || ""), per: Number(s.period) || 0, st: String(t.name || ""), desc: String(t.description || "") };
+        const cs = ((e.competitions && e.competitions[0]) || {}).competitors || []; // счёт: home=teamA, away=teamB
+        let home = null, away = null; cs.forEach((c) => { if (c.homeAway === "home") home = c; else if (c.homeAway === "away") away = c; });
+        if (!home) home = cs[0]; if (!away) away = cs[1];
+        const hs = home && home.score != null && home.score !== "" ? Number(home.score) : NaN;
+        const as = away && away.score != null && away.score !== "" ? Number(away.score) : NaN;
+        out["espn" + e.id] = { clk: String(s.displayClock || ""), per: Number(s.period) || 0, st: String(t.name || ""), desc: String(t.description || ""), a: Number.isFinite(hs) ? hs : null, b: Number.isFinite(as) ? as : null };
       }
     } catch (e) { try { await slog("WARN", "espn", "ESPN live fail: " + ((e && e.message) || e)); } catch (_) {} }
   }
@@ -491,7 +496,7 @@ export async function runCheck() {
   if (liveDue) {
     try {
       const lv = await fetchLive(liveMatches);
-      for (const m of liveMatches) { const d = lv[m.fx]; if (!d) continue; const pv = prevLive[m.fx] || {}; if (pv.clk !== d.clk || pv.st !== d.st) liveChanged++; await fbPut("/live/" + m.fx, { clk: d.clk, per: d.per, st: d.st, desc: d.desc, ts: now }); liveWrote++; }
+      for (const m of liveMatches) { const d = lv[m.fx]; if (!d) continue; const pv = prevLive[m.fx] || {}; if (pv.clk !== d.clk || pv.st !== d.st || (pv.a ?? null) !== (d.a ?? null) || (pv.b ?? null) !== (d.b ?? null)) liveChanged++; await fbPut("/live/" + m.fx, { clk: d.clk, per: d.per, st: d.st, desc: d.desc, a: d.a, b: d.b, ts: now }); liveWrote++; }
     } catch (e) { try { await slog("WARN", "live", "fetchLive: " + ((e && e.message) || e)); } catch (_) {} }
   }
 
