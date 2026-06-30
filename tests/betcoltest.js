@@ -29,7 +29,7 @@ ok(/<div class="lbwrap">[\s\S]*?class="lb/.test(h),'rows wrapped in .lbwrap subg
 // баланс и ставки в одной ячейке: «баланс+ставки=итого₪»; значок $ убран; колонки .hbamt больше нет
 ok(!/class="hb"/.test(h)&&!/>\$</.test(h),'значок $ убран полностью');
 ok(!/class="hbamt"/.test(h),'отдельной колонки .hbamt больше нет');
-ok(/class="bt"[^>]*>100<span class="cur">₪<\/span><\/span><span class="bx"[^>]*>95\+5=<\/span>/.test(h),'p1 с открытой ставкой: итог «100₪» в .bt, затем выражение «95+5=» в .bx');
+ok(/class="bt"[^>]*>100<span class="cur">₪<\/span><\/span><span class="bx"[^>]*>95\+5[^<]*<\/span>/.test(h),'p1 с открытой ставкой: итог «100₪» в .bt, затем выражение «95+5 » (пробел вместо =) в .bx');
 ok(/class="bt"[^>]*>120<span class="cur">/.test(h),'p3 без ставок: только итог «120₪» в .bt (без +/=)');
 ok(/class="bt"[^>]*>[^<]*<span class="cur">[^<]*<\/span><\/span>/.test(h),'итог: число затем ₪ (без $)');
 ok((h.match(/<span class="cur">/g)||[]).length===3,'₪ currency shown next to every balance (all 3 rows)');

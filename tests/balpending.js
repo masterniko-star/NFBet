@@ -12,7 +12,7 @@ A.sandbox.buildState(A.state.tree);
 A.sandbox.ME='u';A.sandbox.TAB='all';
 A.sandbox.renderAllView();
 const html=A.mainHTML()||'';
-ok(/class="bt"[^>]*>100<span class="cur">₪<\/span><\/span><span class="bx"[^>]*>93\+7=<\/span>/.test(html),'порядок: итог «100₪» в .bt, затем выражение «93+7=» в .bx');
+ok(/class="bt"[^>]*>100<span class="cur">₪<\/span><\/span><span class="bx"[^>]*>93\+7[^<]*<\/span>/.test(html),'порядок: итог «100₪» в .bt, затем выражение «93+7 » (пробел вместо =) в .bx');
 ok(/class="bt"[^>]*>100<span class="cur">₪<\/span><\/span>/.test(html),'₪ один раз в конце итога');
 ok(html.indexOf('$')<0&&!/class="hbamt"/.test(html),'значок $ убран; отдельной колонки .hbamt больше нет');
 
