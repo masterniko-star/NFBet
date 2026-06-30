@@ -1172,7 +1172,7 @@ function renderAllView(){
       (own?('<span class="io dep"><span class="ic">📥</span>'+fmt(deposited)+'</span><span class="io wd"><span class="ic">📤</span>'+fmt(withdrawn)+'</span>'):'')+
       '<span class="gp"></span>'+
       '<span class="bt" style="color:'+bc+'">'+fmt(tot)+'<span class="cur">'+cur()+'</span></span>'+
-      '<span class="bx" style="color:'+bc+'">'+(hasBet[e.p.id]?(fmt(rbal)+'+'+fmt(e.s.pending)+'='):'')+'</span>'+
+      '<span class="bx" style="color:'+bc+'">'+(hasBet[e.p.id]?(fmt(rbal)+'+'+fmt(e.s.pending)+' '):'')+'</span>'+
       '</div>';
   }).join("");
   var inHand=0,inBets=0;rk.forEach(function(e){inHand+=e.s.balance;inBets+=e.s.pending;});var poolTotal=inHand+inBets;
