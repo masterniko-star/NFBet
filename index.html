@@ -1020,9 +1020,9 @@ function ilOffMin(ts){var d=new Date(ts);var p=new Intl.DateTimeFormat("en-GB",{
 function ilWallTs(wall){if(!wall)return NaN;var s=String(wall);var Y=+s.slice(0,4),Mo=+s.slice(5,7),D=+s.slice(8,10),H=+s.slice(11,13),Mi=+s.slice(14,16);if(!(Y>0&&Mo>0&&D>0)||isNaN(H)||isNaN(Mi)){var t=new Date(s).getTime();return isNaN(t)?NaN:t;}var asUTC=Date.UTC(Y,Mo-1,D,H,Mi);return asUTC-ilOffMin(asUTC)*60000;}
 function matchLocked(m){if(!m||!m.dt)return false;var t=ilWallTs(m.dt);return !isNaN(t)&&Date.now()>=t;}
 function matchMature(m){if(!m||!m.dt)return false;var t=ilWallTs(m.dt);return !isNaN(t)&&Date.now()>=t+3*36e5;}
-/* ---------- שעון משחק חי: ⏳ ספירה לאחור (שעה לפני) → ⏱ סטופר אדום מתחילת המשחק → "הסתיים" אדום ---------- */
+/* ---------- שעון משחק חי: ⏳ ספירה לאחור (24 שעות לפני) → ⏱ סטופר אדום מתחילת המשחק → "הסתיים" אדום ---------- */
 var CLK_DUR=150*60000;   /* משך משוער של משחק: אחריו השעון הופך ל"הסתיים" (נוקאאוט עם הארכה/פנדלים) */
-var CLK_PRE=60*60000;    /* הספירה לאחור נפתחת שעה לפני שריקת הפתיחה */
+var CLK_PRE=24*60*60000; /* הספירה לאחור נפתחת 24 שעות לפני שריקת הפתיחה */
 function clkP2(n){return (n<10?"0":"")+n;}
 function gameClockState(start,settled,now,overLabel,board){
   if(isNaN(start))return null;
@@ -1030,8 +1030,8 @@ function gameClockState(start,settled,now,overLabel,board){
   /* идёт игра: ⏱ + время матча + «זמן המשחק», всё КРАСНОЕ (одинаково на доске и בלהמר) */
   if(now>=start){var e=now-start;var rt=clkP2(Math.floor(e/60000))+":"+clkP2(Math.floor((e%60000)/1000));
     return {html:'<span style="display:block;line-height:1.1">⏱ '+rt+'</span><span dir="rtl" style="display:block;font-size:9px;font-weight:600;line-height:1.2;margin-top:1px;white-space:nowrap">זמן המשחק</span>',color:"var(--red)"};}
-  /* за час до старта: ⏱ + обратный отсчёт + «המשחק מתחיל בעוד», всё ЗЕЛЁНОЕ */
-  if(now>=start-CLK_PRE){var r=start-now;var ct=clkP2(Math.floor(r/60000))+":"+clkP2(Math.floor((r%60000)/1000));
+  /* до старта (в пределах 24ч): ⏱ + обратный отсчёт + «המשחק מתחיל בעוד», всё ЗЕЛЁНОЕ. Формат HH:MM:SS (часы показываем только если ≥1ч, иначе MM:SS как раньше) */
+  if(now>=start-CLK_PRE){var r=start-now;var rh=Math.floor(r/3600000),rm=Math.floor((r%3600000)/60000),rs=Math.floor((r%60000)/1000);var ct=(rh>0?clkP2(rh)+":":"")+clkP2(rm)+":"+clkP2(rs);
     return {html:'<span style="display:block;line-height:1.1">⏱ '+ct+'</span><span dir="rtl" style="display:block;font-size:9px;font-weight:600;line-height:1.2;margin-top:1px;white-space:nowrap">המשחק מתחיל בעוד</span>',color:"var(--pitch-d)"};}
   return {html:"",color:"var(--mut)"};
 }
