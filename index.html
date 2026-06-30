@@ -689,7 +689,7 @@ function renderHeader(){
 function renderHeaderViewToggle(){
   var box=$("#hViewToggle"); if(!box)return;
   var show=(MODE!=="admin")&&(TAB==="all")&&isOwnerView();
-  box.innerHTML=show?('<label onclick="allViewToggle()" title="הצג את הדף כפי שהשחקנים רואים אותו" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;user-select:none"><span class="checkbox '+(ALLVIEW_ASPLAYER?'on':'')+'" style="width:18px;height:18px;font-size:12px">'+(ALLVIEW_ASPLAYER?'✓':'')+'</span><span style="font-size:15px;line-height:1">👁</span></label>'):'';
+  box.innerHTML=show?('<label onclick="allViewToggle()" title="הצג את הדף כפי שהשחקנים רואים אותו" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;user-select:none"><span class="checkbox '+(ALLVIEW_ASPLAYER?'on':'')+'" style="width:18px;height:18px;font-size:12px">'+(ALLVIEW_ASPLAYER?'✓':'')+'</span></label>'):'';
 }
 function appendExitFooter(){var m=$("#main");if(!m||!me()||TAB==="hist")return;m.innerHTML+='<div style="text-align:left;margin:22px 2px 10px"><button class="btn ghost" onclick="switchMe()" style="font-size:14px;padding:9px 26px;color:var(--mut)">🚪&nbsp;&nbsp;יציאה</button></div>';}
 var _navHtml="";
