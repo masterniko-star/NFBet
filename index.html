@@ -1080,13 +1080,13 @@ function liveClockHtml(m,style,board){var lv=m&&m.live;
 /* ===== СЧЁТ МАТЧА рядом с часами (только доска) =====
    Показываем ТОЛЬКО реальный счёт из ESPN-live (a/b), пока данные свежие (≤ LIVE_TTL = 4 мин).
    До первых реальных данных — ничего. Короткое пропадание (≤4 мин) держит последний счёт; дольше —
-   счёт исчезает (см. tickClocks .livescore). a = teamA (слева), b = teamB (справа), всегда красный. */
+   счёт исчезает (см. tickClocks .livescore). a = teamA (слева), b = teamB (справа), по центру строки, чёрный. */
 function liveScoreHtml(m,style){
   if(!m||!m.dt||m.settled)return "";
   var lv=m.live;
   if(!(lv&&lv.ts&&(Date.now()-(+lv.ts))<LIVE_TTL&&(lv.a!=null||lv.b!=null)))return "";
   var a=Number(lv.a)||0,b=Number(lv.b)||0;
-  return '<span class="livescore" data-ts="'+(+lv.ts)+'" dir="ltr" style="display:inline-block;font-weight:800;white-space:nowrap;color:var(--red);'+(style||"")+'">'+a+':'+b+'</span>';}
+  return '<span class="livescore" data-ts="'+(+lv.ts)+'" dir="ltr" style="display:inline-block;font-weight:800;white-space:nowrap;color:var(--ink);'+(style||"")+'">'+a+':'+b+'</span>';}
 window.tickClocks=tickClocks;
 try{if(typeof setInterval!=="undefined")setInterval(tickClocks,1000);}catch(e){}
 var betLockSig="";

@@ -15,7 +15,7 @@ ok(S.liveScoreHtml({dt:ilWall(-5),settled:false,live:null},'')==='','игра и
 
 // 3) свежий live-счёт 2:1 -> 2:1 красным
 const lh=S.liveScoreHtml({dt:ilWall(-30),settled:false,live:{st:'STATUS_SECOND_HALF',clk:"67'",a:2,b:1,ts:now}},'');
-ok(/class="livescore"/.test(lh)&&lh.indexOf('2:1')>=0&&lh.indexOf('red')>=0,'свежий live: реальный счёт 2:1 красным');
+ok(/class="livescore"/.test(lh)&&lh.indexOf('2:1')>=0&&lh.indexOf('var(--ink)')>=0,'свежий live: реальный счёт 2:1 чёрным (var(--ink))');
 ok(/data-ts="/.test(lh),'счёт несёт data-ts (для скрытия при протухании)');
 
 // 4) свежий live 0:0 в начале игры (реальные данные) -> 0:0 показываем
