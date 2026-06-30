@@ -123,8 +123,9 @@ function seedBasic(){
   r=render({MODE:'player',ME:'p0',TAB:'all'}); ok(!r.err,'render leaderboard no throw'+(r.err?' ['+r.err+']':''));
     has(r.html,'Alice','leaderboard: player listed');
   r=render({MODE:'player',ME:'p0',TAB:'hist'}); ok(!r.err,'render history no throw'+(r.err?' ['+r.err+']':''));
-    has(r.html,'סגור חשבון','hist: close-account action present');
     has(r.html,'תיקו','hist: draw refund label for m4 present');
+  r=render({MODE:'player',ME:'p0',TAB:'help'}); ok(!r.err,'render help no throw'+(r.err?' ['+r.err+']':''));
+    has(r.html,'סגור חשבון','help: close-account action present');
   r=render({MODE:'admin',ME:null,TAB:'players'}); ok(!r.err,'render admin players no throw'+(r.err?' ['+r.err+']':''));
     has(r.html,'Alice','admin players: name shown');
   r=render({MODE:'admin',ME:null,TAB:'matches'}); ok(!r.err,'render admin matches no throw'+(r.err?' ['+r.err+']':''));
