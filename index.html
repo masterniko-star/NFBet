@@ -238,10 +238,7 @@
   .lb .io .ic{font-size:16.5px;margin-inline-end:2px;opacity:.9}
   .lb .io.dep{color:var(--ink)}
   .lb .io.wd{color:var(--ink)}
-  .lb .bal{direction:ltr;display:flex;align-items:baseline;font-weight:800;font-size:15px;white-space:nowrap;font-variant-numeric:tabular-nums}
-  .lb .bal .bx{flex:0 0 auto}
-  .lb .bal .bt{margin-inline-start:auto;flex:0 0 auto}
-  .lb .bal .bpad{display:inline-block}
+  .lb .bal{direction:ltr;text-align:right;font-weight:800;font-size:15px;white-space:nowrap}
   .lb .bal .cur{margin-inline-start:2px}
   .lb.me-row{border-radius:10px}
   .copyrow{display:flex;gap:6px;align-items:stretch;margin-top:6px}
@@ -1162,15 +1159,6 @@ function renderAllView(){
     var start=S.meta.bank;var rbal=Math.round(e.s.balance);var tot=Math.round(e.s.balance+e.s.pending);var bc=tot>start?"var(--pitch-d)":(tot<start?"var(--red)":"var(--tx)");
     var deposited=depOf(e.p);
     var withdrawn=wdOf(e.p);
-    var curHtml='<span class="cur">'+cur()+'</span>';
-    var balInner;
-    if(hasBet[e.p.id]){
-      var bs=fmt(rbal);var padN=bs.length>=3?0:(bs.length===2?1:3); // 3 цифры→0, 2 цифры→1, 1 цифра→3 пробела перед «+»
-      var lead=padN?'<span class="bpad" style="width:'+padN+'ch"></span>':'';
-      balInner='<span class="bx">'+lead+bs+'+'+fmt(e.s.pending)+'=  </span><span class="bt">'+fmt(tot)+curHtml+'</span>';
-    }else{
-      balInner='<span class="bt">'+fmt(rbal)+curHtml+'</span>';
-    }
     return '<div class="lb'+zc+meCls+'">'+
       '<span class="rk"'+(e.p.feePaid?' style="color:var(--tx)"':'')+'>'+medal+'</span>'+
       '<span class="nm">'+(function(){var raw=(e.p.name||"").trim();var unpaid=!e.p.feePaid;var wrap=function(s){return unpaid?'<span class="unpaidName">'+s+'</span>':s;};
@@ -1179,7 +1167,7 @@ function renderAllView(){
       '<span class="gp"></span>'+
       (own?('<span class="io dep"><span class="ic">📥</span>'+fmt(deposited)+'</span><span class="io wd"><span class="ic">📤</span>'+fmt(withdrawn)+'</span>'):'')+
       '<span class="gp"></span>'+
-      '<span class="bal" style="color:'+bc+'">'+balInner+'</span>'+
+      '<span class="bal" style="color:'+bc+'">'+(hasBet[e.p.id]?(fmt(rbal)+'+'+fmt(e.s.pending)+'=  '+fmt(tot)):fmt(rbal))+'<span class="cur">'+cur()+'</span></span>'+
       '</div>';
   }).join("");
   var inHand=0,inBets=0;rk.forEach(function(e){inHand+=e.s.balance;inBets+=e.s.pending;});var poolTotal=inHand+inBets;
