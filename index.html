@@ -1233,6 +1233,7 @@ function renderAdminPlayers(){
         '<div class="p-top">'+
           '<div class="pname" dir="rtl">'+esc(p.name)+(p.phone?' <span class="tiny muted" dir="ltr">'+esc(p.phone)+'</span>':"")+'</div>'+
           '<div class="fee" onclick="aToggleFee(\''+p.id+'\')"><div class="checkbox '+(p.feePaid?"on":"")+'">'+(p.feePaid?"✓":"")+'</div><span>שולם</span></div>'+
+          '<button class="pdel" onclick="aResetPlayerPw(\''+p.id+'\')" title="אפס סיסמה למשתתף">🔑</button>'+
           '<button class="pdel" onclick="aDelPlayer(\''+p.id+'\')" title="מחק משתתף">🗑</button>'+
         '</div>'+
         '<div class="addrow">'+
@@ -1242,7 +1243,7 @@ function renderAdminPlayers(){
       '</div>';
      }).join("");
   var allPaid=S.players.length>0&&S.players.every(function(p){return p.feePaid;});
-  var allHead=S.players.length?('<div class="p-allhead"><div class="p-top"><div class="pname allname" onclick="aMarkAllPaid()" style="cursor:pointer">הכל</div><div class="fee" onclick="aMarkAllPaid()"><div class="checkbox '+(allPaid?"on":"")+'">'+(allPaid?"✓":"")+'</div><span style="visibility:hidden">שולם</span></div><button class="pdel" style="visibility:hidden" tabindex="-1">🗑</button></div></div>'):'';
+  var allHead=S.players.length?('<div class="p-allhead"><div class="p-top"><div class="pname allname" onclick="aMarkAllPaid()" style="cursor:pointer">הכל</div><div class="fee" onclick="aMarkAllPaid()"><div class="checkbox '+(allPaid?"on":"")+'">'+(allPaid?"✓":"")+'</div><span style="visibility:hidden">שולם</span></div><button class="pdel" style="visibility:hidden" tabindex="-1">🔑</button><button class="pdel" style="visibility:hidden" tabindex="-1">🗑</button></div></div>'):'';
   $("#main").innerHTML='<section class="view active"><div class="card">'+
     '<div class="tiny" style="font-weight:800;direction:rtl;text-align:right;margin-bottom:8px;color:'+(S.players.length>=MAX_PLAYERS?"#d33":"var(--mut)")+'">👥 '+S.players.length+"/"+MAX_PLAYERS+' משתתפים</div>'+
     allHead+list+'</div>'+
