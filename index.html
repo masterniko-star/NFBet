@@ -942,6 +942,13 @@ function renderHelp(){
 <div class="field" style="margin-bottom:12px"><label>מספר טלפון (לטלגרם)</label><input class="input" id="tgPhone" type="tel" dir="ltr" placeholder="05X-XXXXXXX" autocomplete="off"></div>
 <button class="btn block" onclick="tgSave()">שמור</button>
 <p class="tiny muted" style="margin-top:10px">🔒 הפרטים נשמרים לצורך שליחת ההתראות בעתיד. השליחה האוטומטית עדיין בפיתוח.</p>`;
+  var hp=me();
+  var acct=hp?('<div class="card card-p" style="margin-top:16px;text-align:center">'+
+    '<div style="font-weight:800;font-size:16px" dir="auto">'+esc(hp.name)+'</div>'+
+    '<div style="display:flex;gap:10px;justify-content:center;margin-top:12px">'+
+      '<button class="btn ghost" style="flex:1;white-space:nowrap;padding:0 8px" onclick="switchMe()"><span>🚪</span><span>יציאה</span></button>'+
+      '<button class="btn danger" style="flex:1;white-space:nowrap;padding:0 8px" onclick="closeMyAccount()"><span>🗑</span><span>סגור חשבון</span></button>'+
+    '</div></div>'):'';
   m.innerHTML='<section class="view active"><div class="section-h"><h2>עזרה</h2></div>'+
     panelCard("hrules","📜&nbsp;&nbsp;תקנון","",'<div class="helpwrap" style="padding:0">'+rules+'</div>')+
     panelCard("hguide","📖&nbsp;&nbsp;מדריך למשתתף","",'<div class="helpwrap" style="padding:0">'+guide+'</div>')+
@@ -951,6 +958,7 @@ function renderHelp(){
       '<div class="field"><label>אימות סיסמה חדשה</label>'+pwBox('myNewPw2')+'</div>'+
       '<button class="btn block" onclick="changeMyPw()">החלף סיסמה</button>')+
     panelCard("htg","📨&nbsp;&nbsp;התראות בטלגרם",'<span style="color:var(--gold);font-weight:800">🚧 בפיתוח</span>',tg)+
+    acct+
     '<p style="text-align:center;margin-top:18px;font-size:12px;color:var(--mut2)">גרסה '+APP_VER+'</p></section>';
   var meP=me();
   if(meP){var ts=document.getElementById("tgSub");if(ts)ts.checked=!!meP.tgSub;var tp=document.getElementById("tgPhone");if(tp)tp.value=meP.tgPhone||"";}
@@ -1225,13 +1233,7 @@ function renderHistView(){
     '<div style="text-align:center"><div class="tiny muted" style="font-weight:700">הפקדה</div><div style="font-size:22px;font-weight:800;color:var(--pitch-d);white-space:nowrap" dir="ltr"><span style="font-size:16px;vertical-align:2px">📥</span> '+fmt1(deposited)+' '+cur()+'</div>'+(withdrawn>0.001?('<div style="font-size:12.5px;font-weight:800;color:var(--red);white-space:nowrap;margin-top:2px" dir="ltr"><span style="font-size:12.5px">📤</span> '+fmt1(withdrawn)+' '+cur()+'</div>'):'')+'</div>'+
     '<div style="text-align:left"><div class="tiny muted" style="font-weight:700">יתרה</div><div class="num" style="font-size:22px;font-weight:800;color:'+balCol+'">'+fmt1(bal)+' '+cur()+'</div></div>'+
     '</div>';
-  var acct='<div class="card card-p" style="margin-top:16px;text-align:center">'+
-    '<div style="font-weight:800;font-size:16px" dir="auto">'+esc(p.name)+'</div>'+
-    '<div style="display:flex;gap:10px;justify-content:center;margin-top:12px">'+
-      '<button class="btn ghost" style="flex:1;white-space:nowrap;padding:0 8px" onclick="switchMe()"><span>🚪</span><span>יציאה</span></button>'+
-      '<button class="btn danger" style="flex:1;white-space:nowrap;padding:0 8px" onclick="closeMyAccount()"><span>🗑</span><span>סגור חשבון</span></button>'+
-    '</div></div>';
-  $("#main").innerHTML='<section class="view active">'+header+(items||'<div class="card"><div class="empty"><div class="em-ic">🧾</div>עדיין לא הימרת על אף משחק.</div></div>')+acct+'</section>';
+  $("#main").innerHTML='<section class="view active">'+header+(items||'<div class="card"><div class="empty"><div class="em-ic">🧾</div>עדיין לא הימרת על אף משחק.</div></div>')+'</section>';
 }
 
 /* ---------- ADMIN: players ---------- */
