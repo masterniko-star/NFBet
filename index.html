@@ -239,7 +239,9 @@
   .lb .io.dep{color:var(--ink)}
   .lb .io.wd{color:var(--ink)}
   .lb .bx{direction:ltr;text-align:right;font-weight:800;font-size:14px;white-space:nowrap;font-variant-numeric:tabular-nums}
-  .lb .bt{direction:ltr;font-weight:800;font-size:15px;white-space:nowrap;font-variant-numeric:tabular-nums;display:flex;align-items:center;justify-content:flex-end}
+  .lb .bt{direction:ltr;font-weight:800;font-size:15px;white-space:nowrap;font-variant-numeric:tabular-nums;display:flex;align-items:center;justify-content:flex-end;align-self:stretch;margin-block:-2px;padding:0 8px;border-left:1px solid #5b9bd5;border-right:1px solid #5b9bd5}
+  .lb:first-child .bt{border-top:1px solid #5b9bd5;border-top-left-radius:6px;border-top-right-radius:6px}
+  .lb:last-child .bt{border-bottom:1px solid #5b9bd5;border-bottom-left-radius:6px;border-bottom-right-radius:6px}
   .lb .bt .cur{margin-inline-start:2px}
   .lb.me-row{border-radius:10px}
   .copyrow{display:flex;gap:6px;align-items:stretch;margin-top:6px}
