@@ -14,6 +14,7 @@ const CASH_RETAIN_MS = 365 * 24 * 60 * 60 * 1000; // журнал פיקדון: 
 // «конец игры» — независимый от autocfg-тумблеров механизм:
 const END_RES_MS = 105 * 60 * 1000; // проверять результат каждую минуту начиная со старт+105 мин (до зачёта)
 const END_NG_MS  = 110 * 60 * 1000; // подгружать новые игры через 5 мин после «конца» (старт+110), один раз на игру
+const LIVE_WIN_MS = 180 * 60 * 1000; // окно сбора live-времени матча: старт..старт+180 мин (покрывает овертайм + пенальти)
 
 /* ---------- Firebase REST ---------- */
 const jurl = (p) => DB + (p.startsWith("/") ? p : "/" + p) + ".json";
@@ -65,7 +66,7 @@ function fmtIsrael(iso) {
 }
 
 /* ---------- серверный лог ошибок -> /diag/server (виден в админском логе) ---------- */
-const SRV_VER="srv-2026-06-29b";
+const SRV_VER="srv-2026-06-29e";
 async function slog(lvl,cat,msg,x){
   const entry={ts:Date.now(),lvl,cat,msg:String(msg||"").slice(0,400),ver:SRV_VER};
   if(x!==undefined){try{entry.x=JSON.parse(JSON.stringify(x));}catch(_){}}
@@ -432,6 +433,36 @@ async function fetchResults(pend){
   return results;
 }
 
+/* ---------- live-время матча: для идущих (state="in") берём реальную минуту/тайм/статус из ESPN ----------
+   Возвращает { "espn<id>": { clk:"45'+4'", per:1, st:"STATUS_HALFTIME", desc:"Halftime" } }.
+   Минута уже включает добавленное/доп. время (displayClock). 365scores не покрываем — для ЧМ источник ESPN. */
+async function fetchLive(live) {
+  const out = {};
+  const espnSlugs = new Set(["fifa.world"]);
+  live.forEach((m) => { const s = srcOf(m); if (s.type !== "365" && s.slug) espnSlugs.add(s.slug); });
+  const ds = live.map((m) => m.dt).filter(Boolean).map((s) => new Date(s)).filter((d) => !isNaN(d.getTime()));
+  let d0, d1;
+  if (ds.length) { const mn = Math.min(...ds.map((d) => d.getTime())), mx = Math.max(...ds.map((d) => d.getTime())); d0 = new Date(mn - 864e5); d1 = new Date(mx + 864e5); }
+  else { d0 = new Date(Date.now() - 864e5); d1 = new Date(Date.now() + 864e5); }
+  for (const sl of espnSlugs) {
+    try {
+      const url = ESPN + encodeURIComponent(sl) + "/scoreboard?limit=300&dates=" + ymdUTC(d0) + "-" + ymdUTC(d1);
+      const r = await fetch(url); if (!r.ok) continue; const j = await r.json();
+      for (const e of ((j && j.events) || [])) {
+        const s = e.status || {}, t = s.type || {};
+        if (t.state !== "in" && t.state !== "post") continue; // идущие + только что завершённые (post -> статус FULL_TIME, клиент покажет «הסתiים» и остановит часы)
+        const cs = ((e.competitions && e.competitions[0]) || {}).competitors || []; // счёт: home=teamA, away=teamB
+        let home = null, away = null; cs.forEach((c) => { if (c.homeAway === "home") home = c; else if (c.homeAway === "away") away = c; });
+        if (!home) home = cs[0]; if (!away) away = cs[1];
+        const hs = home && home.score != null && home.score !== "" ? Number(home.score) : NaN;
+        const as = away && away.score != null && away.score !== "" ? Number(away.score) : NaN;
+        out["espn" + e.id] = { clk: String(s.displayClock || ""), per: Number(s.period) || 0, st: String(t.name || ""), desc: String(t.description || ""), a: Number.isFinite(hs) ? hs : null, b: Number.isFinite(as) ? as : null };
+      }
+    } catch (e) { try { await slog("WARN", "espn", "ESPN live fail: " + ((e && e.message) || e)); } catch (_) {} }
+  }
+  return out;
+}
+
 /* ---------- core (экспортируется для тестов) ---------- */
 export async function runCheck() {
   const tree = (await fbGet("")) || {};
@@ -451,10 +482,23 @@ export async function runCheck() {
   const endResDue = matches.some((m) => !m.settled && m.teamA && m.teamB && Number.isFinite(ilWallToTs(m.dt)) && now >= ilWallToTs(m.dt) + END_RES_MS);
   const endNgLast = (tree.autocfg && tree.autocfg.endchk && Number(tree.autocfg.endchk.ngLast)) || 0;
   const endNgDue = matches.some((m) => { const t = ilWallToTs(m.dt); return Number.isFinite(t) && (t + END_NG_MS) <= now && (t + END_NG_MS) > endNgLast; });
+  // live-время матча: несведённые матчи, идущие прямо сейчас (старт..старт+180мин). Работает независимо от тумблеров.
+  const liveMatches = matches.filter((m) => !m.settled && m.teamA && m.teamB && Number.isFinite(ilWallToTs(m.dt)) && now >= ilWallToTs(m.dt) && now < ilWallToTs(m.dt) + LIVE_WIN_MS);
+  const liveDue = liveMatches.length > 0;
   const resultsDue = dueByCfg(cfg.results, matches, now) || endResDue;
   // טעינת משחקים: לוח הזמנים נגזר תמיד מ"בדיקת תוצאות" + 5 דק' (גם דקות וגם שעות קבועות); הפעלה/כיבוי נפרד
   const newgamesDue = dueByCfg(newgamesSchedule(cfg), matches, now);
-  if (!resultsDue && !newgamesDue && !endNgDue) { await srvPulse(); return { skipped: true }; }
+  if (!resultsDue && !newgamesDue && !endNgDue && !liveDue) { await srvPulse(); return { skipped: true }; }
+
+  // live-время идущих матчей -> /live/{fx}. ts обновляем всегда (свежесть),
+  // но /rev дёргаем (liveChanged) ТОЛЬКО когда минута/статус сменились — чтобы клиент перечитал «когда получает минуту», не каждый прогон.
+  let liveWrote = 0, liveChanged = 0; const prevLive = tree.live || {};
+  if (liveDue) {
+    try {
+      const lv = await fetchLive(liveMatches);
+      for (const m of liveMatches) { const d = lv[m.fx]; if (!d) continue; const pv = prevLive[m.fx] || {}; if (pv.clk !== d.clk || pv.st !== d.st || (pv.a ?? null) !== (d.a ?? null) || (pv.b ?? null) !== (d.b ?? null)) liveChanged++; await fbPut("/live/" + m.fx, { clk: d.clk, per: d.per, st: d.st, desc: d.desc, a: d.a, b: d.b, ts: now }); liveWrote++; }
+    } catch (e) { try { await slog("WARN", "live", "fetchLive: " + ((e && e.message) || e)); } catch (_) {} }
+  }
 
   let updated = 0, checked = 0; const settledLog = [];
   if (resultsDue) {
@@ -476,6 +520,7 @@ export async function runCheck() {
           }
         }
         await fbPatch("/matches/" + m.id, { settled: true, winner: w });
+        try { await fbDel("/live/" + m.fx); } catch (_) {} // матч сведён — снять live-время
         m.settled = true; m.winner = w;
         settledLog.push(m.teamA + "-" + m.teamB + "=" + w);
         updated++;
@@ -496,15 +541,15 @@ export async function runCheck() {
   if (runNew) patch.newgames = { ...cfg.newgames, last: now };
   if (endNgDue) patch.endchk = { ngLast: now }; // отметка «новые игры на конец+5 подгружены», чтобы не дёргать каждую минуту
   try { await fbPatch("/autocfg", patch); } catch (e) {}
-  if (updated || top.added) { try { await fbPut("/rev", Date.now()); } catch (e) {} }
+  if (updated || top.added || liveChanged) { try { await fbPut("/rev", Date.now()); } catch (e) {} }
   try {
     const d = top.dbg || {};
     const settledStr = settledLog.length ? (" {" + settledLog.join(", ") + "}") : "";
-    let msg = "res=" + (resultsDue ? 1 : 0) + (endResDue ? "(end)" : "") + " new=" + (newgamesDue ? 1 : 0) + (endNgDue ? "(end+5)" : "") + ((updated && !newgamesDue && !endNgDue) ? "+slot" : "") + " | checked=" + checked + " settled=" + updated + settledStr;
+    let msg = "res=" + (resultsDue ? 1 : 0) + (endResDue ? "(end)" : "") + " new=" + (newgamesDue ? 1 : 0) + (endNgDue ? "(end+5)" : "") + ((updated && !newgamesDue && !endNgDue) ? "+slot" : "") + (liveDue ? (" live=" + liveWrote + "/" + liveMatches.length) : "") + " | checked=" + checked + " settled=" + updated + settledStr;
     if (runNew) msg += " | unsettled=" + (d.unsettled != null ? d.unsettled : "?") + " need=" + (d.need != null ? d.need : "?") + " | src[" + ((d.perSrc || []).join(",")) + "] cands=" + (d.cands != null ? d.cands : "?") + " | added=" + (top.added || 0) + ((d.added && d.added.length) ? (" {" + d.added.join(", ") + "}") : "");
-    await slog("INFO", "run", msg, { res: resultsDue, new: newgamesDue, endRes: endResDue, endNg: endNgDue, checked, updated, settled: settledLog, topup: d });
+    await slog("INFO", "run", msg, { res: resultsDue, new: newgamesDue, endRes: endResDue, endNg: endNgDue, live: liveWrote, checked, updated, settled: settledLog, topup: d });
   } catch (e) {}
-  return { updated, checked, added: top.added, results: resultsDue, newgames: newgamesDue, fill: resultsDue, add: runNew };
+  return { updated, checked, added: top.added, results: resultsDue, newgames: newgamesDue, fill: resultsDue, add: runNew, live: liveWrote };
 }
 
 export default async () => {

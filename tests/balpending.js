@@ -1,9 +1,9 @@
-// balpending.js — в טבלה деньги в открытых ставках (pending) показываются «(+N)» зелёным
-// в своей выровненной колонке (.hbamt); значок $ убран; сортировка по баланс+pending.
+// balpending.js — в טבלה баланс и ставки в одной ячейке формата «баланс+ставки=итого₪»
+// (например «93+7=100₪»), ₪ один раз в конце, колонка выровнена по ₪; цвет по итогу; сортировка по баланс+pending.
 const {loadApp}=require('./applib.js');
 let pass=0,fail=0;const ok=(c,m)=>{if(c){pass++;}else{fail++;console.log('  FAIL:',m);}};
 
-// игрок с открытой ставкой 7 на несведённом матче
+// игрок с открытой ставкой 7: баланс в руке 93 (100−7) + 7 в ставке = 100
 const A=loadApp({meta:{bank:100,cur:'₪'},
   players:{u:{name:'Better',feePaid:true,dep:100,t:1}},
   matches:{m1:{teamA:'A',teamB:'B',round:'R32',order:1,settled:false,drawOK:false,t:1}},
@@ -12,15 +12,15 @@ A.sandbox.buildState(A.state.tree);
 A.sandbox.ME='u';A.sandbox.TAB='all';
 A.sandbox.renderAllView();
 const html=A.mainHTML()||'';
-ok(/<span class="hbamt">\(\+7 ₪\)<\/span>/.test(html),'pending «(+7 ₪)» в своей колонке (.hbamt)');
-ok(!/class="hb"/.test(html)&&html.indexOf('$')<0,'значок $ убран');
-ok(/class="hbamt">\(\+7 ₪\)<\/span><span class="bal"/.test(html),'pending — отдельная колонка перед балансом');
+ok(/class="bal"[^>]*>93\+7=\s\s100<span class="cur">/.test(html),'формат «93+7=  100» (баланс+ставки=итого, 2 пробела после =) в .bal');
+ok(/93\+7=\s\s100<span class="cur">₪<\/span>/.test(html),'₪ один раз в конце');
+ok(html.indexOf('$')<0&&!/class="hbamt"/.test(html),'значок $ убран; отдельной колонки .hbamt больше нет');
 
-// без ставки — пустой слот pending (колонка зарезервирована), без скобок
+// без ставки — только баланс «100₪», без «+»/«=»
 const B=loadApp({meta:{bank:100,cur:'₪'},players:{u:{name:'NoBet',feePaid:true,dep:100,t:1}},matches:{},bets:{}},{});
 B.sandbox.buildState(B.state.tree);B.sandbox.ME='u';B.sandbox.renderAllView();
 const bh=B.mainHTML()||'';
-ok(/<span class="hbamt"><\/span>/.test(bh)&&!/\(\+/.test(bh),'без ставки — пустой слот pending, без скобок');
+ok(/class="bal"[^>]*>100<span class="cur">/.test(bh),'без ставки — только баланс «100₪» (после числа сразу ₪, без +/=)');
 
 // сортировка по баланс+pending: тотал важнее голого баланса
 const C=loadApp({meta:{bank:100,cur:'₪'},

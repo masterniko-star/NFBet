@@ -47,13 +47,14 @@ console.log('===== RESULTS: offset after kickoff (after:[180]) settles finished 
   ok(typeof (st.tree.autocfg.results||{}).last==='number'&&st.tree.autocfg.results.last>0,'results.last stamped');
 }
 
-console.log('\n===== RESULTS: not due before any offset/time -> skipped =====');
+console.log('\n===== RESULTS: not due before any offset/time (идущий матч -> только live, без зачёта) =====');
 {
   let st={tree:{autocfg:{results:{on:true,after:[180],times:[],last:0},newgames:{on:false}},meta:{bank:100},players:{},
     matches:{m1:mtch('1',-60,'501')},bets:{}},espn:{events:[]}};
   globalThis.fetch=makeFetch(st);
   let r=await RC();
-  ok(r.skipped===true,'match only 1h old, no times -> skipped');
+  // матч идёт (1ч назад) -> live-сбор активен (НЕ skipped), но без зачёта/новых игр (ESPN-мок пуст -> live=0)
+  ok(!r.skipped&&!r.results&&!r.newgames&&(r.live||0)===0&&st.tree.matches.m1.settled!==true,'match only 1h old: live-прогон, без зачёта/новых игр');
 }
 
 console.log('\n===== RESULTS: fixed time triggers (additive with offsets) =====');
