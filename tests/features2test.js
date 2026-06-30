@@ -70,7 +70,7 @@ const tick=()=>new Promise(r=>setTimeout(r,25));
   ok(/class="nmtxt"/.test(h),'name in 2-line nmtxt span (RTL)');
   ok(/class="io dep"><span class="ic">📥<\/span>/.test(h),'deposited column with 📥');
   ok(/class="io wd"><span class="ic">📤<\/span>/.test(h),'withdrawn column with 📤');
-  ok(/class="bal"/.test(h)&&!/💰/.test(h),'balance cell present, 💰 icon removed');
+  ok(/class="bt"/.test(h)&&!/💰/.test(h),'total cell present, 💰 icon removed');
   ok(h.indexOf('class="bet"')<0&&h.indexOf('class="dm"')<0,'old bet/dm columns removed');
   ok(/📥<\/span>100/.test(h),'paid player -> deposited 100');
   ok(/📥<\/span>0/.test(h),'demo player -> deposited 0');

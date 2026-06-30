@@ -19,19 +19,19 @@ ok(/קופה כללית/.test(h),'standings rendered (summary header)');
 ok(/class="nmtxt"/.test(h),'name uses 2-line nmtxt span');
 ok(/class="io dep"><span class="ic">📥<\/span>/.test(h),'deposited column with 📥 icon');
 ok(/class="io wd"><span class="ic">📤<\/span>/.test(h),'withdrawn column with 📤 icon');
-ok(/class="bal"/.test(h)&&!/💰/.test(h),'balance cell present, 💰 icon removed');
+ok(/class="bt"/.test(h)&&!/💰/.test(h),'total cell present, 💰 icon removed');
 ok(!/<span class="bet">/.test(h)&&!/class="dm"/.test(h),'old bet $ + dm columns removed');
 ok(/📥<\/span>100/.test(h),'paid player deposited=100 (bank default)');
 ok(/📥<\/span>0/.test(h),'demo player deposited=0');
 ok(/📥<\/span>150/.test(h)&&/📤<\/span>30/.test(h),'explicit dep=150 / wd=30 rendered');
-ok(/class="nmtxt"[\s\S]*?class="io dep"[\s\S]*?class="io wd"[\s\S]*?class="bal"/.test(h),'order: name -> deposited -> withdrawn -> balance');
+ok(/class="nmtxt"[\s\S]*?class="io dep"[\s\S]*?class="io wd"[\s\S]*?class="bx"[\s\S]*?class="bt"/.test(h),'order: name -> deposited -> withdrawn -> expr -> total');
 ok(/<div class="lbwrap">[\s\S]*?class="lb/.test(h),'rows wrapped in .lbwrap subgrid (columns align across rows)');
 // баланс и ставки в одной ячейке: «баланс+ставки=итого₪»; значок $ убран; колонки .hbamt больше нет
 ok(!/class="hb"/.test(h)&&!/>\$</.test(h),'значок $ убран полностью');
 ok(!/class="hbamt"/.test(h),'отдельной колонки .hbamt больше нет');
-ok(/class="bal"[^>]*>95\+5=\s\s100<span class="cur">/.test(h),'p1 с открытой ставкой: «95+5=100₪» (баланс+ставки=итого)');
-ok(/class="bal"[^>]*>120<span class="cur">/.test(h),'p3 без ставок: только баланс «120₪» (без +/=)');
-ok(/class="bal"[^>]*>[^<]*<span class="cur">[^<]*<\/span><\/span>/.test(h),'баланс: число затем ₪ (без $)');
+ok(/class="bx"[^>]*>95\+5=<\/span><span class="bt"[^>]*>100<span class="cur">/.test(h),'p1 с открытой ставкой: выражение «95+5=» в .bx, итог «100» в .bt');
+ok(/class="bt"[^>]*>120<span class="cur">/.test(h),'p3 без ставок: только итог «120₪» в .bt (без +/=)');
+ok(/class="bt"[^>]*>[^<]*<span class="cur">[^<]*<\/span><\/span>/.test(h),'итог: число затем ₪ (без $)');
 ok((h.match(/<span class="cur">/g)||[]).length===3,'₪ currency shown next to every balance (all 3 rows)');
 
 console.log('\n'+(fails?('FAILED '+fails+'/'+tests):('ALL PASS '+tests+'/'+tests)));process.exit(fails?1:0);
