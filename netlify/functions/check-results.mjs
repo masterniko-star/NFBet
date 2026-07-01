@@ -255,6 +255,43 @@ export async function overBetSweep(players, matches, bets, bank, now){
   return acted;
 }
 
+/* ---------- ежедневный снимок «итого» (free + открытые ставки) в 23:55 по Израилю, хранить ~месяц ---------- */
+const BALSNAP_MIN = 23 * 60 + 55;      // 23:55 израильского времени
+const BALSNAP_RETAIN_DAYS = 31;        // хранить снимки ~месяц
+function ilDateHM(ts){
+  const p = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Jerusalem", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date(ts));
+  const g = (t) => (p.find((x) => x.type === t) || {}).value || "";
+  return { date: g("year") + "-" + g("month") + "-" + g("day"), min: (+g("hour")) * 60 + (+g("minute")) };
+}
+// снимок делаем один раз в сутки, когда израильское время достигло 23:55; итог = free + открытые ставки (как в клиенте)
+export async function balSnapshot(tree, players, matches, bets, bank, now){
+  const meta = tree.meta || {};
+  const cur = ilDateHM(now);
+  if (cur.min < BALSNAP_MIN) return 0;               // ещё не 23:55 по Израилю
+  if (meta.lastBalSnap === cur.date) return 0;       // сегодняшний снимок уже сделан
+  const upd = {}; let n = 0;
+  for (const p of players){
+    if (p.exited) continue;
+    const bb = srvBalance(p, matches, bets, bank);
+    upd[p.id + "/" + cur.date] = Math.round(bb.balance + bb.pending); // итого в целых ₪
+    n++;
+  }
+  if (n) await fbPatch("/balhist", upd);             // deep-merge: /balhist/<id>/<date> = итог
+  // ретеншн: удалить снимки старше BALSNAP_RETAIN_DAYS (сравнение строк YYYY-MM-DD)
+  try {
+    const cutoff = ilDateHM(now - BALSNAP_RETAIN_DAYS * 864e5).date;
+    const all = (await fbGet("/balhist")) || {};
+    for (const pid in all){
+      const del = {};
+      for (const d in (all[pid] || {})){ if (d < cutoff) del[d] = null; }
+      if (Object.keys(del).length) await fbPatch("/balhist/" + pid, del);
+    }
+  } catch (e) {}
+  await fbPatch("/meta", { lastBalSnap: cur.date });
+  try { await slog("INFO", "balsnap", "snapshot " + cur.date + " (" + n + " players)"); } catch (_) {}
+  return n;
+}
+
 /* ---------- автодобавка: всегда держим 3 матча, на которые можно поставить ---------- */
 function detectDrawOK(slug,stage){var t=(String(slug||"")+" "+String(stage||"")).toLowerCase();
   if(/round of|knockout|quarter|semi|\bfinal\b|play-?off|last 16|last 32|round-of|\br16\b|\br32\b|1\/8|1\/4|1\/2|playoff/.test(t))return false;
@@ -476,6 +513,7 @@ export async function runCheck() {
   try { await purgeOldCashlog(tree, now); } catch (e) {}
   try { await idleSweep(tree, players, matches, bets, bank, now); } catch (e) { try { await slog("ERROR","idle","idleSweep: "+((e&&e.message)||e)); } catch(_){} }
   try { await overBetSweep(players, matches, bets, bank, now); } catch (e) { try { await slog("ERROR","overbet","overBetSweep: "+((e&&e.message)||e)); } catch(_){} }
+  try { await balSnapshot(tree, players, matches, bets, bank, now); } catch (e) { try { await slog("ERROR","balsnap","balSnapshot: "+((e&&e.message)||e)); } catch(_){} }
   // независимый от автоапдейта механизм «конец игры»: проверка результата со старт+105 (каждую минуту до зачёта)
   // и подгрузка новых игр через 5 мин после конца (старт+110, один раз на игру). Работает даже когда тумблеры выкл.
   // После איפוס матчей нет -> ни один триггер не срабатывает, игры НЕ возвращаются (защита задачи-7 сохранена).
