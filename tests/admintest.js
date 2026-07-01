@@ -75,7 +75,7 @@ function freshPaidNo(){const A=loadApp(seed,{hash:'ctrl7'});A.state.tree.players
 }
 
 
-// master "all" checkbox above the שולם column (aligned via hidden spacers)
+// master "all" row: הכל label + visible שולם checkbox on the right, p-fill spacer (two-row layout)
 {
   const seed2={meta:{bank:100,cur:'\u20aa'},players:{p1:{name:'A',t:1},p2:{name:'B',t:2},p3:{name:'C',t:3}}};
   const A=loadApp(seed2,{hash:'ctrl7'});
@@ -85,8 +85,8 @@ function freshPaidNo(){const A=loadApp(seed,{hash:'ctrl7'});A.state.tree.players
   const h=H();
   ok(/class="p-allhead"/.test(h),'master "all" header row present');
   ok(/class="pname allname"[^>]*>הכל</.test(h),'  master row labeled הכל');
-  ok(/class="fee"[^>]*>[\s\S]*?visibility:hidden">שולם<\/span>/.test(h),'  hidden שולם spacer reserves checkbox column (alignment law)');
-  ok(/p-allhead[\s\S]*?<button class="pdel" style="visibility:hidden"/.test(h),'  hidden 🗑 spacer reserves delete column (alignment law)');
+  ok(/p-allhead[\s\S]*?<span>שולם<\/span>/.test(h),'  master row shows visible שולם label next to checkbox');
+  ok(/p-allhead[\s\S]*?<span class="p-fill">/.test(h),'  master row uses p-fill spacer (two-row layout)');
   const mcb=()=>{const m=H().match(/p-allhead[\s\S]*?<div class="checkbox ([^"]*)"/);return m?m[1].trim():'?';};
   ok(mcb()==='','  mixed state -> master unchecked');
   A.sandbox.aMarkAllPaid();A.sandbox.buildState(A.state.tree);A.sandbox.renderActive();
