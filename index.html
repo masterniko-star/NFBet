@@ -712,8 +712,8 @@ function renderIdentify(){
   $("#scoreboard").innerHTML="";
   $("#main").innerHTML='<div class="card card-p" style="margin-top:8px">'+
     '<h2 style="margin-bottom:14px">כניסה 👋</h2>'+
-    '<div class="field"><label>שם מלא</label><input class="input" id="logN" type="text" dir="rtl" lang="he" inputmode="text" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="שם מלא"></div>'+
-    '<div class="field"><label>סיסמה</label>'+pwBox('logPw',' placeholder="לפחות 3 תווים"')+'</div>'+
+    '<div class="field"><label>שם מלא</label><input class="input" id="logN" type="text" dir="rtl" lang="he" inputmode="text" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="שם מלא" onkeydown="if(event.key===\'Enter\')loginMe()"></div>'+
+    '<div class="field"><label>סיסמה</label>'+pwBox('logPw',' placeholder="לפחות 3 תווים" onkeydown="if(event.key===\'Enter\')loginMe()"')+'</div>'+
     '<label style="display:flex;align-items:center;gap:8px;margin:2px 2px 14px;font-size:14px;color:var(--mut);font-weight:700;cursor:pointer"><input type="checkbox" id="logRemember" checked style="width:18px;height:18px;accent-color:var(--pitch)"> זכור אותי</label>'+
     '<button class="btn block pitch" onclick="loginMe()">כניסה</button>'+
     '<hr class="sep">'+
