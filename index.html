@@ -176,6 +176,7 @@
   .betrow .pk .tnum{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;font-size:12px;font-weight:800;line-height:1}
   .betrow .pk .tnm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
   .betrow .pk .tnsp{flex:0 0 20px}
+  .betrow .pk .tcoef{flex:0 0 auto;min-width:20px;text-align:center;font-size:12px;font-weight:800;line-height:1;opacity:.72;font-variant-numeric:tabular-nums}
   .betrow .pk.on-a{background:var(--pitch);border-color:var(--pitch);color:#fff}
   .betrow .pk.on-b{background:#3066b0;border-color:#3066b0;color:#fff}
   .betrow .pk.on-x{background:#48FCFE;border-color:#48FCFE;color:#063b41}
@@ -512,7 +513,7 @@ function buildState(t){
   S.cashlog=t.cashlog||{};
   S.notices=t.notices||{};
   S.live=t.live||{};
-  S.matches=Object.keys(t.matches||{}).map(function(id){var m=t.matches[id];return{id:id,round:m.round||"R32",teamA:m.teamA||"",teamB:m.teamB||"",dt:m.dt||"",slot:m.slot||"",wc:m.wc||null,fx:m.fx||null,fxLeague:m.fxLeague||null,order:m.order||0,settled:!!m.settled,winner:m.winner||null,hidden:!!m.hidden,t:m.t||0,drawOK:!!m.drawOK,bets:bets[id]||{},live:(t.live||{})[m.fx]||null};});
+  S.matches=Object.keys(t.matches||{}).map(function(id){var m=t.matches[id];return{id:id,round:m.round||"R32",teamA:m.teamA||"",teamB:m.teamB||"",dt:m.dt||"",slot:m.slot||"",wc:m.wc||null,fx:m.fx||null,fxLeague:m.fxLeague||null,order:m.order||0,settled:!!m.settled,winner:m.winner||null,hidden:!!m.hidden,t:m.t||0,drawOK:!!m.drawOK,odds:m.odds||null,bets:bets[id]||{},live:(t.live||{})[m.fx]||null};});
   S.players.sort(function(a,b){return (a.t||0)-(b.t||0)||String(a.name).localeCompare(b.name,"he");});
   S.exited.sort(function(a,b){return (b.exitedAt||0)-(a.exitedAt||0)||String(a.name).localeCompare(b.name,"he");});
   S.matches.sort(function(a,b){return (ROUND_ORDER[a.round]-ROUND_ORDER[b.round])||(a.order-b.order)||(a.t-b.t);});
@@ -1009,9 +1010,9 @@ function renderBetView(){
       :(stakeInput
         +'<div class="strowpair" style="grid-column:1;grid-row:2"><button class="strow"'+dis+' onclick="pStep(\''+m.id+'\',1)" aria-label="+">▲</button><button class="strow"'+dis+' onclick="pStep(\''+m.id+'\',-1)" aria-label="-">▼</button></div>');
     h+='<div class="betrow'+(dOK?" b3":"")+'"'+(ctrlOff?' style="opacity:.55"':'')+'>'+
-       '<button class="pk '+(selA?"on-a":"")+'"'+dis+' style="grid-column:2;grid-row:1" onclick="pPick(\''+m.id+'\',\'A\')"><span class="tnum">1</span><span class="tnm" dir="auto">'+esc(m.teamA)+'</span><span class="tnsp"></span></button>'+
-       (dOK?('<button class="pk '+(selX?"on-x":"")+'"'+dis+' style="grid-column:2;grid-row:2" onclick="pPick(\''+m.id+'\',\'X\')"><span class="tnum">X</span><span class="tnm">תיקו</span><span class="tnsp"></span></button>'):'')+
-       '<button class="pk '+(selB?"on-b":"")+'"'+dis+' style="grid-column:2;grid-row:'+(dOK?"3":"2")+'" onclick="pPick(\''+m.id+'\',\'B\')"><span class="tnum">2</span><span class="tnm" dir="auto">'+esc(m.teamB)+'</span><span class="tnsp"></span></button>'+
+       '<button class="pk '+(selA?"on-a":"")+'"'+dis+' style="grid-column:2;grid-row:1" onclick="pPick(\''+m.id+'\',\'A\')"><span class="tnum">1</span><span class="tnm" dir="auto">'+esc(m.teamA)+'</span>'+((m.odds&&m.odds.a>0)?'<span class="tcoef" dir="ltr">'+m.odds.a+'</span>':'<span class="tnsp"></span>')+'</button>'+
+       (dOK?('<button class="pk '+(selX?"on-x":"")+'"'+dis+' style="grid-column:2;grid-row:2" onclick="pPick(\''+m.id+'\',\'X\')"><span class="tnum">X</span><span class="tnm">תיקו</span>'+((m.odds&&m.odds.x>0)?'<span class="tcoef" dir="ltr">'+m.odds.x+'</span>':'<span class="tnsp"></span>')+'</button>'):'')+
+       '<button class="pk '+(selB?"on-b":"")+'"'+dis+' style="grid-column:2;grid-row:'+(dOK?"3":"2")+'" onclick="pPick(\''+m.id+'\',\'B\')"><span class="tnum">2</span><span class="tnm" dir="auto">'+esc(m.teamB)+'</span>'+((m.odds&&m.odds.b>0)?'<span class="tcoef" dir="ltr">'+m.odds.b+'</span>':'<span class="tnsp"></span>')+'</button>'+
        stakeCtrl+
        '</div>'+
        '<div class="warn" id="pw-'+m.id+'">'+(locked?'ההימור נסגר — המשחק כבר התחיל.':'')+'</div>';
