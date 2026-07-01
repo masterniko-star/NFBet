@@ -112,14 +112,15 @@
   .pill.wait{background:var(--line);color:var(--mut)}
   .p-item{display:flex;flex-direction:column;align-items:stretch;gap:9px;padding:12px 14px;border-bottom:1px solid var(--blue)}
   .p-top{display:flex;align-items:center;gap:11px}
-  .p-top .pname{flex:1;min-width:0;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .p-top .pname{flex:0 1 auto;min-width:0;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .p-fill{flex:1 1 auto;min-width:0}
   .addinfo{font-size:12.5px;color:var(--mut2);padding:11px 14px;border-bottom:1px solid var(--blue);line-height:1.45}
   .addrow{display:flex;align-items:center;gap:9px;justify-content:flex-start}
-  .addrow .bf{direction:ltr;width:100px;height:36px;border:1.5px solid var(--line);border-radius:9px;padding:0 10px;font-size:15px;font-weight:700;font-family:inherit;background:var(--bg);color:var(--ink);text-align:center}
+  .addrow .bf{direction:ltr;width:96px;height:26px;border:1.5px solid var(--line);border-radius:8px;padding:0 8px;font-size:14px;font-weight:700;font-family:inherit;background:var(--bg);color:var(--ink);text-align:center}
   .addrow .bf:focus{outline:none;border-color:var(--pitch)}
   .addrow .bf.bf-warn{border-color:var(--red)!important;background:rgba(214,69,69,.07);box-shadow:0 0 0 3px rgba(214,69,69,.16);animation:bfWarnPulse 1s ease-in-out infinite}
   @keyframes bfWarnPulse{0%,100%{box-shadow:0 0 0 3px rgba(214,69,69,.16)}50%{box-shadow:0 0 0 3px rgba(214,69,69,.34)}}
-  .addrow .bf-apply{height:36px;padding:0 18px;border:0;border-radius:9px;background:var(--pitch);color:#fff;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;white-space:nowrap}
+  .addrow .bf-apply{height:26px;padding:0 14px;border:0;border-radius:8px;background:var(--pitch);color:#fff;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap}
   .addrow .bf-apply:active{filter:brightness(.93)}
   .p-item:last-child{border-bottom:none}
   .p-allhead{padding:12px 14px;border-bottom:1px solid var(--blue);background:color-mix(in srgb,var(--blue) 7%,transparent)}
@@ -128,7 +129,7 @@
   .fee{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--mut)}
   .pdel{flex:0 0 auto;background:transparent;border:none;cursor:pointer;font-size:17px;line-height:1;padding:6px;border-radius:8px;opacity:.75}
   .pdel:active{background:color-mix(in srgb,var(--red) 12%,transparent);opacity:1}
-  .pkey{flex:0 0 auto;background:color-mix(in srgb,var(--blue) 10%,transparent);border:1px solid var(--blue);color:var(--tx);cursor:pointer;font-size:12.5px;font-weight:800;line-height:1;padding:7px 10px;border-radius:9px;white-space:nowrap;font-family:inherit}
+  .pkey{flex:0 0 auto;background:color-mix(in srgb,var(--blue) 10%,transparent);border:1px solid var(--blue);cursor:pointer;font-size:15px;line-height:1;padding:4px 7px;border-radius:8px;white-space:nowrap;font-family:inherit;vertical-align:middle}
   .pkey:active{filter:brightness(.95)}
   .mdraw{width:100%;margin-top:10px;height:38px;border-radius:10px;border:1.5px dashed var(--line);background:transparent;color:var(--mut);font-weight:700;font-size:13.5px;cursor:pointer}
   .mdraw.on{border-style:solid;border-color:var(--gold);background:color-mix(in srgb,var(--gold) 18%,transparent);color:var(--tx)}
@@ -1238,19 +1239,21 @@ function renderAdminPlayers(){
      S.players.slice().sort(function(a,b){return ((a.feePaid?1:0)-(b.feePaid?1:0))||String(a.name||"").localeCompare(String(b.name||""),"he");}).map(function(p,i){
       return '<div class="p-item'+(i%2===0?' row-y':'')+'">'+
         '<div class="p-top">'+
-          '<div class="pname" dir="rtl">'+esc(p.name)+(p.phone?' <span class="tiny muted" dir="ltr">'+esc(p.phone)+'</span>':"")+'</div>'+
-          '<div class="fee" onclick="aToggleFee(\''+p.id+'\')"><div class="checkbox '+(p.feePaid?"on":"")+'">'+(p.feePaid?"✓":"")+'</div><span>שולם</span></div>'+
-          '<button class="pkey" onclick="aPwSheet(\''+p.id+'\')" title="שינוי או איפוס סיסמה">🔑 סיסמה</button>'+
+          '<div class="pname" dir="rtl"><button class="pkey" onclick="aPwSheet(\''+p.id+'\')" title="שינוי או איפוס סיסמה">🔑</button>&nbsp;&nbsp;'+esc(p.name)+(p.phone?' <span class="tiny muted" dir="ltr">'+esc(p.phone)+'</span>':"")+'</div>'+
+          '<span class="p-fill"></span>'+
           '<button class="pdel" onclick="aDelPlayer(\''+p.id+'\')" title="מחק משתתף">🗑</button>'+
         '</div>'+
         '<div class="addrow">'+
           '<input class="bf" id="bf-'+p.id+'" type="number" step="1" dir="ltr" placeholder="סכום" autocomplete="off" oninput="amtClr(\''+p.id+'\')">'+
+          '<span class="p-fill"></span>'+
+          '<div class="fee" onclick="aToggleFee(\''+p.id+'\')"><div class="checkbox '+(p.feePaid?"on":"")+'">'+(p.feePaid?"✓":"")+'</div><span>שולם</span></div>'+
+          '<span class="p-fill"></span>'+
           '<button class="bf-apply" onclick="aApply(\''+p.id+'\')">החל</button>'+
         '</div>'+
       '</div>';
      }).join("");
   var allPaid=S.players.length>0&&S.players.every(function(p){return p.feePaid;});
-  var allHead=S.players.length?('<div class="p-allhead"><div class="p-top"><div class="pname allname" onclick="aMarkAllPaid()" style="cursor:pointer">הכל</div><div class="fee" onclick="aMarkAllPaid()"><div class="checkbox '+(allPaid?"on":"")+'">'+(allPaid?"✓":"")+'</div><span style="visibility:hidden">שולם</span></div><button class="pkey" style="visibility:hidden" tabindex="-1">🔑 סיסמה</button><button class="pdel" style="visibility:hidden" tabindex="-1">🗑</button></div></div>'):'';
+  var allHead=S.players.length?('<div class="p-allhead"><div class="p-top"><div class="pname allname" onclick="aMarkAllPaid()" style="cursor:pointer">הכל</div><div class="fee" onclick="aMarkAllPaid()"><div class="checkbox '+(allPaid?"on":"")+'">'+(allPaid?"✓":"")+'</div><span>שולם</span></div><span class="p-fill"></span></div></div>'):'';
   $("#main").innerHTML='<section class="view active"><div class="card">'+
     '<div class="tiny" style="font-weight:800;direction:rtl;text-align:right;margin-bottom:8px;color:'+(S.players.length>=MAX_PLAYERS?"#d33":"var(--mut)")+'">👥 '+S.players.length+"/"+MAX_PLAYERS+' משתתפים</div>'+
     allHead+list+'</div>'+
@@ -1284,7 +1287,7 @@ function amtClr(id){var el=document.getElementById("bf-"+id);if(el)el.classList.
 function aToggleFee(id){var p=S.players.find(function(x){return x.id===id;});if(!p)return;
   if(p.feePaid){var st=statsFor(id);var snap=st.balance+st.pending;var depA=st.staked-st.pending-st.won;if(snap>0&&typeof confirm==="function"&&!confirm("לאפס את היתרה של "+p.name+" ("+fmt(snap)+" ₪)? ההימורים הפתוחים יבוטלו."))return;var ops=[fbUpd("/players/"+id,{feePaid:false,dep:depA,wd:0,resetBal:snap,resetAt:Date.now()}),logCash(id,"zero",snap,0,"ביטול שולם")];S.matches.forEach(function(m){if(!m.settled&&(m.bets||{})[id])ops.push(fbDel("/bets/"+m.id+"/"+id));});Promise.all(ops).then(refresh);}
   else{var el=document.getElementById("bf-"+id);var raw=el?String(el.value||"").trim():"";var v=Math.round(Number(raw)||0);if(raw===""||!(v>0)){amtWarn(id);toast("הזן סכום הפקדה בשדה");return;}if(el)el.value="";if(p.resetAt||p.resetBal!=null||p.demoteAt){var ck=uid();var ncl={};ncl[ck]={ts:Date.now(),type:"in",amount:v,bal:v,note:"הפקדה ראשונה"};var ops=[fbUpd("/players/"+id,{feePaid:true,dep:v,wd:0,resetBal:null,resetAt:null,bal0:null,lastBet:null,demoteAt:null,demoteNotify:null}),fbSet("/cashlog/"+id,ncl)];S.matches.forEach(function(m){if((m.bets||{})[id])ops.push(fbDel("/bets/"+m.id+"/"+id));});Promise.all(ops).then(refresh);}else{Promise.all([fbUpd("/players/"+id,{feePaid:true,dep:v,wd:0,resetBal:null,resetAt:null}),logCash(id,"in",v,v,"הפקדה ראשונה")]).then(refresh);}}}
-function aMarkAllPaid(){if(!S.players.length)return;var val=!(S.players.every(function(p){return p.feePaid;}));if(!val&&typeof confirm==="function"&&!confirm("לאפס יתרה לכל המשתתפים? ההימורים הפתוחים יבוטלו."))return;var bank=Number(S.meta.bank)||0;var ops=[];S.players.forEach(function(p){if(val){if(!p.feePaid){if(p.resetAt||p.resetBal!=null||p.demoteAt){var ck=uid();var ncl={};ncl[ck]={ts:Date.now(),type:"in",amount:bank,bal:bank,note:"הפקדה ראשונה"};ops.push(fbUpd("/players/"+p.id,{feePaid:true,dep:bank,wd:0,resetBal:null,resetAt:null,bal0:null,lastBet:null,demoteAt:null,demoteNotify:null}));ops.push(fbSet("/cashlog/"+p.id,ncl));S.matches.forEach(function(m){if((m.bets||{})[p.id])ops.push(fbDel("/bets/"+m.id+"/"+p.id));});}else{ops.push(fbUpd("/players/"+p.id,{feePaid:true,dep:bank,wd:0,resetBal:null,resetAt:null}));ops.push(logCash(p.id,"in",bank,bank,"הפקדה ראשונה"));}}}else{var st=statsFor(p.id);var snap=st.balance+st.pending;var depA=st.staked-st.pending-st.won;ops.push(fbUpd("/players/"+p.id,{feePaid:false,dep:depA,wd:0,resetBal:snap,resetAt:Date.now()}));ops.push(logCash(p.id,"zero",snap,0,"ביטול שולם"));S.matches.forEach(function(m){if(!m.settled&&(m.bets||{})[p.id])ops.push(fbDel("/bets/"+m.id+"/"+p.id));});}});Promise.all(ops).then(refresh);}
+function aMarkAllPaid(){if(!S.players.length)return;var val=!(S.players.every(function(p){return p.feePaid;}));if(typeof confirm==="function"&&!confirm(val?"להמשיך בפעולה?":"לאפס יתרה לכל המשתתפים? ההימורים הפתוחים יבוטלו."))return;var bank=Number(S.meta.bank)||0;var ops=[];S.players.forEach(function(p){if(val){if(!p.feePaid){if(p.resetAt||p.resetBal!=null||p.demoteAt){var ck=uid();var ncl={};ncl[ck]={ts:Date.now(),type:"in",amount:bank,bal:bank,note:"הפקדה ראשונה"};ops.push(fbUpd("/players/"+p.id,{feePaid:true,dep:bank,wd:0,resetBal:null,resetAt:null,bal0:null,lastBet:null,demoteAt:null,demoteNotify:null}));ops.push(fbSet("/cashlog/"+p.id,ncl));S.matches.forEach(function(m){if((m.bets||{})[p.id])ops.push(fbDel("/bets/"+m.id+"/"+p.id));});}else{ops.push(fbUpd("/players/"+p.id,{feePaid:true,dep:bank,wd:0,resetBal:null,resetAt:null}));ops.push(logCash(p.id,"in",bank,bank,"הפקדה ראשונה"));}}}else{var st=statsFor(p.id);var snap=st.balance+st.pending;var depA=st.staked-st.pending-st.won;ops.push(fbUpd("/players/"+p.id,{feePaid:false,dep:depA,wd:0,resetBal:snap,resetAt:Date.now()}));ops.push(logCash(p.id,"zero",snap,0,"ביטול שולם"));S.matches.forEach(function(m){if(!m.settled&&(m.bets||{})[p.id])ops.push(fbDel("/bets/"+m.id+"/"+p.id));});}});Promise.all(ops).then(refresh);}
 function aApply(id){var p=S.players.find(function(x){return x.id===id;});if(!p)return;var el=document.getElementById("bf-"+id);var raw=el?String(el.value||"").trim():"";if(raw===""){toast("הזן סכום בשדה");return;}var v=Math.round(Number(raw)||0);if(!v){toast("הזן מספר תקין");return;}if(!p.feePaid){toast("יש לסמן 'שולם' תחילה");return;}var cd=depOf(p),cw=wdOf(p),bal=statsFor(id).balance;if(v>0){if(typeof confirm==="function"&&!confirm("להוסיף "+v+" ₪ ל"+p.name+"?"))return;if(el)el.value="";Promise.all([fbUpd("/players/"+id,{dep:cd+v,wd:cw}),logCash(id,"in",v,bal+v,"")]).then(refresh);}else{var x=-v;if(x>bal){toast("אין מספיק יתרה (יתרה: "+fmt(bal)+" ₪)");return;}if(typeof confirm==="function"&&!confirm("למשוך "+x+" ₪ מ"+p.name+"?"))return;if(el)el.value="";Promise.all([fbUpd("/players/"+id,{dep:cd,wd:cw+x}),logCash(id,"out",x,bal-x,"")]).then(refresh);}}
 window.aAddPlayer=aAddPlayer;window.aCommitPlayer=aCommitPlayer;window.aAddBulk=aAddBulk;window.aCommitBulk=aCommitBulk;window.aEditPlayer=aEditPlayer;window.aSavePlayer=aSavePlayer;window.aDelPlayer=aDelPlayer;window.aToggleFee=aToggleFee;window.aMarkAllPaid=aMarkAllPaid;window.aApply=aApply;window.amtClr=amtClr;
 
