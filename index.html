@@ -1253,7 +1253,7 @@ function renderAdminPlayers(){
       '</div>';
      }).join("");
   var allPaid=S.players.length>0&&S.players.every(function(p){return p.feePaid;});
-  var allHead=S.players.length?('<div class="p-allhead"><div class="p-top"><div class="pname allname" onclick="aMarkAllPaid()" style="cursor:pointer">הכל</div><span class="p-fill"></span><div class="fee" onclick="aMarkAllPaid()"><div class="checkbox '+(allPaid?"on":"")+'">'+(allPaid?"✓":"")+'</div><span>שולם</span></div></div></div>'):'';
+  var allHead=S.players.length?('<div class="p-allhead"><div class="p-top"><div class="pname allname" onclick="aMarkAllPaid()" style="cursor:pointer">הכל</div><div class="fee" onclick="aMarkAllPaid()"><div class="checkbox '+(allPaid?"on":"")+'">'+(allPaid?"✓":"")+'</div><span>שולם</span></div><span class="p-fill"></span></div></div>'):'';
   $("#main").innerHTML='<section class="view active"><div class="card">'+
     '<div class="tiny" style="font-weight:800;direction:rtl;text-align:right;margin-bottom:8px;color:'+(S.players.length>=MAX_PLAYERS?"#d33":"var(--mut)")+'">👥 '+S.players.length+"/"+MAX_PLAYERS+' משתתפים</div>'+
     allHead+list+'</div>'+
