@@ -500,6 +500,50 @@ async function fetchLive(live) {
   return out;
 }
 
+/* ---------- коэффициенты букмекера (ESPN/DraftKings): 3-путёвка 1/X/2, только для предстоящих матчей ----------
+   Витрина: parimutuel от них не зависит. Обновляем не чаще раза в 20 мин. Американские -> десятичные. */
+const ODDS_REFRESH_MS = 20 * 60 * 1000;
+function amToDec(am){ const n = Number(am); if (!Number.isFinite(n) || n === 0) return null; return Math.round((n > 0 ? (1 + n / 100) : (1 + 100 / (-n))) * 100) / 100; }
+export async function fetchOdds(matches, tree, now){
+  const meta = tree.meta || {};
+  if (now - (Number(meta.lastOddsFetch) || 0) < ODDS_REFRESH_MS) return 0;
+  const pre = matches.filter((m) => !m.settled && m.teamA && m.teamB && m.fx && Number.isFinite(ilWallToTs(m.dt)) && now < ilWallToTs(m.dt));
+  await fbPatch("/meta", { lastOddsFetch: now });                 // маркер ставим всегда, чтобы не долбить ESPN
+  if (!pre.length) return 0;
+  const espnSlugs = new Set(["fifa.world"]);
+  pre.forEach((m) => { const s = srcOf(m); if (s.type !== "365" && s.slug) espnSlugs.add(s.slug); });
+  const ds = pre.map((m) => m.dt).filter(Boolean).map((s) => new Date(s)).filter((d) => !isNaN(d.getTime()));
+  let d0, d1;
+  if (ds.length) { const mn = Math.min(...ds.map((d) => d.getTime())), mx = Math.max(...ds.map((d) => d.getTime())); d0 = new Date(mn - 2 * 864e5); d1 = new Date(mx + 2 * 864e5); }
+  else { d0 = new Date(now - 2 * 864e5); d1 = new Date(now + 21 * 864e5); }
+  const byFx = {};
+  for (const sl of espnSlugs){
+    try {
+      const url = ESPN + encodeURIComponent(sl) + "/scoreboard?limit=300&dates=" + ymdUTC(d0) + "-" + ymdUTC(d1);
+      const r = await fetch(url); if (!r.ok) continue; const j = await r.json();
+      for (const e of ((j && j.events) || [])){
+        const c = (e.competitions && e.competitions[0]) || {};
+        const o = (c.odds && c.odds[0]) ? c.odds[0] : null;
+        if (!o || !o.moneyline) continue;
+        const a = amToDec(((o.moneyline.home || {}).close || {}).odds);   // teamA = хозяева
+        const b = amToDec(((o.moneyline.away || {}).close || {}).odds);   // teamB = гости
+        const x = amToDec((o.drawOdds || {}).moneyLine);                  // ничья
+        const od = {}; if (a != null) od.a = a; if (x != null) od.x = x; if (b != null) od.b = b;
+        if (Object.keys(od).length) byFx["espn" + e.id] = od;
+      }
+    } catch (e) { try { await slog("WARN", "odds", "fetchOdds " + sl + " fail: " + ((e && e.message) || e)); } catch (_) {} }
+  }
+  let n = 0;
+  for (const m of pre){
+    const od = byFx[m.fx]; if (!od) continue;
+    const cur = m.odds || {};
+    if (cur.a === od.a && cur.x === od.x && cur.b === od.b) continue;      // без изменений — не пишем
+    await fbPatch("/matches/" + m.id, { odds: od }); m.odds = od; n++;
+  }
+  if (n){ try { await fbPut("/rev", now); } catch (_) {} try { await slog("INFO", "odds", "updated odds for " + n + " matches"); } catch (_) {} }
+  return n;
+}
+
 /* ---------- core (экспортируется для тестов) ---------- */
 export async function runCheck() {
   const tree = (await fbGet("")) || {};
@@ -514,6 +558,7 @@ export async function runCheck() {
   try { await idleSweep(tree, players, matches, bets, bank, now); } catch (e) { try { await slog("ERROR","idle","idleSweep: "+((e&&e.message)||e)); } catch(_){} }
   try { await overBetSweep(players, matches, bets, bank, now); } catch (e) { try { await slog("ERROR","overbet","overBetSweep: "+((e&&e.message)||e)); } catch(_){} }
   try { await balSnapshot(tree, players, matches, bets, bank, now); } catch (e) { try { await slog("ERROR","balsnap","balSnapshot: "+((e&&e.message)||e)); } catch(_){} }
+  try { await fetchOdds(matches, tree, now); } catch (e) { try { await slog("ERROR","odds","fetchOdds: "+((e&&e.message)||e)); } catch(_){} }
   // независимый от автоапдейта механизм «конец игры»: проверка результата со старт+105 (каждую минуту до зачёта)
   // и подгрузка новых игр через 5 мин после конца (старт+110, один раз на игру). Работает даже когда тумблеры выкл.
   // После איפוס матчей нет -> ни один триггер не срабатывает, игры НЕ возвращаются (защита задачи-7 сохранена).
