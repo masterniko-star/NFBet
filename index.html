@@ -1012,6 +1012,7 @@ function renderChat(){var m=$("#main");if(!m)return;var sb=$("#scoreboard");if(s
   var body=rows||'<div class="chatempty">אין הודעות עדיין.<br>כתוב/כתבי ראשון/ה 💬</div>';
   var inputRow=meP?('<div class="chatinput"><input id="chatIn" class="input" type="text" dir="rtl" placeholder="הודעה…" autocomplete="off" maxlength="500" onkeydown="if(event.key===\'Enter\')chatSend()"><button class="btn pitch" onclick="chatSend()">שלח</button></div>'):('<div class="chatinput tiny muted" style="justify-content:center;font-weight:700">יש להתחבר כמשתתף כדי לכתוב</div>');
   m.innerHTML='<section class="view active chatview"><div class="chatlist" id="chatList">'+body+'</div>'+inputRow+'</section>';
+  var cv=document.querySelector('.chatview');if(cv){var hdr=document.querySelector('header'),nv=$("#nav");var hH=hdr?hdr.getBoundingClientRect().height:0;var nH=nv?nv.getBoundingClientRect().height:0;cv.style.height=Math.max(300,window.innerHeight-hH-nH-5)+'px';}
   var cl=$("#chatList");if(cl)cl.scrollTop=cl.scrollHeight;chatMarkSeen();}
 window.renderChat=renderChat;
 function chatSend(){var p=me();if(!p){toast("יש להתחבר כמשתתף");return;}var el=$("#chatIn");var txt=el?String(el.value||"").trim():"";if(!txt)return;if(txt.length>500)txt=txt.slice(0,500);if(el)el.value="";fbSet("/chat/"+uid(),{pid:p.id,name:p.name||"",text:txt,ts:Date.now()}).then(fbBump).then(function(){markEntry();return refresh();}).catch(function(){toast("שגיאה בשליחה");});}
