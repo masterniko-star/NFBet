@@ -131,6 +131,8 @@
   .pdel:active{background:color-mix(in srgb,var(--red) 12%,transparent);opacity:1}
   .pkey{flex:0 0 auto;background:color-mix(in srgb,var(--blue) 10%,transparent);border:1px solid var(--blue);cursor:pointer;font-size:15px;line-height:1;padding:4px 7px;border-radius:8px;white-space:nowrap;font-family:inherit;vertical-align:middle}
   .pkey:active{filter:brightness(.95)}
+  .prestore{flex:0 0 auto;background:color-mix(in srgb,var(--gold) 14%,transparent);border:1px solid var(--gold);color:#946b00;cursor:pointer;font-size:12.5px;font-weight:800;line-height:1;padding:5px 10px;border-radius:8px;white-space:nowrap;font-family:inherit}
+  .prestore:active{filter:brightness(.95)}
   .mdraw{width:100%;margin-top:10px;height:38px;border-radius:10px;border:1.5px dashed var(--line);background:transparent;color:var(--mut);font-weight:700;font-size:13.5px;cursor:pointer}
   .mdraw.on{border-style:solid;border-color:var(--gold);background:color-mix(in srgb,var(--gold) 18%,transparent);color:var(--tx)}
   .mdraw:disabled{opacity:.45;cursor:default}
@@ -1240,6 +1242,8 @@ function renderAdminPlayers(){
       return '<div class="p-item'+(i%2===0?' row-y':'')+'">'+
         '<div class="p-top">'+
           '<div class="pname" dir="rtl"><button class="pkey" onclick="aPwSheet(\''+p.id+'\')" title="שינוי או איפוס סיסמה">🔑</button>&nbsp;&nbsp;'+esc(p.name)+(p.phone?' <span class="tiny muted" dir="ltr">'+esc(p.phone)+'</span>':"")+'</div>'+
+          '<span class="p-fill"></span>'+
+          '<button class="prestore" onclick="aRestoreSheet(\''+p.id+'\')" title="שחזור יתרה לתאריך">החזר</button>'+
           '<span class="p-fill"></span>'+
           '<button class="pdel" onclick="aDelPlayer(\''+p.id+'\')" title="מחק משתתף">🗑</button>'+
         '</div>'+
