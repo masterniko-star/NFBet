@@ -12,15 +12,15 @@ A.sandbox.buildState(A.state.tree);
 A.sandbox.ME='u';A.sandbox.TAB='all';
 A.sandbox.renderAllView();
 const html=A.mainHTML()||'';
-ok(/class="bal"[^>]*>93\+7=\s\s100<span class="cur">/.test(html),'формат «93+7=  100» (баланс+ставки=итого, 2 пробела после =) в .bal');
-ok(/93\+7=\s\s100<span class="cur">₪<\/span>/.test(html),'₪ один раз в конце');
+ok(/class="bt"[^>]*>100<span class="cur">₪<\/span><\/span><span class="bx"[^>]*>93\+7[^<]*<\/span>/.test(html),'порядок: итог «100₪» в .bt, затем выражение «93+7 » (пробел вместо =) в .bx');
+ok(/class="bt"[^>]*>100<span class="cur">₪<\/span><\/span>/.test(html),'₪ один раз в конце итога');
 ok(html.indexOf('$')<0&&!/class="hbamt"/.test(html),'значок $ убран; отдельной колонки .hbamt больше нет');
 
 // без ставки — только баланс «100₪», без «+»/«=»
 const B=loadApp({meta:{bank:100,cur:'₪'},players:{u:{name:'NoBet',feePaid:true,dep:100,t:1}},matches:{},bets:{}},{});
 B.sandbox.buildState(B.state.tree);B.sandbox.ME='u';B.sandbox.renderAllView();
 const bh=B.mainHTML()||'';
-ok(/class="bal"[^>]*>100<span class="cur">/.test(bh),'без ставки — только баланс «100₪» (после числа сразу ₪, без +/=)');
+ok(/class="bt"[^>]*>100<span class="cur">/.test(bh),'без ставки — только итог «100₪» в .bt (без +/=)');
 
 // сортировка по баланс+pending: тотал важнее голого баланса
 const C=loadApp({meta:{bank:100,cur:'₪'},
