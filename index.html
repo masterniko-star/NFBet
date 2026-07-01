@@ -129,7 +129,7 @@
   .fee{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--mut)}
   .pdel{flex:0 0 auto;background:transparent;border:none;cursor:pointer;font-size:17px;line-height:1;padding:6px;border-radius:8px;opacity:.75}
   .pdel:active{background:color-mix(in srgb,var(--red) 12%,transparent);opacity:1}
-  .pkey{flex:0 0 auto;background:color-mix(in srgb,var(--blue) 10%,transparent);border:1px solid var(--blue);cursor:pointer;font-size:15px;line-height:1;padding:4px 7px;border-radius:8px;white-space:nowrap;font-family:inherit}
+  .pkey{flex:0 0 auto;background:color-mix(in srgb,var(--blue) 10%,transparent);border:1px solid var(--blue);cursor:pointer;font-size:15px;line-height:1;padding:4px 7px;border-radius:8px;white-space:nowrap;font-family:inherit;vertical-align:middle}
   .pkey:active{filter:brightness(.95)}
   .mdraw{width:100%;margin-top:10px;height:38px;border-radius:10px;border:1.5px dashed var(--line);background:transparent;color:var(--mut);font-weight:700;font-size:13.5px;cursor:pointer}
   .mdraw.on{border-style:solid;border-color:var(--gold);background:color-mix(in srgb,var(--gold) 18%,transparent);color:var(--tx)}
@@ -1239,8 +1239,7 @@ function renderAdminPlayers(){
      S.players.slice().sort(function(a,b){return ((a.feePaid?1:0)-(b.feePaid?1:0))||String(a.name||"").localeCompare(String(b.name||""),"he");}).map(function(p,i){
       return '<div class="p-item'+(i%2===0?' row-y':'')+'">'+
         '<div class="p-top">'+
-          '<div class="pname" dir="rtl">'+esc(p.name)+(p.phone?' <span class="tiny muted" dir="ltr">'+esc(p.phone)+'</span>':"")+'</div>'+
-          '<button class="pkey" onclick="aPwSheet(\''+p.id+'\')" title="שינוי או איפוס סיסמה">🔑</button>'+
+          '<div class="pname" dir="rtl"><button class="pkey" onclick="aPwSheet(\''+p.id+'\')" title="שינוי או איפוס סיסמה">🔑</button>&nbsp;&nbsp;'+esc(p.name)+(p.phone?' <span class="tiny muted" dir="ltr">'+esc(p.phone)+'</span>':"")+'</div>'+
           '<span class="p-fill"></span>'+
           '<button class="pdel" onclick="aDelPlayer(\''+p.id+'\')" title="מחק משתתף">🗑</button>'+
         '</div>'+
