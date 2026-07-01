@@ -1245,9 +1245,9 @@ function renderAdminPlayers(){
           '<button class="pdel" onclick="aDelPlayer(\''+p.id+'\')" title="מחק משתתף">🗑</button>'+
         '</div>'+
         '<div class="addrow">'+
-          '<div class="fee" onclick="aToggleFee(\''+p.id+'\')"><div class="checkbox '+(p.feePaid?"on":"")+'">'+(p.feePaid?"✓":"")+'</div><span>שולם</span></div>'+
-          '<span class="p-fill"></span>'+
           '<input class="bf" id="bf-'+p.id+'" type="number" step="1" dir="ltr" placeholder="סכום" autocomplete="off" oninput="amtClr(\''+p.id+'\')">'+
+          '<span class="p-fill"></span>'+
+          '<div class="fee" onclick="aToggleFee(\''+p.id+'\')"><div class="checkbox '+(p.feePaid?"on":"")+'">'+(p.feePaid?"✓":"")+'</div><span>שולם</span></div>'+
           '<button class="bf-apply" onclick="aApply(\''+p.id+'\')">החל</button>'+
         '</div>'+
       '</div>';
