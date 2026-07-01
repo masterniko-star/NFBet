@@ -1284,6 +1284,33 @@ function aPwSheet(id){var p=pById2(id);if(!p)return;
 window.aPwSheet=aPwSheet;
 function aSetPlayerPw(id){var p=pById2(id);if(!p)return;var a=($("#npw1").value||""),b=($("#npw2").value||"");if(a.length<3){toast("סיסמה — לפחות 3 תווים");return;}if(a!==b){toast("הסיסמאות אינן תואמות");return;}fbUpd("/players/"+id,pwSet(a)).then(refresh).then(function(){closeSheet();toast("הסיסמה עודכנה");});}
 window.aSetPlayerPw=aSetPlayerPw;
+/* ---- שחזור יתרה לתאריך: снимки /balhist пишет сервер в 23:55; итог = free + открытые ставки ---- */
+function ilYMD(ts){var p=new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Jerusalem",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date(ts));var g=function(t){return (p.find(function(x){return x.type===t;})||{}).value;};return g("year")+"-"+g("month")+"-"+g("day");}
+var _rbHist={},_rbId=null;
+function aRestoreSheet(id){var p=pById2(id);if(!p)return;_rbId=id;_rbHist={};
+  var maxD=ilYMD(Date.now()),minD=ilYMD(Date.now()-30*864e5);
+  $("#sheet").innerHTML='<button class="sh-x" onclick="closeSheet()">×</button><div class="grab"></div><h3 dir="rtl">שחזור יתרה — '+esc(p.name)+'</h3>'+
+    '<div class="tiny muted" style="margin-bottom:12px;direction:rtl;text-align:right">בחר/י תאריך (עד חודש אחורה) כדי לראות את היתרה של המשתתף באותו יום ולשחזר אותה.</div>'+
+    '<div class="field"><label>תאריך</label><input class="input" id="rbDate" type="date" dir="ltr" min="'+minD+'" max="'+maxD+'" value="'+maxD+'" onchange="aRestoreLoad()"></div>'+
+    '<div class="bigbal" style="margin:6px 0 14px"><span class="l">יתרה ביום זה</span><span class="v num" id="rbVal">…</span></div>'+
+    '<div class="two"><button class="btn ghost" onclick="closeSheet()">ביטול</button><button class="btn pitch" id="rbGo" onclick="aRestoreDo()">שחזר</button></div>';
+  openSheet();
+  fbGet("/balhist/"+id).then(function(h){_rbHist=h||{};aRestoreLoad();}).catch(function(){_rbHist={};aRestoreLoad();});}
+window.aRestoreSheet=aRestoreSheet;
+function aRestoreLoad(){var d=($("#rbDate")||{}).value||"";var v=_rbHist[d];var val=$("#rbVal"),go=$("#rbGo");
+  if(v==null){if(val){val.textContent="אין נתונים";val.style.color="var(--mut)";}if(go){go.disabled=true;go.style.opacity=".5";}}
+  else{if(val){val.textContent=fmt(Number(v))+" "+cur();val.style.color="var(--tx)";}if(go){go.disabled=false;go.style.opacity="";}}}
+window.aRestoreLoad=aRestoreLoad;
+function aRestoreDo(){var id=_rbId;var p=pById2(id);if(!p)return;var d=($("#rbDate")||{}).value||"";var v=_rbHist[d];
+  if(v==null){toast("אין נתונים לתאריך זה");return;}
+  var target=Math.round(Number(v)),st=statsFor(id),curTot=Math.round(st.balance+st.pending);
+  if(target===curTot){toast("היתרה כבר שווה");closeSheet();return;}
+  if(typeof confirm==="function"&&!confirm("לשחזר את היתרה של "+p.name+" ל-"+fmt(target)+" ₪ (מ-"+d+")?"))return;
+  var delta=target-curTot,cd=depOf(p),cw=wdOf(p),newBal=st.balance+delta,ops;
+  if(delta>0)ops=[fbUpd("/players/"+id,{dep:cd+delta,wd:cw}),logCash(id,"in",delta,newBal,"שחזור ליום "+d)];
+  else ops=[fbUpd("/players/"+id,{dep:cd,wd:cw+(-delta)}),logCash(id,"out",-delta,newBal,"שחזור ליום "+d)];
+  Promise.all(ops).then(refresh).then(function(){closeSheet();toast("היתרה שוחזרה");});}
+window.aRestoreDo=aRestoreDo;
 function aSavePlayer(id){var n=($("#ep").value||"").trim();if(!n){toast("שם ריק");return;}if(nameTaken(n,id)){toast("השם כבר קיים אצל משתתף אחר");return;}fbUpd("/players/"+id,{name:n,phone:($("#epP").value||"").trim()}).then(function(){closeSheet();return refresh();});}
 function aDelPlayer(id){if(!confirm("להוציא את המשתתף מהטורניר? הנתונים יישמרו לסטטיסטיקה."))return;var st=statsFor(id);var bal=st.balance+st.pending;var ops=[fbUpd("/players/"+id,{exited:true,exitedAt:Date.now(),exitBal:bal,exitReason:"manual"})];S.matches.forEach(function(m){if(!m.settled&&(m.bets||{})[id])ops.push(fbDel("/bets/"+m.id+"/"+id));});Promise.all(ops).then(function(){closeSheet();return refresh();});}
 function amtWarn(id){var el=document.getElementById("bf-"+id);if(!el)return;el.classList.add("bf-warn");amtWarn._t=amtWarn._t||{};if(amtWarn._t[id])clearTimeout(amtWarn._t[id]);amtWarn._t[id]=setTimeout(function(){var e=document.getElementById("bf-"+id);if(e)e.classList.remove("bf-warn");},60000);}
