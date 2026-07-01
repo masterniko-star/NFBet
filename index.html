@@ -684,8 +684,8 @@ function renderActive(){
     renderNav([["players","👥","משתתפים"],["matches","⚽","משחקים"],["settings","⚙️","הגדרות"]]);
     var v={players:renderAdminPlayers,matches:renderAdminMatches,settings:renderSettings}[TAB]||renderAdminPlayers; v(); }
   else { if(!me()){ renderIdentify(); $("#nav").innerHTML=""; return; }
-    renderNav([["bet","🎰","להמר"],["board","🏆","לוח ההימורים"],["all","💰","טבלה"],["hist","🧾","היסטוריה"],["help","❓","עזרה"]]);
-    var pv={bet:renderBetView,board:renderBoardView,all:renderAllView,hist:renderHistView,help:renderHelp}[TAB]||renderBetView; pv(); }
+    renderNav([["bet","🎰","להמר"],["board","🏆","לוח ההימורים"],["all","💰","טבלה"],["chat","💬","צ'אט"],["hist","🧾","היסטוריה"],["help","❓","עזרה"]]);
+    var pv={bet:renderBetView,board:renderBoardView,all:renderAllView,chat:renderChat,hist:renderHistView,help:renderHelp}[TAB]||renderBetView; pv(); }
   }catch(e){ logCrit("render","renderActive נכשל ב-"+(typeof TAB!=="undefined"?TAB:"?")+": "+((e&&e.message)||e),{stack:e&&e.stack?String(e.stack).slice(0,600):null}); }
 }
 function renderHeader(){
@@ -2190,7 +2190,7 @@ function clientAutoTick(){ if(document.hidden||fxBusy||(sheetOpen&&MODE==="admin
 function start(){
   if(!DB||!/^https?:\/\//.test(DB)){ renderSetup(); return; }
   var shown=false;
-  try{var ct=cacheLoad();if(ct&&typeof ct==="object"){var vt=(MODE==="admin")?["players","matches","settings"]:["bet","board","all","hist","help"];var lt=cacheTabLoad();if(lt&&vt.indexOf(lt)>=0)TAB=lt;buildState(ct);renderActive();shown=true;}}catch(e){}
+  try{var ct=cacheLoad();if(ct&&typeof ct==="object"){var vt=(MODE==="admin")?["players","matches","settings"]:["bet","board","all","chat","hist","help"];var lt=cacheTabLoad();if(lt&&vt.indexOf(lt)>=0)TAB=lt;buildState(ct);renderActive();shown=true;}}catch(e){}
   if(!shown){var _mn=$("#main"); if(_mn&&!_mn.innerHTML) _mn.innerHTML='<div class="boot-load"><div class="boot-spin"></div><div>טוען…</div></div>';}
   try{ensureMeta();}catch(e){}  /* параллельно: гарантирует /meta, НЕ блокирует первый рендер */
   refresh().then(function(){ try{markEntry();}catch(e){}
