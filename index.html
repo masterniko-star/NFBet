@@ -689,7 +689,7 @@ function renderHeader(){
 function renderHeaderViewToggle(){
   var box=$("#hViewToggle"); if(!box)return;
   var show=(MODE!=="admin")&&(TAB==="all")&&isOwnerView();
-  box.innerHTML=show?('<label onclick="allViewToggle()" title="הצג את הדף כפי שהשחקנים רואים אותו" style="display:flex;align-items:center;gap:4px;cursor:pointer;user-select:none"><span class="checkbox '+(ALLVIEW_ASPLAYER?'on':'')+'" style="width:18px;height:18px;font-size:12px">'+(ALLVIEW_ASPLAYER?'✓':'')+'</span></label>'):'';
+  box.innerHTML=show?('<label onclick="allViewToggle()" title="הצג את החלק הניהולי" style="display:flex;align-items:center;gap:4px;cursor:pointer;user-select:none"><span class="checkbox '+(ALLVIEW_ASADMIN?'on':'')+'" style="width:18px;height:18px;font-size:12px">'+(ALLVIEW_ASADMIN?'✓':'')+'</span></label>'):'';
 }
 function appendExitFooter(){var m=$("#main");if(!m||!me()||TAB==="hist")return;m.innerHTML+='<div style="text-align:left;margin:22px 2px 10px"><button class="btn ghost" onclick="switchMe()" style="font-size:14px;padding:9px 26px;color:var(--mut)">🚪&nbsp;&nbsp;יציאה</button></div>';}
 var _navHtml="";
@@ -1149,14 +1149,14 @@ function renderBoardView(){
 }
 
 /* ---------- PARTICIPANT: total & my history ---------- */
-/* admin-only toggle: view the "טבלה" page exactly as regular players see it */
-var ALLVIEW_ASPLAYER=(function(){try{return localStorage.getItem("allview_asplayer")==="1";}catch(e){return false;}})();
-function allViewToggle(){ALLVIEW_ASPLAYER=!ALLVIEW_ASPLAYER;try{localStorage.setItem("allview_asplayer",ALLVIEW_ASPLAYER?"1":"0");}catch(e){}renderHeaderViewToggle();renderAllView();}
+/* admin-only toggle: show the administrative part on the "טבלה" page (checked = admin part visible; default visible) */
+var ALLVIEW_ASADMIN=(function(){try{return localStorage.getItem("allview_asadmin")!=="0";}catch(e){return true;}})();
+function allViewToggle(){ALLVIEW_ASADMIN=!ALLVIEW_ASADMIN;try{localStorage.setItem("allview_asadmin",ALLVIEW_ASADMIN?"1":"0");}catch(e){}renderHeaderViewToggle();renderAllView();}
 window.allViewToggle=allViewToggle;
 function renderAllView(){
   var rk=ranking();
   var hasBet={};S.matches.forEach(function(m){if(!m.settled){var bb=m.bets||{};for(var pid in bb){if(bb[pid])hasBet[pid]=1;}}});
-  var own=isOwnerView()&&!ALLVIEW_ASPLAYER;
+  var own=isOwnerView()&&ALLVIEW_ASADMIN;
   var rows=rk.map(function(e,idx){
     var medal=String(e.rank); // порядковый номер для всех (без медалей)
     var meCls=(ME&&e.p.id===ME)?" me-row":"";var zc=(idx%2===0)?" row-y":"";
