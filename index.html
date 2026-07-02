@@ -1840,8 +1840,8 @@ function renderLogins(){
     var week=rows.filter(function(r){return r.t&&(now-r.t)<7*DAY;}).length;
     rows.sort(function(a,b){return (b.t-a.t)||0;});
     var head='<div class="tiny muted" style="margin-bottom:8px;direction:rtl;text-align:right">נכנסו <b style="color:var(--tx)">'+entered+'</b>/'+S.players.length+' · היום <b style="color:var(--tx)">'+today+'</b> · השבוע <b style="color:var(--tx)">'+week+'</b> · לא נכנסו <b style="color:var(--red)">'+(S.players.length-entered)+'</b></div>';
-    var list=rows.map(function(r){var when=r.t?shortDT(r.t):'לא נכנס/ה';var c=r.t?((now-r.t)<DAY?'#2e9e6b':((now-r.t)<7*DAY?'#b8860b':'var(--mut2)')):'#d9534f';return '<div class="logrow"><span class="logmsg" style="font-weight:600;direction:rtl;text-align:right">'+esc(r.name)+'</span><span class="loglvl" style="color:'+c+'">'+(r.c||0)+'\u00d7</span><span class="logt" style="direction:ltr">'+esc(when)+'</span></div>';}).join("");
-    b.innerHTML=head+(list||'<div class="logempty">אין משתתפים.</div>');
+    var list=rows.filter(function(r){return r.t&&(now-r.t)<DAY;}).map(function(r){var when=r.t?shortDT(r.t):'לא נכנס/ה';var c=r.t?((now-r.t)<DAY?'#2e9e6b':((now-r.t)<7*DAY?'#b8860b':'var(--mut2)')):'#d9534f';return '<div class="logrow"><span class="logmsg" style="font-weight:600;direction:rtl;text-align:right">'+esc(r.name)+'</span><span class="loglvl" style="color:'+c+'">'+(r.c||0)+'\u00d7</span><span class="logt" style="direction:ltr">'+esc(when)+'</span></div>';}).join("");
+    b.innerHTML=head+(list||'<div class="logempty">אין כניסות ב-24 השעות האחרונות.</div>');
   }).catch(function(){});
 }
 window.renderLogins=renderLogins;
