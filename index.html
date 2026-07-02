@@ -783,6 +783,8 @@ function switchMe(){localStorage.removeItem(meKey);sessionStorage.removeItem(meK
 window.switchMe=switchMe;
 function goAdmin(){try{location.hash=ADMIN_CODE;}catch(e){}location.reload();}
 window.goAdmin=goAdmin;
+function goPlay(){try{location.href=location.origin+location.pathname+location.search;}catch(e){try{location.hash="";}catch(_){}location.reload();}} /* יציאה מהניהול אל חלק המשחק (בלי #ctrl7) */
+window.goPlay=goPlay;
 /* ---------- ADMIN: login gate (כניסת ניהול בסיסמה) ---------- */
 function findByName(n){var nn=normName(n);return (S.players||[]).find(function(p){return normName(p.name)===nn;})||(S.exited||[]).find(function(p){return normName(p.name)===nn;})||null;}
 function renderAdminLogin(){
@@ -1624,7 +1626,7 @@ function renderSettings(){
   var resetBody='<button class="btn block danger" onclick="aReset()">איפוס הטורניר</button>';
   var usageBody='<div id="usageBox"><div class="tiny muted">פתח/י לחישוב…</div></div>';
   var loginsBody='<div id="loginsBox"><div class="tiny muted">פתח/י לצפייה…</div></div>';
-  $("#main").innerHTML='<section class="view active"><div class="section-h"><h2>הגדרות</h2></div>'+panelCard("cfg","⚙️&nbsp;&nbsp;הגדרות הטורניר","",cfgBody)+panelCard("security","👮&nbsp;&nbsp;ניהול ואבטחה",(adminLockOn()?"🔒":""),adminSecBody())+panelCard("stats","📊&nbsp;&nbsp;סטטיסטיקה",'<span id="statsMini"></span>',statsBody())+dashRes+dashNg+panelCard("usage","💡&nbsp;&nbsp;שימוש",'<span id="usageMini"></span>',usageBody)+panelCard("logins","👤&nbsp;&nbsp;כניסות משתתפים","",loginsBody)+panelCard("log","📒&nbsp;&nbsp;יומן אירועים","",logBody)+panelCard("integrity","🔍&nbsp;&nbsp;בדיקת תקינות",'<span id="intgMini"></span>',integrityBody())+panelCard("reset","איפוס","",resetBody)+'<div class="empty tiny" style="padding:10px">מחובר ל: '+esc(DB)+'</div></section>';
+  $("#main").innerHTML='<section class="view active"><div class="section-h" style="align-items:center"><h2>הגדרות</h2><button class="btn sm" onclick="goPlay()">⚽&nbsp;מעבר למשחק</button></div>'+panelCard("cfg","⚙️&nbsp;&nbsp;הגדרות הטורניר","",cfgBody)+panelCard("security","👮&nbsp;&nbsp;ניהול ואבטחה",(adminLockOn()?"🔒":""),adminSecBody())+panelCard("stats","📊&nbsp;&nbsp;סטטיסטיקה",'<span id="statsMini"></span>',statsBody())+dashRes+dashNg+panelCard("usage","💡&nbsp;&nbsp;שימוש",'<span id="usageMini"></span>',usageBody)+panelCard("logins","👤&nbsp;&nbsp;כניסות משתתפים","",loginsBody)+panelCard("log","📒&nbsp;&nbsp;יומן אירועים","",logBody)+panelCard("integrity","🔍&nbsp;&nbsp;בדיקת תקינות",'<span id="intgMini"></span>',integrityBody())+panelCard("reset","איפוס","",resetBody)+'<div class="empty tiny" style="padding:10px">מחובר ל: '+esc(DB)+'</div></section>';
   try{renderUsage();}catch(e){}
   acDashInit();logRender();diagLoad();try{fitRefund();}catch(e){}try{statsMiniUpdate();}catch(e){}
 }
