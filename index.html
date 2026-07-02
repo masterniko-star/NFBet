@@ -1172,6 +1172,10 @@ function renderBoardView(){
   var betsHtml=open.map(function(m){
     var c=calcMatch(m);
     var dOK=!!m.drawOK;
+    /* צבע השם לפי התוצאה החיה: מי מוביל לפי הספירה כרגע (A/B/X); רק כשמוצגת תוצאה חיה (אותו תנאי כמו liveScoreHtml) */
+    var _lv=m.live;
+    var _liveOn=!!(m.dt&&!m.settled&&_lv&&_lv.ts&&(Date.now()-(+_lv.ts))<LIVE_TTL&&(_lv.a!=null||_lv.b!=null));
+    var _lead=_liveOn?((Number(_lv.a)||0)>(Number(_lv.b)||0)?"A":((Number(_lv.b)||0)>(Number(_lv.a)||0)?"B":"X")):null;
     var ri=0;
     var _tOrd={A:0,X:1,B:2}; /* сортировка таблицы по колонке ניחוש: 1 (A) → X (תיקו) → 2 (B); внутри группы — порядок игроков сохраняется */
     var _betters=S.players.filter(function(pl){return (m.bets||{})[pl.id];});
@@ -1181,7 +1185,8 @@ function renderBoardView(){
       var coef=b.team==="A"?c.coefA:(b.team==="B"?c.coefB:c.coefX);var net=coef?(b.stake*coef-b.stake):0;
       var otherSum=c.pool-(b.team==="A"?c.sumA:(b.team==="B"?c.sumB:c.sumX));var hasOpp=otherSum>0;
       var pickNum=b.team==="A"?"1":(b.team==="B"?"2":"X");var zc=(ri%2===0)?" row-y":"";ri++;
-      return '<div class="brow'+zc+(p&&pl.id===p.id?" me-row":"")+'"><span class="bname" dir="rtl">'+esc(pl.name)+'</span>'+
+      var _nmCol=_liveOn?(b.team===_lead?"var(--pitch-d)":"var(--red)"):"";
+      return '<div class="brow'+zc+(p&&pl.id===p.id?" me-row":"")+'"><span class="bname" dir="rtl"'+(_nmCol?' style="color:'+_nmCol+'"':'')+'>'+esc(pl.name)+'</span>'+
         '<span class="bpick num">'+pickNum+'</span>'+
         '<span class="num">'+fmt(b.stake)+'</span>'+
         '<span class="'+(net>0?"pos":"")+' num">'+fmt(net)+'</span>'+
