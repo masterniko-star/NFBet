@@ -1006,7 +1006,7 @@ function chatUnread(){return chatLatestTs()>chatSeenTs();} /* новое соо�
 function chatMarkSeen(){try{localStorage.setItem("chat_seen",String(chatLatestTs()||Date.now()));}catch(e){}var cb=document.querySelector('#nav button[data-tab="chat"]');if(cb)cb.classList.remove("unread");}
 function chatTime(ts){if(!ts)return"";try{return new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Jerusalem",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).format(new Date(ts));}catch(e){return"";}}
 function renderChat(){var m=$("#main");if(!m)return;var sb=$("#scoreboard");if(sb)sb.innerHTML="";var meP=me();
-  var msgs=Object.keys(S.chat||{}).map(function(k){return S.chat[k];}).filter(function(x){return x&&x.text;}).sort(function(a,b){return (a.ts||0)-(b.ts||0);}).slice(-200);
+  var msgs=Object.keys(S.chat||{}).map(function(k){return S.chat[k];}).filter(function(x){return x&&x.text&&(Date.now()-(x.ts||0)<48*36e5);}).sort(function(a,b){return (a.ts||0)-(b.ts||0);}).slice(-200);
   var rows=msgs.map(function(x){var mine=!!(meP&&x.pid===meP.id);
     return '<div class="chatmsg'+(mine?' mine':'')+'">'+(mine?'':'<div class="chatname" dir="auto">'+esc(x.name||"")+'</div>')+'<div class="chatbub"><span class="chattext" dir="auto">'+esc(x.text)+'</span><span class="chatt">'+chatTime(x.ts)+'</span></div></div>';}).join("");
   var body=rows||'<div class="chatempty">אין הודעות עדיין.<br>כתוב/כתבי ראשון/ה 💬</div>';
