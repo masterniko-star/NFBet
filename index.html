@@ -1607,7 +1607,14 @@ function renderSettings(){
   var adminLink=base+"#"+ADMIN_CODE;
   var playLink=base;
   var linkBody='<div class="tiny" style="margin-bottom:6px;color:var(--pitch-d);font-weight:800">שלח את הקישור הזה לקבוצה — קבוע, משמש להרשמה ולהימורים:</div>'+'<div class="copyrow"><input class="input" dir="ltr" readonly value="'+esc(playLink)+'" onclick="this.select()"><button class="btn copy-ic" title="העתק" onclick="uiCopy(\''+esc(playLink)+'\',this)">📋</button></div>'+'<div class="tiny" style="margin-top:12px;color:var(--red);font-weight:800">קישור הניהול שלך (שמור לעצמך):</div>'+'<div class="copyrow" style="opacity:.45"><input class="input" dir="ltr" readonly value="'+esc(adminLink)+'" onclick="this.select()" style="color:var(--mut);background:#eef1f4"><button class="btn copy-ic" title="העתק" onclick="uiCopy(\''+esc(adminLink)+'\',this)">📋</button></div>';
-  var cfgBody=linkBody;
+  var betSizeBody='<hr class="sep"><div class="tiny" style="margin:2px 2px 6px;color:var(--tx);font-weight:800">💰&nbsp;גודל ההימור</div>'+
+    '<div class="tiny muted" style="margin-bottom:10px;line-height:1.5">טווח הסכום שמשתתף יכול להמר על משחק אחד.</div>'+
+    '<div class="two tight">'+
+      '<div class="field c"><label>מינימום (₪)</label><input class="input sm num" id="cMin" type="number" min="1" dir="ltr" inputmode="numeric" value="'+(Number(S.meta.minBet)||1)+'"></div>'+
+      '<div class="field c"><label>מקסימום (₪)</label><input class="input sm num" id="cMax" type="number" min="1" dir="ltr" inputmode="numeric" value="'+(Number(S.meta.maxBet)||10)+'"></div>'+
+    '</div>'+
+    '<button class="btn block pitch" style="margin-top:4px" onclick="aSaveCfg()">שמור</button>';
+  var cfgBody=linkBody+betSizeBody;
   var dashRes='<div class="card card-p"><button onclick="acDashToggle(\'results\')" class="panel-h"><div class="panel-top"><span class="panel-t">✅&nbsp;&nbsp;בדיקת תוצאות</span><span id="acChev_results" class="panel-chev">'+(ac2Open.results?"▲":"▼")+'</span></div><div class="panel-status"><span class="tiny muted">'+acDashStatus('results')+'</span></div></button><div id="acBody_results" style="display:'+(ac2Open.results?"block":"none")+';margin-top:14px">'+autoDashBody('results')+'</div></div>';
   var dashNg='<div class="card card-p"><button onclick="acDashToggle(\'newgames\')" class="panel-h"><div class="panel-top"><span class="panel-t">📥&nbsp;&nbsp;טעינת משחקים</span><span id="acChev_newgames" class="panel-chev">'+(ac2Open.newgames?"▲":"▼")+'</span></div><div class="panel-status"><span class="tiny muted">'+acDashStatus('newgames')+'</span></div></button><div id="acBody_newgames" style="display:'+(ac2Open.newgames?"block":"none")+';margin-top:14px">'+autoDashBody('newgames')+'</div></div>';
   var logBody=
@@ -1895,7 +1902,7 @@ function acDashStatus(kind){var c=(S.autocfg&&S.autocfg[kind])||{};if(!c.on)retu
 function acDashToggle(kind){ac2Open[kind]=!ac2Open[kind];var b=$("#acBody_"+kind);if(b)b.style.display=ac2Open[kind]?"block":"none";var ch=$("#acChev_"+kind);if(ch)ch.textContent=ac2Open[kind]?"▲":"▼";if(ac2Open[kind]){acRenderAfter(kind);acRenderTimes2(kind);}}
 window.acAfterAdd=acAfterAdd;window.acAfterEdit=acAfterEdit;window.acAfterDel=acAfterDel;window.acTimesAdd=acTimesAdd;window.acTimesEdit=acTimesEdit;window.acTimesDel=acTimesDel;window.acDashSave=acDashSave;window.acDashToggle=acDashToggle;
 
-function aSaveCfg(){var meta={fee:(Number(S.meta.fee)||0),bank:Math.max(1,Number($("#cBank").value)||S.meta.bank||100),minBet:Math.max(1,Number($("#cMin").value)||S.meta.minBet||1),maxBet:Math.max(1,Number($("#cMax").value)||S.meta.maxBet||10),cur:S.meta.cur||"₪"};if(meta.maxBet<meta.minBet)meta.maxBet=meta.minBet;fbSet("/meta",meta).then(refresh).then(function(){toast("נשמר");});}
+function aSaveCfg(){var g=function(id,d){var el=$("#"+id);return el?(Number(el.value)||d):d;};var minB=Math.max(1,g("cMin",Number(S.meta.minBet)||1)),maxB=Math.max(1,g("cMax",Number(S.meta.maxBet)||10));if(maxB<minB)maxB=minB;var upd={minBet:minB,maxBet:maxB};var bEl=$("#cBank");if(bEl)upd.bank=Math.max(1,Number(bEl.value)||Number(S.meta.bank)||100);fbUpd("/meta",upd).then(refresh).then(function(){toast("נשמר ✓");});}
 function aGenBracket(){if(S.matches.length&&!confirm("כבר יש משחקים. להוסיף עוד 32?"))return;var ups={},o=S.matches.length;ROUNDS.forEach(function(r){for(var i=0;i<r.count;i++){ups[uid()]={round:r.key,teamA:"",teamB:"",dt:"",order:o++,settled:false,winner:null,t:Date.now()+o};}});fbUpd("/matches",ups).then(refresh).then(function(){TAB="matches";renderActive();toast("נוצר עץ");});}
 function aShare(link){window.open("https://wa.me/?text="+encodeURIComponent("טורניר הניחושים פלייאוף מונדיאל 2026 ⚽\nהיכנסו, הירשמו והמרו כאן 👇\n"+link),"_blank");}
 var _rkeep={};
