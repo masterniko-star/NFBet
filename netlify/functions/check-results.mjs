@@ -544,6 +544,15 @@ export async function fetchOdds(matches, tree, now){
   return n;
 }
 
+/* ---------- ретеншн чата: чистим сообщения старше 48ч (история хранится 48 часов) ---------- */
+async function purgeOldChat(tree, now){
+  const CHAT_TTL = 48 * 3600 * 1000;
+  const chat = tree.chat || {};
+  const del = {};
+  for (const k in chat){ const ts = chat[k] && chat[k].ts; if (ts && (now - ts) >= CHAT_TTL) del[k] = null; }
+  if (Object.keys(del).length){ await fbPatch("/chat", del); try { await slog("INFO", "chat", "pruned " + Object.keys(del).length + " messages older than 48h"); } catch (_) {} }
+}
+
 /* ---------- core (экспортируется для тестов) ---------- */
 export async function runCheck() {
   const tree = (await fbGet("")) || {};
@@ -555,6 +564,7 @@ export async function runCheck() {
   const bets = {}; const bo = tree.bets || {}; for (const mid in bo) bets[mid] = { ...bo[mid] };
   const now = Date.now();
   try { await purgeOldCashlog(tree, now); } catch (e) {}
+  try { await purgeOldChat(tree, now); } catch (e) {}
   try { await idleSweep(tree, players, matches, bets, bank, now); } catch (e) { try { await slog("ERROR","idle","idleSweep: "+((e&&e.message)||e)); } catch(_){} }
   try { await overBetSweep(players, matches, bets, bank, now); } catch (e) { try { await slog("ERROR","overbet","overBetSweep: "+((e&&e.message)||e)); } catch(_){} }
   try { await balSnapshot(tree, players, matches, bets, bank, now); } catch (e) { try { await slog("ERROR","balsnap","balSnapshot: "+((e&&e.message)||e)); } catch(_){} }
