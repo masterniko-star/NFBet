@@ -1823,7 +1823,8 @@ function markEntry(){
   var attempt=++_entryTries,meId=ME,u=fbUrl("/seen/"+meId);
   fetch(u).then(function(r){if(!r.ok)throw new Error("GET "+r.status);return r.json();}).then(function(prev){
     prev=prev||{}; var now=Date.now(); var nm=(me()&&me().name)||prev.n||"";
-    var rec={t:now,c:(prev.c||0)+1,f:prev.f||now,n:nm};
+    var h=(Array.isArray(prev.h)?prev.h:[]).filter(function(x){return now-x<864e5;});h.push(now);if(h.length>200)h=h.slice(-200); /* היסטוריית כניסות 24ש׳ — למונה ×N בפאנל */
+    var rec={t:now,c:(prev.c||0)+1,f:prev.f||now,n:nm,h:h};
     return fetch(u,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(rec)}).then(function(r2){
       if(!r2||!r2.ok)throw new Error("PUT "+(r2&&r2.status));
       if(_entryMarked!==meId){_entryMarked=meId;logInfo("entry","כניסה נרשמה: "+nm,{pid:meId});}
@@ -1843,7 +1844,7 @@ function renderLogins(){
     // диагностика рассинхрона: игрок без записи /seen («לא נכנס», красный), но со ставкой — значит markEntry не записал вход. Логируем (раз на игрока за сессию).
     var betPids={};(S.matches||[]).forEach(function(m){var bb=m.bets||{};for(var pid in bb)betPids[pid]=1;});
     S.players.forEach(function(pl){var sv=seen[pl.id]||{};if(!(sv.t>0)&&betPids[pl.id]){once("entrymiss-"+pl.id,function(){logWarn("entry","‏"+(pl.name||pl.id)+" מסומן 'לא נכנס' אך יש לו הימור — רישום /seen כנראה נכשל",{pid:pl.id});});}});
-    var rows=S.players.map(function(pl){var sv=seen[pl.id]||{};return {name:pl.name,t:sv.t||0,c:sv.c||0};});
+    var rows=S.players.map(function(pl){var sv=seen[pl.id]||{};var c24=Array.isArray(sv.h)?sv.h.filter(function(x){return (now-x)<DAY;}).length:((sv.t&&(now-sv.t)<DAY)?1:0);return {name:pl.name,t:sv.t||0,c:c24};}); /* ×N = כניסות ב-24 השעות האחרונות (רשומות ישנות בלי h → 1) */
     var entered=rows.filter(function(r){return r.t>0;}).length;
     var today=rows.filter(function(r){return r.t&&(now-r.t)<DAY;}).length;
     var week=rows.filter(function(r){return r.t&&(now-r.t)<7*DAY;}).length;
