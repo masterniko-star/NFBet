@@ -14,9 +14,15 @@ A.sandbox.renderLogins();await flush(60);
 const box=(A.q('#loginsBox')||{}).innerHTML||'';
 ok(box.indexOf('\u05e0\u05db\u05e0\u05e1\u05d5')>=0&&box.indexOf('1')>=0,'header shows entered count ("נכנסו 1/2")');
 ok(box.indexOf('\u05d3\u05e0\u05d9')>=0,'entered player "דני" listed');
-ok(box.indexOf('\u05e0\u05d5\u05e2\u05d4')>=0,'not-entered player "נועה" listed');
-ok(box.indexOf('\u05dc\u05d0 \u05e0\u05db\u05e0\u05e1')>=0,'"לא נכנס/ה" marker shown for non-entrant');
+ok(box.indexOf('\u05e0\u05d5\u05e2\u05d4')<0,'not-entered player "נועה" NOT listed (list = only last-24h entries)');
+ok(box.indexOf('\u05dc\u05d0 \u05e0\u05db\u05e0\u05e1\u05d5')>=0,'header still counts non-entrants ("לא נכנסו")');
 ok(box.indexOf('\u00d7')>=0,'entry-count "×" indicator present');
+// вход старше 24 часов не показывается в списке (шапка при этом его считает)
+A.state.tree.seen.p2={t:Date.now()-25*36e5,c:4,f:1,n:'\u05e0\u05d5\u05e2\u05d4'};
+A.sandbox.renderLogins();await flush(60);
+const box2=(A.q('#loginsBox')||{}).innerHTML||'';
+ok(box2.indexOf('\u05e0\u05d5\u05e2\u05d4')<0,'entry older than 24h NOT listed');
+ok(box2.indexOf('\u05d3\u05e0\u05d9')>=0,'fresh entry still listed');
 
 console.log('\n===== switch account within one session re-marks both =====');
 // \u0431\u0430\u0433 \u0431\u044b\u043b: \u0433\u043b\u043e\u0431\u0430\u043b\u044c\u043d\u044b\u0439 \u0444\u043b\u0430\u0433 _enteredThisSession \u043d\u0435 \u0441\u0431\u0440\u0430\u0441\u044b\u0432\u0430\u043b\u0441\u044f \u043f\u0440\u0438 switchMe -> \u0432\u0442\u043e\u0440\u043e\u0439 \u0438\u0433\u0440\u043e\u043a \u043d\u0435 \u043f\u0438\u0441\u0430\u043b\u0441\u044f \u0432 /seen.
@@ -52,7 +58,7 @@ ok((D.sandbox._diagBuf||[]).some(function(e){return e.cat==='entry'&&/\u05dc\u05
 console.log('\n===== logins panel: no participants =====');
 const B=loadApp({meta:{bank:100,cur:'\u20aa'},players:{},matches:{},bets:{}},{hash:'ctrl7'});B.sandbox.buildState(B.state.tree);
 B.sandbox.renderLogins();await flush(40);
-ok(((B.q('#loginsBox')||{}).innerHTML||'').indexOf('\u05d0\u05d9\u05df \u05de\u05e9\u05ea\u05ea\u05e4\u05d9\u05dd')>=0,'no players -> "אין משתתפים"');
+ok(((B.q('#loginsBox')||{}).innerHTML||'').indexOf('\u05d0\u05d9\u05df \u05db\u05e0\u05d9\u05e1\u05d5\u05ea')>=0,'no players -> "אין כניסות ב-24 השעות האחרונות"');
 
 console.log('\n'+(fails?('FAILED '+fails+'/'+tests):('ALL PASS '+tests+'/'+tests)));process.exit(fails?1:0);
 })();
