@@ -624,7 +624,7 @@ function closeSheet(fromPop){$("#scrim").classList.remove("on");document.body.st
 window.addEventListener("popstate",function(){if(sheetOpen)closeSheet(true);});
 
 /* ============================================================ RENDER ============================================================ */
-var TAB=(MODE==="admin")?"players":"bet";
+var TAB=(MODE==="admin")?"settings":"bet";
 /* ---------- urgent-info popup (owner only: admin + Niko's game account) ---------- */
 var _noticeOpen=false,_noticeShownIds=[];
 function isOwnerView(){if(typeof MODE!=="undefined"&&MODE==="admin")return adminAuthed();var p=me();return !!(p&&isSuperAdmin(p.name));}
@@ -2218,7 +2218,7 @@ function clientAutoTick(){ if(document.hidden||fxBusy||(sheetOpen&&MODE==="admin
 function start(){
   if(!DB||!/^https?:\/\//.test(DB)){ renderSetup(); return; }
   var shown=false;
-  try{var ct=cacheLoad();if(ct&&typeof ct==="object"){var vt=(MODE==="admin")?["players","matches","settings"]:["bet","board","all","chat","hist","help"];var lt=cacheTabLoad();if(lt&&vt.indexOf(lt)>=0)TAB=lt;buildState(ct);renderActive();shown=true;}}catch(e){}
+  try{var ct=cacheLoad();if(ct&&typeof ct==="object"){var vt=(MODE==="admin")?["players","matches","settings"]:["bet","board","all","chat","hist","help"];var lt=cacheTabLoad();if(MODE!=="admin"&&lt&&vt.indexOf(lt)>=0)TAB=lt;buildState(ct);renderActive();shown=true;}}catch(e){}
   if(!shown){var _mn=$("#main"); if(_mn&&!_mn.innerHTML) _mn.innerHTML='<div class="boot-load"><div class="boot-spin"></div><div>טוען…</div></div>';}
   try{ensureMeta();}catch(e){}  /* параллельно: гарантирует /meta, НЕ блокирует первый рендер */
   refresh().then(function(){ try{markEntry();}catch(e){}
