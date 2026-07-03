@@ -2029,108 +2029,94 @@ function espnGet(url){
     .catch(function(e){logWarn("espn","proxy 1 נכשל — proxy 2");return viaProxy("https://api.allorigins.win/raw?url="+encodeURIComponent(url));})
     .catch(function(e){logErr("espn","כל הניסיונות ל-ESPN נכשלו: "+((e&&e.message)||e),{url:String(url).slice(0,160)});throw e;});
 }
-function loadFxGames(lg){
-  var res=$("#fxRes"); if(!res)return;
-  var disp=fxHe(lg.name)||esc(lg.name);
-  fxBusy=true; fxSlug=lg.slug||""; res.innerHTML='<div class="tiny muted">טוען משחקים: '+disp+'…</div>';
+/* ---------- количество игр (сколько грузить с турнира / держать в корзине) ---------- */
+function fxCountLoad(){
+  var v=null;
+  try{var w=S.autocfg&&S.autocfg.newgames&&S.autocfg.newgames.want;if(w!=null&&isFinite(+w))v=+w;}catch(e){}
+  if(v==null){try{var s=localStorage.getItem("fxcount");if(s&&isFinite(+s))v=+s;}catch(e){}}
+  if(v==null)v=3;
+  return Math.max(1,Math.round(v));
+}
+/* ---------- общий фетчер событий турнира (ESPN + 365scores) ---------- */
+function fxEventsUrl(slug){
+  if(slug.indexOf("365:")===0){
+    var comp=slug.slice(4)||"42";
+    return "https://webws.365scores.com/web/games/?appTypeId=5&langId=2&timezoneName=Asia/Jerusalem&userCountryId=6&competitions="+encodeURIComponent(comp);
+  }
   var d0=new Date(),d1=new Date(Date.now()+75*864e5);
-  var url="https://site.api.espn.com/apis/site/v2/sports/soccer/"+encodeURIComponent(lg.slug)+"/scoreboard?limit=300&dates="+fxYMD(d0)+"-"+fxYMD(d1);
-  espnGet(url).then(function(j){
-    var evs=(j&&j.events)||[];
-    var games=evs.map(function(e){
-      var comp=(e.competitions&&e.competitions[0])||{},cs=comp.competitors||[],home=null,away=null;
-      cs.forEach(function(c){if(c.homeAway==="home")home=c;else if(c.homeAway==="away")away=c;});
-      if(!home)home=cs[0]; if(!away)away=cs[1];
-      var st=((e.status&&e.status.type)||{});
-      var nm=function(c){return (c&&c.team&&(c.team.displayName||c.team.shortDisplayName||c.team.name))||"";};
-      return {id:e.id,date:e.date,home:nm(home),away:nm(away),state:st.state||"",note:e.name||"",slug:lg.slug,stage:((comp.notes&&comp.notes[0]&&(comp.notes[0].headline||comp.notes[0].text))||(e.season&&e.season.slug)||"")};
-    });
-    var have={};S.matches.forEach(function(m){if(m.fx)have[m.fx]=1;});
-    var fresh=games.filter(function(g){return !have["espn"+g.id];}); // skip games already in the list
-    var up=fresh.filter(function(g){return g.state==="pre";});
-    up.sort(function(a,b){return String(a.date||"").localeCompare(String(b.date||""));});
-    var pick=up.slice(0,3);
-    if(!pick.length){var nc=fresh.filter(function(g){return g.state!=="post";});nc.sort(function(a,b){return String(a.date||"").localeCompare(String(b.date||""));});pick=nc.slice(0,3);}
-    if(!pick.length){
-      var someAdded=games.some(function(g){return have["espn"+g.id];});
-      res.innerHTML='<div class="tiny" style="color:var(--mut);font-weight:700;margin-bottom:2px">'+(someAdded?"כל המשחקים הקרובים כבר נוספו ✓":("לא נמצאו משחקים קרובים ל"+disp+"."))+'</div>'+(someAdded?"":'<div class="tiny muted" style="direction:ltr;text-align:left">diag: espn='+esc(lg.slug)+' events='+evs.length+'</div>')+'<button class="btn block ghost" style="margin-top:8px" onclick="aFxCancel()">סגור</button>';
-      return;
-    }
-    fxData=pick;
-    var rows=pick.map(function(g,i){
-      var tm=((g.home||"")+(g.away?(" — "+g.away):"")).trim()||g.note||("משחק "+(i+1));
-      var dd=fxFmtDate(g.date);
-      return '<label style="display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px"><input type="checkbox" class="fxc" data-i="'+i+'" checked style="accent-color:var(--pitch);width:18px;height:18px;flex:0 0 auto"><span dir="auto" style="flex:1">'+esc(tm)+'<br><span class="tiny muted">'+esc(dd)+'</span></span></label>';
-    }).join("");
-    res.innerHTML='<div class="tiny muted" style="margin-bottom:6px">'+disp+' — '+pick.length+' המשחקים הקרובים. בטל/י סימון למה שלא רוצים:</div>'+rows+'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn pitch" style="flex:1" onclick="aAddSelectedFixtures()">＋ הוסף את המסומנים</button><button class="btn ghost" style="flex:0 0 auto" onclick="aFxCancel()">בטל</button></div>';
-  }).catch(function(e){res.innerHTML='<div class="tiny" style="color:var(--red);font-weight:700">החיפוש נכשל (רשת/CORS).</div><div class="tiny muted" style="direction:ltr;text-align:left">'+esc(String((e&&e.message)||e))+'</div>';});
+  return "https://site.api.espn.com/apis/site/v2/sports/soccer/"+encodeURIComponent(slug)+"/scoreboard?limit=300&dates="+fxYMD(d0)+"-"+fxYMD(d1);
 }
-function load365Games(comp){
-  comp=comp||"42";
+function fxNormEspn(j,slug){
+  return ((j&&j.events)||[]).map(function(e){
+    var comp=(e.competitions&&e.competitions[0])||{},cs=comp.competitors||[],home=null,away=null;
+    cs.forEach(function(c){if(c.homeAway==="home")home=c;else if(c.homeAway==="away")away=c;});
+    if(!home)home=cs[0]; if(!away)away=cs[1];
+    var st=((e.status&&e.status.type)||{});
+    var nm=function(c){return (c&&c.team&&(c.team.displayName||c.team.shortDisplayName||c.team.name))||"";};
+    return {id:e.id,date:e.date,home:nm(home),away:nm(away),state:st.state||"",note:e.name||"",slug:slug,stage:((comp.notes&&comp.notes[0]&&(comp.notes[0].headline||comp.notes[0].text))||(e.season&&e.season.slug)||""),fxid:"espn"+e.id};
+  });
+}
+function fxNorm365(j,slug){
+  return ((j&&j.games)||[]).map(function(g){
+    var hc=g.homeCompetitor||{},aw=g.awayCompetitor||{};
+    var txt=String(g.shortStatusText||g.statusText||"");
+    var ended=(Number(g.statusGroup)===4)||/ended|finished|final|הסתיים|גמר/i.test(txt);
+    var t=new Date(g.startTime).getTime();
+    var state=ended?"post":((isFinite(t)&&t>Date.now())?"pre":"in");
+    return {id:String(g.id),date:g.startTime,home:String(hc.name||""),away:String(aw.name||""),state:state,note:"",slug:slug,stage:"",fxid:"365"+g.id};
+  }).filter(function(g){return g.id&&g.home&&g.away;});
+}
+function fetchFxEvents(slug){
+  var is365=slug.indexOf("365:")===0;
+  return espnGet(fxEventsUrl(slug)).then(function(j){return is365?fxNorm365(j,slug):fxNormEspn(j,slug);});
+}
+function fxHaveMap(){var have={};S.matches.forEach(function(m){if(m.fx)have[m.fx]=1;});return have;}
+function fxTopN(evs,have,n){
+  var fresh=evs.filter(function(g){return !have[g.fxid];});
+  var up=fresh.filter(function(g){return g.state==="pre";});
+  up.sort(function(a,b){return String(a.date||"").localeCompare(String(b.date||""));});
+  var pick=up.slice(0,n);
+  if(!pick.length){var nc=fresh.filter(function(g){return g.state!=="post";});nc.sort(function(a,b){return String(a.date||"").localeCompare(String(b.date||""));});pick=nc.slice(0,n);}
+  return {pick:pick, someAdded:evs.some(function(g){return have[g.fxid];})};
+}
+function fxRowsHtml(list,showSlug){
+  return list.map(function(g,i){
+    var tm=((g.home||"")+(g.away?(" — "+g.away):"")).trim()||g.note||("משחק "+(i+1));
+    var sub=(showSlug?(esc(fxSlugHe(g.slug))+' · '):'')+esc(fxFmtDate(g.date));
+    return '<label style="display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px"><input type="checkbox" class="fxc" data-i="'+i+'" checked style="accent-color:var(--pitch);width:18px;height:18px;flex:0 0 auto"><span dir="auto" style="flex:1">'+esc(tm)+'<br><span class="tiny muted">'+sub+'</span></span></label>';
+  }).join("");
+}
+function fxLoadOne(slug,dispName,count){
   var res=$("#fxRes"); if(!res)return;
-  fxBusy=true; fxSlug="365:"+comp; res.innerHTML='<div class="tiny muted">טוען משחקים: ליגת העל…</div>';
-  var url="https://webws.365scores.com/web/games/?appTypeId=5&langId=2&timezoneName=Asia/Jerusalem&userCountryId=6&competitions="+encodeURIComponent(comp);
-  return espnGet(url).then(function(j){
-    var games=((j&&j.games)||[]).map(function(g){
-      var hc=g.homeCompetitor||{},aw=g.awayCompetitor||{};
-      var txt=String(g.shortStatusText||g.statusText||"");
-      var ended=(Number(g.statusGroup)===4)||/ended|finished|final|הסתיים|גמר/i.test(txt);
-      var t=new Date(g.startTime).getTime();
-      var state=ended?"post":((isFinite(t)&&t>Date.now())?"pre":"in");
-      return {id:String(g.id),date:g.startTime,home:String(hc.name||""),away:String(aw.name||""),state:state,note:"",slug:"365:"+comp,stage:""};
-    }).filter(function(g){return g.id&&g.home&&g.away;});
-    var have={};S.matches.forEach(function(m){if(m.fx)have[m.fx]=1;});
-    var fresh=games.filter(function(g){return !have["365"+g.id];});
-    var up=fresh.filter(function(g){return g.state==="pre";});
-    up.sort(function(a,b){return String(a.date||"").localeCompare(String(b.date||""));});
-    var pick=up.slice(0,3);
-    if(!pick.length){var nc=fresh.filter(function(g){return g.state!=="post";});nc.sort(function(a,b){return String(a.date||"").localeCompare(String(b.date||""));});pick=nc.slice(0,3);}
-    if(!pick.length){
-      var someAdded=games.some(function(g){return have["365"+g.id];});
-      res.innerHTML='<div class="tiny" style="color:var(--mut);font-weight:700;margin-bottom:2px">'+(someAdded?"כל המשחקים הקרובים כבר נוספו ✓":"לא נמצאו משחקים קרובים בליגת העל.")+'</div>'+(someAdded?"":'<div class="tiny muted" style="direction:ltr;text-align:left">diag: 365 comp='+esc(comp)+' games='+games.length+'</div>')+'<button class="btn block ghost" style="margin-top:8px" onclick="aFxCancel()">סגור</button>';
+  var n=count||fxCountLoad();
+  fxBusy=true; fxSlug=slug; res.innerHTML='<div class="tiny muted">טוען משחקים: '+esc(dispName)+'…</div>';
+  return fetchFxEvents(slug).then(function(evs){
+    var r=fxTopN(evs,fxHaveMap(),n);
+    if(!r.pick.length){
+      res.innerHTML='<div class="tiny" style="color:var(--mut);font-weight:700;margin-bottom:2px">'+(r.someAdded?"כל המשחקים הקרובים כבר נוספו ✓":("לא נמצאו משחקים קרובים ל"+esc(dispName)+"."))+'</div>'+(r.someAdded?"":'<div class="tiny muted" style="direction:ltr;text-align:left">diag: slug='+esc(slug)+' events='+evs.length+'</div>')+'<button class="btn block ghost" style="margin-top:8px" onclick="aFxCancel()">סגור</button>';
       return;
     }
-    fxData=pick;
-    var rows=pick.map(function(g,i){
-      var tm=((g.home||"")+(g.away?(" — "+g.away):"")).trim()||("משחק "+(i+1));
-      var dd=fxFmtDate(g.date);
-      return '<label style="display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px"><input type="checkbox" class="fxc" data-i="'+i+'" checked style="accent-color:var(--pitch);width:18px;height:18px;flex:0 0 auto"><span dir="auto" style="flex:1">'+esc(tm)+'<br><span class="tiny muted">'+esc(dd)+'</span></span></label>';
-    }).join("");
-    res.innerHTML='<div class="tiny muted" style="margin-bottom:6px">ליגת העל — '+pick.length+' המשחקים הקרובים. בטל/י סימון למה שלא רוצים:</div>'+rows+'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn pitch" style="flex:1" onclick="aAddSelectedFixtures()">＋ הוסף את המסומנים</button><button class="btn ghost" style="flex:0 0 auto" onclick="aFxCancel()">בטל</button></div>';
+    fxData=r.pick;
+    res.innerHTML='<div class="tiny muted" style="margin-bottom:6px">'+esc(dispName)+' — '+r.pick.length+' המשחקים הקרובים. בטל/י סימון למה שלא רוצים:</div>'+fxRowsHtml(r.pick,false)+'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn pitch" style="flex:1" onclick="aAddSelectedFixtures()">＋ הוסף את המסומנים</button><button class="btn ghost" style="flex:0 0 auto" onclick="aFxCancel()">בטל</button></div>';
   }).catch(function(e){res.innerHTML='<div class="tiny" style="color:var(--red);font-weight:700">החיפוש נכשל (רשת/CORS).</div><div class="tiny muted" style="direction:ltr;text-align:left">'+esc(String((e&&e.message)||e))+'</div>';});
 }
+function loadFxGames(lg,count){ return fxLoadOne(lg.slug, fxHe(lg.name)||lg.name, count); }
+function load365Games(comp,count){ comp=comp||"42"; return fxLoadOne("365:"+comp, "ליגת העל", count); }
 window.load365Games=load365Games;
 function loadTopFx(){
   var res=$("#fxRes"); if(!res)return;
   fxBusy=true; fxSlug=""; res.innerHTML='<div class="tiny muted">טוען משחקים מהטורנירים המובילים…</div>';
-  var dates=fxYMD(new Date())+"-"+fxYMD(new Date(Date.now()+75*864e5));
-  var jobs=TOP_FX.map(function(slug){
-    var url="https://site.api.espn.com/apis/site/v2/sports/soccer/"+encodeURIComponent(slug)+"/scoreboard?limit=300&dates="+dates;
-    return espnGet(url).then(function(j){
-      return ((j&&j.events)||[]).map(function(e){
-        var comp=(e.competitions&&e.competitions[0])||{},cs=comp.competitors||[],home=null,away=null;
-        cs.forEach(function(c){if(c.homeAway==="home")home=c;else if(c.homeAway==="away")away=c;});
-        if(!home)home=cs[0]; if(!away)away=cs[1];
-        var st=((e.status&&e.status.type)||{});
-        var nm=function(c){return (c&&c.team&&(c.team.displayName||c.team.shortDisplayName||c.team.name))||"";};
-        return {id:e.id,date:e.date,home:nm(home),away:nm(away),state:st.state||"",note:e.name||"",slug:slug,stage:((comp.notes&&comp.notes[0]&&(comp.notes[0].headline||comp.notes[0].text))||(e.season&&e.season.slug)||"")};
-      });
-    }).catch(function(){return [];});
-  });
+  var jobs=TOP_FX.map(function(slug){return fetchFxEvents(slug).catch(function(){return [];});});
   Promise.all(jobs).then(function(arrs){
     var all=[],seen={};
     arrs.forEach(function(a){a.forEach(function(g){if(g.id&&!seen[g.id]){seen[g.id]=1;all.push(g);}});});
-    var have={};S.matches.forEach(function(m){if(m.fx)have[m.fx]=1;});
-    var up=all.filter(function(g){return g.state==="pre"&&!have["espn"+g.id];});
+    var have=fxHaveMap();
+    var up=all.filter(function(g){return g.state==="pre"&&!have[g.fxid];});
     up.sort(function(a,b){return String(a.date||"").localeCompare(String(b.date||""));});
     var pick=up.slice(0,8);
     if(!pick.length){res.innerHTML='<div class="tiny" style="color:var(--mut);font-weight:700;margin-bottom:2px">לא נמצאו משחקים קרובים בטורנירים המובילים.</div><div class="tiny muted">אפשר להקליד שם טורניר ספציפי בשורת החיפוש.</div><button class="btn block ghost" style="margin-top:8px" onclick="aFxCancel()">סגור</button>';return;}
     fxData=pick;
-    var rows=pick.map(function(g,i){
-      var tm=((g.home||"")+(g.away?(" — "+g.away):"")).trim()||g.note||("משחק "+(i+1));
-      return '<label style="display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px"><input type="checkbox" class="fxc" data-i="'+i+'" checked style="accent-color:var(--pitch);width:18px;height:18px;flex:0 0 auto"><span dir="auto" style="flex:1">'+esc(tm)+'<br><span class="tiny muted">'+esc(fxSlugHe(g.slug))+' · '+esc(fxFmtDate(g.date))+'</span></span></label>';
-    }).join("");
-    res.innerHTML='<div class="tiny muted" style="margin-bottom:6px">הטורנירים המובילים — '+pick.length+' המשחקים הקרובים. בטל/י סימון למה שלא רוצים:</div>'+rows+'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn pitch" style="flex:1" onclick="aAddSelectedFixtures()">＋ הוסף את המסומנים</button><button class="btn ghost" style="flex:0 0 auto" onclick="aFxCancel()">בטל</button></div>';
+    res.innerHTML='<div class="tiny muted" style="margin-bottom:6px">הטורנירים המובילים — '+pick.length+' המשחקים הקרובים. בטל/י סימון למה שלא רוצים:</div>'+fxRowsHtml(pick,true)+'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn pitch" style="flex:1" onclick="aAddSelectedFixtures()">＋ הוסף את המסומנים</button><button class="btn ghost" style="flex:0 0 auto" onclick="aFxCancel()">בטל</button></div>';
   }).catch(function(e){res.innerHTML='<div class="tiny" style="color:var(--red);font-weight:700">החיפוש נכשל (רשת/CORS).</div><div class="tiny muted" style="direction:ltr;text-align:left">'+esc(String((e&&e.message)||e))+'</div>';});
 }
 function aAddSelectedFixtures(){
