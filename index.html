@@ -187,7 +187,7 @@
   .betrow .stakein{min-width:0;height:50px;border:1.5px solid var(--line);border-radius:11px;background:var(--card);color:var(--tx);text-align:center;font-size:16px;font-weight:700;padding:0 2px}
   .betrow .stakein:focus{outline:none;border-color:var(--ink2)}
   .betrow .sendbtn{height:50px;padding:0;border-radius:11px;font-size:14px}
-  .betrow .stval{width:100%;min-width:0;height:100%;border:1.5px solid var(--line);border-radius:9px;text-align:center;font-size:17px;font-weight:700;background:var(--card);color:var(--tx);padding:0;pointer-events:none;cursor:default}
+  .betrow .stval{width:100%;min-width:0;height:100%;border:1.5px solid var(--line);border-radius:9px;text-align:center;font-size:17px;font-weight:700;background:var(--card);color:var(--tx);padding:0;pointer-events:none;cursor:default;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .betrow .stval:focus{outline:none;border-color:var(--ink2)}
   .betrow .strow{width:100%;min-width:0;height:100%;border:1.5px solid var(--line);border-radius:9px;background:var(--card);color:var(--tx);font-size:13px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer}
   .betrow .strow:active{background:var(--bg)}
@@ -1052,7 +1052,7 @@ function renderBetView(){
     if(rightMeta||clockHtml||scoreHtml) h+='<div class="round betmeta" style="display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:8px;margin-bottom:4px;font-size:13px;font-weight:700;color:var(--mut);direction:ltr"><span style="justify-self:start">'+clockHtml+'</span><span style="justify-self:center">'+scoreHtml+'</span><span style="justify-self:end;display:flex;align-items:center;gap:8px;direction:rtl">'+rightMeta+'</span></div>';
     h+='<div class="round betmeta projrow" style="display:flex;align-items:center;justify-content:flex-start;min-height:20px;margin-bottom:8px;font-size:13px;font-weight:700;color:var(--mut)">'+(projInner||'')+'</div>';
     var ctrlOff=locked;var dis=ctrlOff?" disabled":"";
-    var stakeInput='<input id="st-'+m.id+'" class="stval num" type="text" value="'+sv+'" readonly tabindex="-1" style="grid-column:1;grid-row:1">';
+    var stakeInput='<div id="st-'+m.id+'" class="stval num" style="grid-column:1;grid-row:1">'+sv+'</div>';
     var stakeCtrl=dOK
       ?(stakeInput
         +'<button class="strow"'+dis+' onclick="pStep(\''+m.id+'\',1)" aria-label="+" style="grid-column:1;grid-row:2">▲</button>'
@@ -1158,9 +1158,9 @@ function pPick(mid,team){var m=S.matches.find(function(x){return x.id===mid;});i
   stakeOf[mid]=stake;
   Promise.all([fbSet("/bets/"+mid+"/"+p.id,{team:team,stake:stake,t:Date.now()}),fbUpd("/players/"+p.id,{lastBet:Date.now()})]).then(refresh);}
 function pStake(mid,val){var p=me();if(!p||!p.feePaid)return;var m=S.matches.find(function(x){return x.id===mid;});if(m&&matchLocked(m)){var w=$("#pw-"+mid);if(w)w.textContent="ההימור נסגר — המשחק כבר התחיל.";return;}var b=(m.bets||{})[p.id];var n=clampStake(mid,val);if(n<1)n=S.meta.minBet;stakeOf[mid]=n;
-  if(b&&!m.settled){ var inp=$("#st-"+mid); if(inp)inp.value=n; Promise.all([fbSet("/bets/"+mid+"/"+p.id,{team:b.team,stake:n,t:Date.now()}),fbUpd("/players/"+p.id,{lastBet:Date.now()})]).then(refresh); } else { renderBetView(); }}
+  if(b&&!m.settled){ var inp=$("#st-"+mid); if(inp)inp.textContent=n; Promise.all([fbSet("/bets/"+mid+"/"+p.id,{team:b.team,stake:n,t:Date.now()}),fbUpd("/players/"+p.id,{lastBet:Date.now()})]).then(refresh); } else { renderBetView(); }}
 function pStep(mid,d){var p=me();if(!p||!p.feePaid)return;var m=S.matches.find(function(x){return x.id===mid;});if(m&&matchLocked(m)){var w=$("#pw-"+mid);if(w)w.textContent="ההימור נסגר — המשחק כבר התחיל.";return;}var b=(m.bets||{})[p.id];var n=clampStake(mid,curStake(mid,b)+d);if(n<1)n=S.meta.minBet;stakeOf[mid]=n;
-  if(b&&!m.settled){ var inp=$("#st-"+mid); if(inp)inp.value=n; Promise.all([fbSet("/bets/"+mid+"/"+p.id,{team:b.team,stake:n,t:Date.now()}),fbUpd("/players/"+p.id,{lastBet:Date.now()})]).then(refresh); } else { renderBetView(); }}
+  if(b&&!m.settled){ var inp=$("#st-"+mid); if(inp)inp.textContent=n; Promise.all([fbSet("/bets/"+mid+"/"+p.id,{team:b.team,stake:n,t:Date.now()}),fbUpd("/players/"+p.id,{lastBet:Date.now()})]).then(refresh); } else { renderBetView(); }}
 function pDelete(mid){var m=S.matches.find(function(x){return x.id===mid;});if(!m||m.settled)return;if(matchLocked(m)){var w=$("#pw-"+mid);if(w)w.textContent="ההימור נסגר — המשחק כבר התחיל.";return;}var p=me();if(!p)return;fbDel("/bets/"+mid+"/"+p.id).then(refresh).then(function(){toast("ההימור בוטל");});}
 window.pPick=pPick;window.pStake=pStake;window.pStep=pStep;window.pDelete=pDelete;
 
