@@ -1823,7 +1823,8 @@ function markEntry(){
   var attempt=++_entryTries,meId=ME,u=fbUrl("/seen/"+meId);
   fetch(u).then(function(r){if(!r.ok)throw new Error("GET "+r.status);return r.json();}).then(function(prev){
     prev=prev||{}; var now=Date.now(); var nm=(me()&&me().name)||prev.n||"";
-    var h=(Array.isArray(prev.h)?prev.h:[]).filter(function(x){return now-x<864e5;});h.push(now);if(h.length>200)h=h.slice(-200); /* היסטוריית כניסות 24ש׳ — למונה ×N בפאנל */
+    var mid=ilWallTs(ilYMD(now)+"T00:00"); // начало сегодняшних суток (Израиль) — храним только входы за календарный день
+    var h=(Array.isArray(prev.h)?prev.h:[]).filter(function(x){return x>=mid;});h.push(now);if(h.length>200)h=h.slice(-200); /* היסטוריית כניסות מתחילת היום — למונה ×N בפאנל */
     var rec={t:now,c:(prev.c||0)+1,f:prev.f||now,n:nm,h:h};
     return fetch(u,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(rec)}).then(function(r2){
       if(!r2||!r2.ok)throw new Error("PUT "+(r2&&r2.status));
@@ -1841,16 +1842,17 @@ function renderLogins(){
   var box=$("#loginsBox"); if(!box)return;
   fbGet("/seen").then(function(seen){var b=$("#loginsBox");if(!b)return;seen=seen||{};
     var now=Date.now(),DAY=864e5;
+    var mid=ilWallTs(ilYMD(now)+"T00:00"); // начало сегодняшних суток по израильскому времени (счётчик входов за календарный день)
     // диагностика рассинхрона: игрок без записи /seen («לא נכנס», красный), но со ставкой — значит markEntry не записал вход. Логируем (раз на игрока за сессию).
     var betPids={};(S.matches||[]).forEach(function(m){var bb=m.bets||{};for(var pid in bb)betPids[pid]=1;});
     S.players.forEach(function(pl){var sv=seen[pl.id]||{};if(!(sv.t>0)&&betPids[pl.id]){once("entrymiss-"+pl.id,function(){logWarn("entry","‏"+(pl.name||pl.id)+" מסומן 'לא נכנס' אך יש לו הימור — רישום /seen כנראה נכשל",{pid:pl.id});});}});
-    var rows=S.players.map(function(pl){var sv=seen[pl.id]||{};var c24=Array.isArray(sv.h)?sv.h.filter(function(x){return (now-x)<DAY;}).length:((sv.t&&(now-sv.t)<DAY)?1:0);return {name:pl.name,t:sv.t||0,c:c24};}); /* ×N = כניסות ב-24 השעות האחרונות (רשומות ישנות בלי h → 1) */
+    var rows=S.players.map(function(pl){var sv=seen[pl.id]||{};var c24=Array.isArray(sv.h)?sv.h.filter(function(x){return x>=mid;}).length:((sv.t&&sv.t>=mid)?1:0);return {name:pl.name,t:sv.t||0,c:c24};}); /* ×N = כניסות מתחילת היום (00:00 שעון ישראל); רשומות ישנות בלי h → 1 אם נכנסו היום */
     var entered=rows.filter(function(r){return r.t>0;}).length;
-    var today=rows.filter(function(r){return r.t&&(now-r.t)<DAY;}).length;
+    var today=rows.filter(function(r){return r.t&&r.t>=mid;}).length;
     var week=rows.filter(function(r){return r.t&&(now-r.t)<7*DAY;}).length;
     rows.sort(function(a,b){return (b.t-a.t)||0;});
     var head='<div class="tiny muted" style="margin-bottom:8px;direction:rtl;text-align:right">נכנסו <b style="color:var(--tx)">'+entered+'</b>/'+S.players.length+' · היום <b style="color:var(--tx)">'+today+'</b> · השבוע <b style="color:var(--tx)">'+week+'</b> · לא נכנסו <b style="color:var(--red)">'+(S.players.length-entered)+'</b></div>';
-    /* כל המשתתפים; ×N = כניסות ב-24 השעות האחרונות, 0 אם לא נכנס */
+    /* כל המשתתפים; ×N = כניסות מתחילת היום, 0 אם לא נכנס היום */
     var list=rows.map(function(r){var when=r.t?shortDT(r.t):'לא נכנס/ה';var c=r.c>0?'#2e9e6b':(r.t?'var(--mut2)':'#d9534f');return '<div class="logrow"><span class="logmsg" style="font-weight:600;direction:rtl;text-align:right">'+esc(r.name)+'</span><span class="loglvl" style="color:'+c+'">'+(r.c||0)+'\u00d7</span><span class="logt" style="direction:ltr">'+esc(when)+'</span></div>';}).join("");
     b.innerHTML=head+(list||'<div class="logempty">אין משתתפים.</div>');
   }).catch(function(){});
