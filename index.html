@@ -138,6 +138,9 @@
   .mdraw:disabled{opacity:.45;cursor:default}
   .checkbox{width:24px;height:24px;border-radius:7px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;color:#fff;background:var(--card)}
   .checkbox.on{background:var(--pitch);border-color:var(--pitch)}
+  .fxli{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:9px;cursor:pointer;border:1px solid transparent}
+  .fxli.live{background:color-mix(in srgb,var(--pitch) 12%,transparent);border-color:color-mix(in srgb,var(--pitch) 40%,transparent)}
+  .fxnum{flex:0 0 auto;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--pitch);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
   .round-h{display:flex;align-items:center;gap:8px;margin:18px 2px 9px;font-size:14.5px;font-weight:800;color:var(--mut)}
   .round-h .ln{flex:1;height:1px;background:var(--line)}
   .m-head{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer}
@@ -512,14 +515,15 @@ try{if(typeof window!=="undefined"&&window.addEventListener){
 }}catch(e){}
 
 function setConn(ok){var d=$("#conn"); if(d) d.classList.toggle("off",!ok);}
+function acNgExtra(c){c=c||{};var want=Math.round(Number(c.want));if(!(want>=1))want=3;var leagues=Array.isArray(c.leagues)?c.leagues.filter(function(s){return typeof s==="string"&&!!s;}):[];return {want:want,leagues:leagues};}
 function acMig(ac){
   ac=ac||{};
   function clean(c,defOn,defAfter,defTimes){c=c||{};var on=(c.on===undefined&&c.enabled===undefined)?defOn:!!(c.on!==undefined?c.on:c.enabled);var after=(Array.isArray(c.after)?c.after:defAfter).map(function(x){return Math.round(Number(x));}).filter(function(x){return isFinite(x)&&x>=0;});var times=(Array.isArray(c.times)?c.times:defTimes).filter(function(t){return acParse(t)!=null;});return {on:on,after:after,times:times,last:Number(c.last)||0};}
-  if(ac.results||ac.newgames)return {results:clean(ac.results,true,[180],[]),newgames:clean(ac.newgames,true,[210],AC_DEF_TIMES.slice())};
+  if(ac.results||ac.newgames)return {results:clean(ac.results,true,[180],[]),newgames:Object.assign(clean(ac.newgames,true,[210],AC_DEF_TIMES.slice()),acNgExtra(ac.newgames))};
   var oldTimes=Array.isArray(ac.times)?ac.times.filter(function(t){return acParse(t)!=null;}):[];
   var oldEnabled=(ac.enabled===undefined)?true:!!ac.enabled;
   var add35=(ac.add35===undefined)?true:!!ac.add35;
-  return {results:{on:true,after:[180],times:[],last:Number(ac.lastFill)||0},newgames:{on:true,after:add35?[210]:[],times:oldEnabled?(oldTimes.length?oldTimes:AC_DEF_TIMES.slice()):[],last:Number(ac.lastAdd)||Number(ac.srvLast)||0}};
+  return {results:{on:true,after:[180],times:[],last:Number(ac.lastFill)||0},newgames:Object.assign({on:true,after:add35?[210]:[],times:oldEnabled?(oldTimes.length?oldTimes:AC_DEF_TIMES.slice()):[],last:Number(ac.lastAdd)||Number(ac.srvLast)||0},acNgExtra(ac))};
 }
 function buildState(t){
   t=t||{};_cmCache={};
@@ -625,6 +629,7 @@ window.addEventListener("popstate",function(){if(sheetOpen)closeSheet(true);});
 
 /* ============================================================ RENDER ============================================================ */
 var TAB=(MODE==="admin")?"players":"bet";
+var _fxLastTab=null; // отслеживаем вход на вкладку "משחקים" для пробы доступности турниров
 /* ---------- urgent-info popup (owner only: admin + Niko's game account) ---------- */
 var _noticeOpen=false,_noticeShownIds=[];
 function isOwnerView(){if(typeof MODE!=="undefined"&&MODE==="admin")return adminAuthed();var p=me();return !!(p&&isSuperAdmin(p.name));}
@@ -685,6 +690,7 @@ function renderActive(){
   if(MODE==="admin"){
     if(!adminAuthed()){ $("#nav").innerHTML=""; renderAdminLogin(); return; }
     renderNav([["players","👥","משתתפים"],["matches","⚽","משחקים"],["settings","⚙️","הגדרות"]]);
+    if(TAB==="matches"&&_fxLastTab!=="matches")fxAvail=null; _fxLastTab=TAB; // перепроба доступности при входе на вкладку
     var v={players:renderAdminPlayers,matches:renderAdminMatches,settings:renderSettings}[TAB]||renderAdminPlayers; v(); }
   else { if(!me()){ renderIdentify(); $("#nav").innerHTML=""; return; }
     renderNav([["bet","🎰","להמר"],["board","🏆","לוח ההימורים"],["all","💰","טבלה"],["chat","💬","צ'אט"],["hist","🧾","היסטוריה"],["help","❓","עזרה"]]);
@@ -1382,19 +1388,25 @@ function scrollAdminToFirstUnfinished(){try{
   un.sort(function(a,b){return((a.order||0)-(b.order||0))||((a.t||0)-(b.t||0));});
   var el=document.getElementById("amc-"+un[0].id);if(!el){window.scrollTo({top:0});return;}
   var off=0,hdr=$("header");if(hdr)off+=hdr.offsetHeight||0;
-  var fxc=document.getElementById("fxSelect");if(fxc){var cc=fxc.closest(".card");if(cc)off+=cc.offsetHeight||0;}
+  var fxc=document.getElementById("fxCard");if(fxc)off+=fxc.offsetHeight||0;
   var y=el.getBoundingClientRect().top+window.scrollY-off-8;
   window.scrollTo({top:Math.max(0,y),behavior:"smooth"});
 }catch(e){}}
 function renderAdminMatches(){
-  var fxCard='<div class="card card-p" style="margin-bottom:12px;position:sticky;top:0;z-index:20"><select id="fxSelect" onchange="fxSelectGo(this.value)" class="input" dir="rtl" style="width:100%;height:auto;min-height:0;margin:0;font-weight:800;padding:2px 10px;line-height:1.4">'+fxSelectOptions()+'</select><div style="display:flex;gap:10px;margin-top:9px;justify-content:center"><button class="btn pitch" onclick="fxReloadSel()" style="height:38px;padding:0 18px;font-size:13.5px;font-weight:800">🔄 טען משחקים</button><button class="btn" onclick="aFillResults()" style="height:38px;padding:0 18px;font-size:13.5px;font-weight:800">✅ מלא תוצאות</button></div><div id="fillMsg" class="tiny" style="margin-top:8px;text-align:center;font-weight:700"></div><div id="fxRes" style="margin-top:10px"></div></div>';
+  fxSelInit();
+  if(fxAvail===null&&!fxAvailBusy)fxProbeAvailability();
+  var fxCard='<div id="fxCard" class="card card-p" style="margin-bottom:12px;position:sticky;top:0;z-index:20">'
+    +'<div id="fxTourneys">'+fxTourneyListHtml()+'</div>'
+    +'<div style="display:flex;gap:10px;margin-top:10px;justify-content:center"><button class="btn pitch" onclick="fxLoadSelected()" style="height:38px;padding:0 18px;font-size:13.5px;font-weight:800">🔄 טען משחקים</button><button class="btn" onclick="aFillResults()" style="height:38px;padding:0 18px;font-size:13.5px;font-weight:800">✅ מלא תוצאות</button></div>'
+    +'<div id="fillMsg" class="tiny" style="margin-top:8px;text-align:center;font-weight:700"></div>'
+    +'<div id="fxRes" style="margin-top:10px"></div></div>';
   var list=S.matches.filter(function(m){return !m.hidden && !adminExpired(m);});
   list.sort(function(a,b){return ((b.settled?1:0)-(a.settled?1:0))||((a.order||0)-(b.order||0))||((a.t||0)-(b.t||0));});
   var html="";
   if(!list.length){ html='<div class="empty"><div class="em-ic">⚽</div>אין משחקים.<br>צור משחקים בהגדרות או הוסף משחק.</div><button class="btn block pitch" onclick="aAddMatch()">＋ הוסף משחק</button>'; }
   else { list.forEach(function(m){html+=matchCard(m);}); html+='<button class="btn block ghost" onclick="aAddMatch()" style="margin-top:10px">＋ הוסף משחק</button>'; }
   $("#main").innerHTML='<section class="view active">'+fxCard+html+'</section>';
-  try{var hdr=$("header"),fc=$("#fxSelect");if(fc&&hdr){var cc=fc.closest(".card");if(cc)cc.style.top=((hdr.offsetHeight||0))+"px";}}catch(e){}
+  try{var hdr=$("header"),cc=$("#fxCard");if(cc&&hdr){cc.style.top=((hdr.offsetHeight||0))+"px";}}catch(e){}
 }
 function matchCard(m){var c=calcMatch(m);var bb=m.bets||{};var nA=0,nB=0,aA=0,aB=0;for(var k in bb){if(bb[k].team==="A"){nA++;if(bb[k].auto)aA++;}else if(bb[k].team==="B"){nB++;if(bb[k].auto)aB++;}}var canS=!!(m.teamA&&m.teamB);var dOK=!!m.drawOK;var locked=!!m.settled;var dis=(canS&&!locked)?"":" disabled";var ro=locked?" readonly":"";
   var col=function(side,name,n,sum,na){var color=m.settled?(m.winner===side?"var(--pitch-d)":((m.winner==="X"||m.winner==="VOID")?"":"var(--red)")):"";var ck=(m.settled&&m.winner===side)?" checked":"";
@@ -1956,6 +1968,10 @@ function aLoadFixtures(){
   }).catch(function(){toast("הטעינה נכשלה — בדוק/י אינטרנט ונסה/י שוב");});
 }
 var fxData=[],fxBusy=false,fxSlug="";
+var fxAvail=null;      // null = ещё не проверяли в эту сессию вкладки; {} slug->bool после пробы
+var fxAvailRaw={};     // slug -> нормализованные события (кэш пробы, переиспользуется при "טען")
+var fxAvailBusy=false; // защита от повторного запуска пробы
+var fxSelOrder=null;   // упорядоченный массив выбранных слагов (порядок кликов = приоритет)
 var FXSUG=[
  {en:"World Cup",he:"מונדיאל (גביע העולם)",slug:"fifa.world",k:["world cup","fifa world cup","mondial","מונדיאל","גביע העולם","чемпионат мира","кубок мира","мундиаль","copa mundial","coupe du monde"]},
  {en:"Champions League",he:"ליגת האלופות",slug:"uefa.champions",k:["champions league","uefa champions league","ucl","ליגת האלופות","лига чемпионов","лч"]},
@@ -1994,23 +2010,87 @@ function fxFmtDate(iso){var L=fxLocal(iso);return L?L.replace("T"," "):"";}
 // TOP_FX: highest-rated tournaments shown when the fixtures search box is empty (priority order; results are sorted by soonest date anyway).
 var TOP_FX=["fifa.world","uefa.champions","eng.1","esp.1","ita.1","ger.1","fra.1","uefa.europa"];
 function fxSlugHe(slug){for(var i=0;i<FXSUG.length;i++){if(FXSUG[i].slug===slug)return FXSUG[i].he;}return slug;}
-function fxSelectOptions(){
-  var sel="";try{sel=localStorage.getItem("fxslug")||"";}catch(e){}
-  var opt=function(a){return '<option value="'+esc(a.slug)+'"'+(a.slug===sel?' selected':'')+'>'+esc(a.he)+'</option>';};
-  var isr=FXSUG.filter(function(a){return a.slug.indexOf("365:")===0;});
-  var rest=FXSUG.filter(function(a){return a.slug.indexOf("365:")!==0;});
-  return '<option value=""'+(sel?'':' selected')+'>📋 בחר ליגה / טורניר…</option>'+isr.map(opt).join('')+rest.map(opt).join('');
+/* ---------- выбор турниров: упорядоченный мультивыбор (порядок = приоритет добора) ---------- */
+function fxSelInit(){
+  if(fxSelOrder)return;
+  var valid={};FXSUG.forEach(function(a){valid[a.slug]=1;});
+  var src=null;
+  try{var lg=S.autocfg&&S.autocfg.newgames&&S.autocfg.newgames.leagues;if(Array.isArray(lg)&&lg.length)src=lg;}catch(e){}
+  if(!src){try{var raw=localStorage.getItem("fxslugs");if(raw!=null){var arr=JSON.parse(raw);if(Array.isArray(arr))src=arr;}}catch(e){}}
+  if(!src){try{var old=localStorage.getItem("fxslug");if(old)src=[old];}catch(e){}}
+  var seen={};
+  fxSelOrder=(src||[]).filter(function(s){return valid[s]&&!seen[s]&&(seen[s]=1);});
 }
-function fxSelectGo(slug){
-  if(!slug)return;
-  var sug=null;for(var i=0;i<FXSUG.length;i++){if(FXSUG[i].slug===slug){sug=FXSUG[i];break;}}
-  try{localStorage.setItem("fxq",(sug&&sug.he)||slug);localStorage.setItem("fxslug",slug);}catch(e){}
-  if(slug.indexOf("365:")===0){load365Games(slug.slice(4));return;}
-  loadFxGames({slug:slug,name:(sug?sug.en:slug)});
+function fxSelSave(){
+  try{localStorage.setItem("fxslugs",JSON.stringify(fxSelOrder));}catch(e){}
+  try{fbUpd("/autocfg/newgames",{leagues:fxSelOrder});}catch(e){}
 }
-window.fxSelectGo=fxSelectGo;
-function fxReloadSel(){var s=$("#fxSelect");var v=s?s.value:"";if(v)fxSelectGo(v);else{var r=$("#fxRes");if(r)r.innerHTML='<div class="tiny muted">בחר/י ליגה מהרשימה.</div>';}}
-window.fxReloadSel=fxReloadSel;
+function fxToggleOne(slug){
+  fxSelInit();
+  var i=fxSelOrder.indexOf(slug);
+  if(i>=0)fxSelOrder.splice(i,1); else fxSelOrder.push(slug); // добавляемый — в конец (наименьший приоритет)
+  fxSelSave();
+  var c=$("#fxTourneys");if(c)c.innerHTML=fxTourneyListHtml();
+}
+function fxToggleAll(){
+  fxSelInit();
+  var allOn=FXSUG.length>0&&FXSUG.every(function(a){return fxSelOrder.indexOf(a.slug)>=0;});
+  fxSelOrder=allOn?[]:FXSUG.map(function(a){return a.slug;});
+  fxSelSave();
+  var c=$("#fxTourneys");if(c)c.innerHTML=fxTourneyListHtml();
+}
+window.fxToggleOne=fxToggleOne;window.fxToggleAll=fxToggleAll;
+function fxTourneyListHtml(){
+  fxSelInit();
+  var allOn=FXSUG.length>0&&FXSUG.every(function(a){return fxSelOrder.indexOf(a.slug)>=0;});
+  var loading=(fxAvail===null)?'<div class="tiny muted" style="text-align:center;padding:4px 0 8px">🔄 בודק אילו טורנירים פעילים…</div>':'';
+  var head='<div class="row" style="justify-content:space-between;margin-bottom:6px"><div class="tiny muted" style="font-weight:800">בחר/י טורנירים (הסדר = עדיפות)</div>'
+    +'<div class="row" style="gap:6px;cursor:pointer" onclick="fxToggleAll()"><div class="checkbox '+(allOn?"on":"")+'" style="width:20px;height:20px;font-size:14px">'+(allOn?"✓":"")+'</div><span class="tiny muted">בחר הכל</span></div></div>';
+  var rows=FXSUG.map(function(a){
+    var pos=fxSelOrder.indexOf(a.slug), on=pos>=0, live=!!(fxAvail&&fxAvail[a.slug]===true);
+    var badge=on?'<span class="fxnum">'+(pos+1)+'</span>':'';
+    return '<div class="fxli'+(live?' live':'')+'" onclick="fxToggleOne(\''+a.slug+'\')"><div class="checkbox '+(on?"on":"")+'" style="width:22px;height:22px;font-size:14px">'+(on?"✓":"")+'</div>'+badge
+      +'<span class="tiny" style="flex:1;font-weight:'+(live?'800':'600')+'" dir="rtl">'+esc(a.he)+(live?' <span style="color:var(--pitch-d)">●</span>':'')+'</span></div>';
+  }).join("");
+  return head+loading+'<div style="max-height:240px;overflow-y:auto">'+rows+'</div>';
+}
+function fxLoadSelected(){
+  fxSelInit();
+  var res=$("#fxRes"); if(!res)return;
+  var slugs=fxSelOrder.slice();
+  if(!slugs.length){res.innerHTML='<div class="tiny muted">בחר/י לפחות טורניר אחד מהרשימה.</div>';return;}
+  var n=fxCountLoad();
+  fxBusy=true; fxSlug=""; res.innerHTML='<div class="tiny muted">טוען משחקים…</div>';
+  var have=fxHaveMap(); // пересчитан на момент клика — покрывает добавления с момента пробы
+  var jobs=slugs.map(function(slug){
+    var cached=fxAvailRaw[slug]; // переиспользуем сырые события пробы, если уже пришли
+    var p=(cached!=null)?Promise.resolve(cached):fetchFxEvents(slug).catch(function(){return [];});
+    return p.then(function(evs){return fxTopN(evs,have,n).pick;});
+  });
+  Promise.all(jobs).then(function(arrs){
+    var all=[],seen={};
+    arrs.forEach(function(a){a.forEach(function(g){if(!seen[g.fxid]){seen[g.fxid]=1;all.push(g);}});}); // порядок = приоритет турниров
+    if(!all.length){res.innerHTML='<div class="tiny" style="color:var(--mut);font-weight:700">לא נמצאו משחקים קרובים בטורנירים שנבחרו.</div><button class="btn block ghost" style="margin-top:8px" onclick="aFxCancel()">סגור</button>';return;}
+    fxData=all;
+    res.innerHTML='<div class="tiny muted" style="margin-bottom:6px">'+all.length+' משחקים מ-'+slugs.length+' טורנירים. בטל/י סימון למה שלא רוצים:</div>'+fxRowsHtml(all,true)+'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn pitch" style="flex:1" onclick="aAddSelectedFixtures()">＋ הוסף את המסומנים</button><button class="btn ghost" style="flex:0 0 auto" onclick="aFxCancel()">בטל</button></div>';
+  }).catch(function(e){res.innerHTML='<div class="tiny" style="color:var(--red);font-weight:700">החיפוש נכשל (רשת/CORS).</div>';});
+}
+window.fxLoadSelected=fxLoadSelected;
+function fxProbeAvailability(){
+  if(fxAvailBusy)return;
+  fxAvailBusy=true; fxBusy=true;
+  var jobs=FXSUG.map(function(a){
+    return fetchFxEvents(a.slug).then(function(evs){
+      fxAvailRaw[a.slug]=evs;
+      return {slug:a.slug, ok:evs.some(function(g){return g.state==="pre";})};
+    }).catch(function(){ fxAvailRaw[a.slug]=null; return {slug:a.slug, ok:false}; });
+  });
+  Promise.all(jobs).then(function(results){
+    var map={}; results.forEach(function(r){map[r.slug]=r.ok;});
+    fxAvail=map; fxAvailBusy=false; fxBusy=false;
+    var c=$("#fxTourneys"); if(c)c.innerHTML=fxTourneyListHtml();
+  }).catch(function(){ fxAvailBusy=false; fxBusy=false; });
+}
 function aSearchFixtures(){
   var q=(($("#fxQ")||{}).value||"").trim();
   var res=$("#fxRes"); if(!res)return;
