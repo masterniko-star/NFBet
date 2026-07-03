@@ -18,6 +18,8 @@ const tick=()=>new Promise(r=>setTimeout(r,25));
   ok(h.indexOf('id="fxTourneys"')>=0,'tournament checklist present');
   ok(h.indexOf('fxLoadSelected()')>=0,'load button wired to fxLoadSelected');
   ok(h.indexOf('fxToggleAll()')>=0,'select-all control present');
+  ok(h.indexOf('id="fxCount"')>=0,'games-count field present');
+  ok(h.indexOf('fxCountChange(this.value)')>=0,'count field wired to fxCountChange');
   ok(h.indexOf('id="fxQ"')<0,'no free-text input');
   ok(h.indexOf('id="fxSelect"')<0,'old single-select dropdown removed');
   // main leagues as checklist rows

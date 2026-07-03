@@ -1397,6 +1397,7 @@ function renderAdminMatches(){
   if(fxAvail===null&&!fxAvailBusy)fxProbeAvailability();
   var fxCard='<div id="fxCard" class="card card-p" style="margin-bottom:12px;position:sticky;top:0;z-index:20">'
     +'<div id="fxTourneys">'+fxTourneyListHtml()+'</div>'
+    +'<div style="display:flex;align-items:center;gap:8px;margin-top:10px;justify-content:center"><label class="tiny muted" for="fxCount" style="white-space:nowrap;font-weight:700">מס׳ משחקים לכל טורניר</label><input type="number" id="fxCount" class="input sm" min="1" max="20" step="1" value="'+fxCountLoad()+'" dir="ltr" style="width:64px;text-align:center;padding:0 6px" onchange="fxCountChange(this.value)"></div>'
     +'<div style="display:flex;gap:10px;margin-top:10px;justify-content:center"><button class="btn pitch" onclick="fxLoadSelected()" style="height:38px;padding:0 18px;font-size:13.5px;font-weight:800">🔄 טען משחקים</button><button class="btn" onclick="aFillResults()" style="height:38px;padding:0 18px;font-size:13.5px;font-weight:800">✅ מלא תוצאות</button></div>'
     +'<div id="fillMsg" class="tiny" style="margin-top:8px;text-align:center;font-weight:700"></div>'
     +'<div id="fxRes" style="margin-top:10px"></div></div>';
@@ -1885,7 +1886,7 @@ function autoDashBody(kind){
       '<div class="tiny muted" style="margin-bottom:8px;line-height:1.5">⏱️ הזמנים נגזרים אוטומטית מ-<strong>בדיקת תוצאות + 5 דקות</strong> (גם דקות וגם שעות קבועות). לשינוי הזמנים — ערוך/י את "בדיקת תוצאות".</div>'+
       '<div style="background:#f4f7f5;border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:14px;direction:ltr;text-align:left;font-weight:800">'+esc(prev)+'</div>'+
       '<button class="btn block" onclick="acDashSave(\'newgames\')">שמור</button>'+
-      '<div class="tiny muted" style="margin-top:8px">משחקים חדשים נטענים 5 דקות אחרי בדיקת התוצאות. תמיד נשמרים עד 3 משחקים פתוחים.</div>';
+      '<div class="tiny muted" style="margin-top:8px">משחקים חדשים נטענים 5 דקות אחרי בדיקת התוצאות. תמיד נשמרים עד '+fxCountLoad()+' משחקים פתוחים.</div>';
   }
   var hint='אחרי שמשחק התחיל — לבדוק תוצאה';
   return '<label style="display:flex;align-items:center;gap:8px;margin-bottom:14px;font-weight:700"><input type="checkbox" id="'+onId+'" '+(c.on?'checked':'')+' style="width:18px;height:18px;accent-color:var(--pitch)"> מופעל</label>'+
@@ -1896,7 +1897,7 @@ function autoDashBody(kind){
     '<div id="acTimes_'+kind+'" style="margin-bottom:8px;display:flex;flex-wrap:wrap;gap:8px"></div>'+
     '<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px"><input class="input" id="acTimesNew_'+kind+'" type="time" dir="ltr" value="08:00" style="flex:1"><button class="btn pitch" style="flex:0 0 auto;padding:0 14px" onclick="acTimesAdd(\''+kind+'\')">＋ הוסף</button></div>'+
     '<button class="btn block" onclick="acDashSave(\''+kind+'\')">שמור</button>'+
-    '<div class="tiny muted" style="margin-top:8px">'+(kind==='results'?'תוצאות מתעדכנות בכל אחד מהזמנים שלמעלה (אחרי תחילת המשחק או בשעה קבועה).':'משחקים חדשים נטענים בכל אחד מהזמנים שלמעלה. תמיד נשמרים עד 3 משחקים פתוחים.')+'</div>';
+    '<div class="tiny muted" style="margin-top:8px">'+(kind==='results'?'תוצאות מתעדכנות בכל אחד מהזמנים שלמעלה (אחרי תחילת המשחק או בשעה קבועה).':'משחקים חדשים נטענים בכל אחד מהזמנים שלמעלה. תמיד נשמרים עד '+fxCountLoad()+' משחקים פתוחים.')+'</div>';
 }
 function acRenderAfter(kind){var el=$("#acAfter_"+kind);if(!el)return;var arr=ac2[kind].after;if(!arr.length){el.innerHTML='<div class="tiny muted" style="padding:4px 0">לא מוגדר.</div>';return;}el.innerHTML=arr.map(function(min,i){return '<div style="display:flex;align-items:center;gap:6px;flex:1 1 44%;min-width:140px"><input class="input" type="number" dir="ltr" value="'+min+'" min="1" step="5" inputmode="numeric" onchange="acAfterEdit(\''+kind+'\','+i+',this.value)" style="flex:1;min-width:0"><button class="btn ghost" style="padding:2px 12px;flex:0 0 auto" onclick="acAfterDel(\''+kind+'\','+i+')">✕</button></div>';}).join("");}
 function acRenderTimes2(kind){var el=$("#acTimes_"+kind);if(!el)return;var arr=ac2[kind].times;if(!arr.length){el.innerHTML='<div class="tiny muted" style="padding:4px 0">אין שעות.</div>';return;}el.innerHTML=arr.map(function(t,i){return '<div style="display:flex;align-items:center;gap:6px;flex:1 1 44%;min-width:140px"><input class="input" type="time" dir="ltr" value="'+esc(t)+'" onchange="acTimesEdit(\''+kind+'\','+i+',this.value)" style="flex:1;min-width:0"><button class="btn ghost" style="padding:2px 12px;flex:0 0 auto" onclick="acTimesDel(\''+kind+'\','+i+')">✕</button></div>';}).join("");}
@@ -2117,6 +2118,13 @@ function fxCountLoad(){
   if(v==null)v=3;
   return Math.max(1,Math.round(v));
 }
+function fxCountChange(v){
+  var n=Math.max(1,Math.min(20,Math.round(Number(v)||3)));
+  try{localStorage.setItem("fxcount",String(n));}catch(e){}
+  try{fbUpd("/autocfg/newgames",{want:n});}catch(e){}
+  var el=$("#fxCount");if(el)el.value=n;
+}
+window.fxCountChange=fxCountChange;
 /* ---------- общий фетчер событий турнира (ESPN + 365scores) ---------- */
 function fxEventsUrl(slug){
   if(slug.indexOf("365:")===0){
