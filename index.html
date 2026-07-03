@@ -189,7 +189,7 @@
   .betrow .sendbtn{height:50px;padding:0;border-radius:11px;font-size:14px}
   .betrow .stval{width:100%;min-width:0;height:100%;border:1.5px solid var(--line);border-radius:9px;text-align:center;font-size:17px;font-weight:700;background:var(--card);color:var(--tx);padding:0;pointer-events:none;cursor:default;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .betrow .stval:focus{outline:none;border-color:var(--ink2)}
-  .betrow .strow{width:100%;min-width:0;height:100%;border:1.5px solid var(--line);border-radius:9px;background:var(--card);color:var(--tx);font-size:13px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .betrow .strow{width:100%;min-width:0;height:100%;border:1.5px solid var(--line);border-radius:9px;background:var(--card);color:var(--tx);font-size:13px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
   .betrow .strow:active{background:var(--bg)}
   .betrow .strowpair{display:flex;gap:4px;min-width:0}
   .betrow .strowpair .strow{flex:1}
@@ -622,6 +622,8 @@ function openSheet(){$("#scrim").classList.add("on");document.body.style.overflo
 var sheetOpen=false;
 function closeSheet(fromPop){$("#scrim").classList.remove("on");document.body.style.overflow="";if(sheetOpen){sheetOpen=false;if(!fromPop){try{history.back();}catch(e){}}}}
 window.addEventListener("popstate",function(){if(sheetOpen)closeSheet(true);});
+document.addEventListener("pointerup",function(){pHoldEnd();}); // отпускание/срыв ▲▼ где угодно завершает удержание (одна запись ставки)
+document.addEventListener("pointercancel",function(){pHoldEnd();});
 
 /* ============================================================ RENDER ============================================================ */
 var TAB=(MODE==="admin")?"players":"bet";
@@ -1055,10 +1057,10 @@ function renderBetView(){
     var stakeInput='<div id="st-'+m.id+'" class="stval num" style="grid-column:1;grid-row:1">'+sv+'</div>';
     var stakeCtrl=dOK
       ?(stakeInput
-        +'<button class="strow"'+dis+' onclick="pStep(\''+m.id+'\',1)" aria-label="+" style="grid-column:1;grid-row:2">▲</button>'
-        +'<button class="strow"'+dis+' onclick="pStep(\''+m.id+'\',-1)" aria-label="-" style="grid-column:1;grid-row:3">▼</button>')
+        +'<button class="strow"'+dis+' onpointerdown="pHold(event,\''+m.id+'\',1)" oncontextmenu="return false" aria-label="+" style="grid-column:1;grid-row:2">▲</button>'
+        +'<button class="strow"'+dis+' onpointerdown="pHold(event,\''+m.id+'\',-1)" oncontextmenu="return false" aria-label="-" style="grid-column:1;grid-row:3">▼</button>')
       :(stakeInput
-        +'<div class="strowpair" style="grid-column:1;grid-row:2"><button class="strow"'+dis+' onclick="pStep(\''+m.id+'\',1)" aria-label="+">▲</button><button class="strow"'+dis+' onclick="pStep(\''+m.id+'\',-1)" aria-label="-">▼</button></div>');
+        +'<div class="strowpair" style="grid-column:1;grid-row:2"><button class="strow"'+dis+' onpointerdown="pHold(event,\''+m.id+'\',1)" oncontextmenu="return false" aria-label="+">▲</button><button class="strow"'+dis+' onpointerdown="pHold(event,\''+m.id+'\',-1)" oncontextmenu="return false" aria-label="-">▼</button></div>');
     h+='<div class="betrow'+(dOK?" b3":"")+'"'+(ctrlOff?' style="opacity:.55"':'')+'>'+
        '<button class="pk '+(selA?"on-a":"")+'"'+dis+' style="grid-column:2;grid-row:1" onclick="pPick(\''+m.id+'\',\'A\')"><span class="tnum">1</span><span class="tnm" dir="auto">'+esc(m.teamA)+'</span>'+((m.odds&&m.odds.a>0)?'<span class="tcoef" dir="ltr">'+m.odds.a+'</span>':'<span class="tnsp"></span>')+'</button>'+
        (dOK?('<button class="pk '+(selX?"on-x":"")+'"'+dis+' style="grid-column:2;grid-row:2" onclick="pPick(\''+m.id+'\',\'X\')"><span class="tnum">X</span><span class="tnm">תיקו</span>'+((m.odds&&m.odds.x>0)?'<span class="tcoef" dir="ltr">'+m.odds.x+'</span>':'<span class="tnsp"></span>')+'</button>'):'')+
@@ -1159,8 +1161,46 @@ function pPick(mid,team){var m=S.matches.find(function(x){return x.id===mid;});i
   Promise.all([fbSet("/bets/"+mid+"/"+p.id,{team:team,stake:stake,t:Date.now()}),fbUpd("/players/"+p.id,{lastBet:Date.now()})]).then(refresh);}
 function pStake(mid,val){var p=me();if(!p||!p.feePaid)return;var m=S.matches.find(function(x){return x.id===mid;});if(m&&matchLocked(m)){var w=$("#pw-"+mid);if(w)w.textContent="ההימור נסגר — המשחק כבר התחיל.";return;}var b=(m.bets||{})[p.id];var n=clampStake(mid,val);if(n<1)n=S.meta.minBet;stakeOf[mid]=n;
   if(b&&!m.settled){ var inp=$("#st-"+mid); if(inp)inp.textContent=n; Promise.all([fbSet("/bets/"+mid+"/"+p.id,{team:b.team,stake:n,t:Date.now()}),fbUpd("/players/"+p.id,{lastBet:Date.now()})]).then(refresh); } else { renderBetView(); }}
-function pStep(mid,d){var p=me();if(!p||!p.feePaid)return;var m=S.matches.find(function(x){return x.id===mid;});if(m&&matchLocked(m)){var w=$("#pw-"+mid);if(w)w.textContent="ההימור נסגר — המשחק כבר התחיל.";return;}var b=(m.bets||{})[p.id];var n=clampStake(mid,curStake(mid,b)+d);if(n<1)n=S.meta.minBet;stakeOf[mid]=n;
-  if(b&&!m.settled){ var inp=$("#st-"+mid); if(inp)inp.textContent=n; Promise.all([fbSet("/bets/"+mid+"/"+p.id,{team:b.team,stake:n,t:Date.now()}),fbUpd("/players/"+p.id,{lastBet:Date.now()})]).then(refresh); } else { renderBetView(); }}
+/* pStepLocal: меняет ставку локально (только поле #st-mid), без сети/рендера; clampStake держит сумму ставок ≤ баланс. Возвращает false если нельзя (демо/locked). */
+function pStepLocal(mid,d){
+  var p=me();if(!p||!p.feePaid)return false;
+  var m=S.matches.find(function(x){return x.id===mid;});if(!m)return false;
+  if(matchLocked(m)){var w=$("#pw-"+mid);if(w)w.textContent="ההימור נסגר — המשחק כבר התחיל.";return false;}
+  var b=(m.bets||{})[p.id];var n=clampStake(mid,curStake(mid,b)+d);if(n<1)n=S.meta.minBet;stakeOf[mid]=n;
+  var inp=$("#st-"+mid); if(inp)inp.textContent=n;
+  return true;
+}
+/* pStepCommit: одна запись ставки в БД (или перерисовка, если ставка ещё не размещена) — вызывается один раз в конце удержания/клика. */
+function pStepCommit(mid){
+  var p=me();if(!p)return;
+  var m=S.matches.find(function(x){return x.id===mid;});if(!m)return;
+  var b=(m.bets||{})[p.id];var n=stakeOf[mid];
+  if(b&&!m.settled){ Promise.all([fbSet("/bets/"+mid+"/"+p.id,{team:b.team,stake:n,t:Date.now()}),fbUpd("/players/"+p.id,{lastBet:Date.now()})]).then(refresh); } else { renderBetView(); }
+}
+function pStep(mid,d){ if(pStepLocal(mid,d)) pStepCommit(mid); }
+/* ---------- длинное нажатие на ▲/▼ = быстрая прокрутка с ускорением ---------- */
+var _hold={mid:null,to:null};
+function pHoldClear(){ if(_hold.to){clearTimeout(_hold.to);_hold.to=null;} }
+function pHoldTick(mid,d,delay){
+  var before=stakeOf[mid];
+  if(!pStepLocal(mid,d)){pHoldClear();return;}
+  if(stakeOf[mid]===before){pHoldClear();return;} // упёрлись в предел (баланс/maxBet/minBet) — разгон сам останавливается
+  var next=Math.max(40,delay*0.85);
+  _hold.to=setTimeout(function(){pHoldTick(mid,d,next);},next);
+}
+function pHold(e,mid,d){
+  if(e&&typeof e.button==="number"&&e.button>0)return; // только основная кнопка мыши / касание
+  pHoldClear();
+  if(!pStepLocal(mid,d)){_hold.mid=null;return;} // первый шаг сразу (одиночный тап = ±1); нельзя (демо/locked) — выход
+  _hold.mid=mid;
+  _hold.to=setTimeout(function(){pHoldTick(mid,d,180);},350); // порог отличения клика от удержания -> разгон
+}
+function pHoldEnd(){
+  if(_hold.mid==null){pHoldClear();return;}
+  var mid=_hold.mid; pHoldClear(); _hold.mid=null;
+  pStepCommit(mid); // одна запись финального значения
+}
+window.pHold=pHold;
 function pDelete(mid){var m=S.matches.find(function(x){return x.id===mid;});if(!m||m.settled)return;if(matchLocked(m)){var w=$("#pw-"+mid);if(w)w.textContent="ההימור נסגר — המשחק כבר התחיל.";return;}var p=me();if(!p)return;fbDel("/bets/"+mid+"/"+p.id).then(refresh).then(function(){toast("ההימור בוטל");});}
 window.pPick=pPick;window.pStake=pStake;window.pStep=pStep;window.pDelete=pDelete;
 
