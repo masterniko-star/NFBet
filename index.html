@@ -1511,7 +1511,7 @@ function renderAdminMatches(){
       +'</div>'
       +'<div id="fxTourneys" style="display:'+(fxListOpen?"block":"none")+';margin-top:10px">'+fxTourneyListHtml()+'</div>'
     +'</div>'
-    +'<div style="display:flex;align-items:center;gap:10px;margin-top:10px;justify-content:center"><button class="winbtn" onclick="fxLoadSelected()">🔄 טען משחקים</button><label style="display:flex;align-items:center;gap:8px;font-weight:700;cursor:pointer;user-select:none;font-size:13px;white-space:nowrap"><input type="checkbox" id="fxAuto" '+(!(S.autocfg&&S.autocfg.newgames&&S.autocfg.newgames.on===false)?"checked":"")+' onchange="fxAutoToggle(this.checked)" style="width:18px;height:18px;accent-color:var(--pitch)"> טעינת אוטומטית</label></div>'
+    +'<div style="display:flex;align-items:center;gap:10px;margin-top:10px;justify-content:center"><button class="winbtn" onclick="fxLoadSelected()">🔄 טען משחקים</button><label style="display:flex;align-items:center;gap:8px;font-weight:700;cursor:pointer;user-select:none;font-size:13px;white-space:nowrap"><input type="checkbox" id="fxAuto" '+(!(S.autocfg&&S.autocfg.newgames&&S.autocfg.newgames.on===false)?"checked":"")+' onchange="fxAutoToggle(this.checked)" style="width:18px;height:18px;accent-color:var(--pitch)"> טעינת משחקים אוטומטית</label></div>'
     +'<div id="fillMsg" class="tiny" style="margin-top:8px;text-align:center;font-weight:700"></div>'
     +'<div id="fxRes" style="margin-top:10px"></div></div>';
   var list=S.matches.filter(function(m){return !m.hidden && !adminExpired(m);});
