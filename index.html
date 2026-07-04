@@ -1004,11 +1004,8 @@ function renderHelp(){
       '<button class="btn ghost" style="flex:1;white-space:nowrap;padding:0 8px" onclick="switchMe()"><span>🚪</span><span>יציאה</span></button>'+
       '<button class="btn danger" style="flex:1;white-space:nowrap;padding:0 8px" onclick="closeMyAccount()"><span>🗑</span><span>סגור חשבון</span></button>'+
     '</div></div>'):'';
-  var adminEntry=isOwnerView()?('<div class="card card-p" style="margin-top:16px;text-align:center">'+
-    '<div class="tiny muted" style="margin-bottom:10px">אזור ניהול (למנהל בלבד)</div>'+
-    '<button class="btn block pitch" onclick="goAdmin()">🛠️&nbsp;&nbsp;מעבר לניהול</button>'+
-    '</div>'):'';
-  m.innerHTML='<section class="view active"><div class="section-h"><h2>עזרה</h2></div>'+
+  var adminEntry=isOwnerView()?('<button class="btn sm" onclick="goAdmin()">🛠️&nbsp;מעבר לניהול</button>'):'';
+  m.innerHTML='<section class="view active"><div class="section-h" style="align-items:center"><h2>עזרה</h2>'+adminEntry+'</div>'+
     panelCard("hrules","📜&nbsp;&nbsp;תקנון","",'<div class="helpwrap" style="padding:0">'+rules+'</div>')+
     panelCard("hguide","📖&nbsp;&nbsp;מדריך למשתתף","",'<div class="helpwrap" style="padding:0">'+guide+'</div>')+
     panelCard("hpw","🔑&nbsp;&nbsp;שינוי סיסמה","",'<div class="tiny muted" style="margin-bottom:12px">שינוי סיסמת הכניסה שלך.</div>'+
@@ -1017,7 +1014,6 @@ function renderHelp(){
       '<div class="field"><label>אימות סיסמה חדשה</label>'+pwBox('myNewPw2')+'</div>'+
       '<button class="btn block" onclick="changeMyPw()">החלף סיסמה</button>')+
     panelCard("htg","📨&nbsp;&nbsp;התראות בטלגרם",'<span style="color:var(--gold);font-weight:800">🚧 בפיתוח</span>',tg)+
-    adminEntry+
     acct+
     '<p style="text-align:center;margin-top:18px;font-size:12px;color:var(--mut2)">גרסה '+APP_VER+'</p></section>';
   var meP=me();
