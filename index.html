@@ -1213,7 +1213,7 @@ function renderBoardView(){
       var coef=b.team==="A"?c.coefA:(b.team==="B"?c.coefB:c.coefX);var net=coef?(b.stake*coef-b.stake):0;
       var otherSum=c.pool-(b.team==="A"?c.sumA:(b.team==="B"?c.sumB:c.sumX));var hasOpp=otherSum>0;
       var pickNum=b.team==="A"?"1":(b.team==="B"?"2":"X");var zc=(ri%2===0)?" row-y":"";ri++;
-      var _nmCol=_liveOn?(b.team===_lead?"var(--pitch-d)":"var(--red)"):"";
+      var _nmCol=(_liveOn&&(_lead!=="X"||dOK))?(b.team===_lead?"var(--pitch-d)":"var(--red)"):"";
       return '<div class="brow'+zc+(p&&pl.id===p.id?" me-row":"")+'"><span class="bname" dir="rtl"'+(_nmCol?' style="color:'+_nmCol+'"':'')+'>'+esc(pl.name)+'</span>'+
         '<span class="bpick num">'+pickNum+'</span>'+
         '<span class="num">'+fmt(b.stake)+'</span>'+
