@@ -36,6 +36,21 @@ console.log('\n===== participant row: field+החל money UI =====');
   ok((main.match(/הקלד סכום ולחץ/g)||[]).length===0,'addinfo instruction line removed');
 }
 
+console.log('\n===== participant row: aPToggle expand/collapse =====');
+{
+  const A=loadApp(seed,{hash:'ctrl7'});A.sandbox.buildState(A.state.tree);A.sandbox.TAB='players';A.sandbox.renderActive();
+  let main=(A.q('#main')||{}).innerHTML||'';
+  ok(/id="pexp-p1" style="display:none"/.test(main),'row starts collapsed (pexp hidden)');
+  ok(/id="pchev-p1">▼/.test(main),'chevron shows ▼ when closed');
+  A.sandbox.aPToggle('p1');
+  ok(A.sandbox.pOpen&&A.sandbox.pOpen.p1===true,'aPToggle flips pOpen state');
+  A.sandbox.renderActive();main=(A.q('#main')||{}).innerHTML||'';
+  ok(/id="pexp-p1" style="display:block"/.test(main),'re-render keeps row expanded (pOpen persists)');
+  ok(/id="pchev-p1">▲/.test(main),'chevron shows ▲ when open');
+  A.sandbox.aPToggle('p1');A.sandbox.renderActive();main=(A.q('#main')||{}).innerHTML||'';
+  ok(/id="pexp-p1" style="display:none"/.test(main),'second toggle collapses again');
+}
+
 console.log('\n===== money model: check=deposit, החל=±, uncheck=zero =====');
 function freshPaidNo(){const A=loadApp(seed,{hash:'ctrl7'});A.state.tree.players.p1.feePaid=false;A.sandbox.buildState(A.state.tree);A.sandbox.TAB='players';A.sandbox.renderActive();return A;}
 // check + empty field => NO auto-deposit, not paid (red prompt instead)
