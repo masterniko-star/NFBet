@@ -2107,7 +2107,8 @@ function fxProbeAvailability(){
   var jobs=FXSUG.map(function(a){
     return fetchFxEvents(a.slug).then(function(evs){
       fxAvailRaw[a.slug]=evs;
-      return {slug:a.slug, ok:evs.some(function(g){return g.state==="pre";})};
+      var lim=Date.now()+864e5; // зелёная подсветка только если есть игра в ближайшие 24 часа
+      return {slug:a.slug, ok:evs.some(function(g){if(g.state!=="pre")return false;var t=new Date(g.date).getTime();return isFinite(t)&&t>=Date.now()&&t<=lim;})};
     }).catch(function(){ fxAvailRaw[a.slug]=null; return {slug:a.slug, ok:false}; });
   });
   Promise.all(jobs).then(function(results){
