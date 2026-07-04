@@ -78,9 +78,12 @@
   .btn.danger{background:transparent;color:var(--red);border:1.5px solid color-mix(in srgb,var(--red) 35%,transparent)}
   .btn.sm{height:38px;padding:0 12px;font-size:15.5px;border-radius:10px}
   .btn[disabled]{opacity:.45;pointer-events:none}
-  .winbtn{display:inline-flex;align-items:center;justify-content:center;gap:5px;height:30px;padding:0 12px;font-size:13px;font-weight:600;border-radius:5px;border:1px solid #d1d1d1;background:#fbfbfb;color:#1a1a1a;cursor:pointer;font-family:inherit}
+  .winbtn{display:inline-flex;align-items:center;justify-content:center;gap:5px;height:30px;padding:0 12px;font-size:13px;font-weight:600;border-radius:5px;border:1px solid #d1d1d1;background:#fbfbfb;color:#1a1a1a;cursor:pointer;font-family:inherit;white-space:nowrap}
   .winbtn:hover{background:#f5f5f5}.winbtn:active{background:#ededed}
   #fillMsg:empty,#fxRes:empty{margin-top:0!important} /* пустые служебные строки не добавляют зазор до нижней границы панели (низ = 4px паддинга) */
+  .fxbtnrow{display:flex;align-items:center;gap:22px;margin-top:10px;justify-content:center}
+  .fxbtnrow label{display:flex;align-items:center;gap:8px;font-weight:700;cursor:pointer;user-select:none;font-size:13px;white-space:nowrap}
+  @media (max-width:480px){.fxbtnrow{gap:10px}.fxbtnrow .winbtn{font-size:12px;padding:0 8px}.fxbtnrow label{font-size:12px;gap:6px}} /* на телефоне ряд кнопка+чекбокс должен влезать в одну строку целиком */
   .field{margin-bottom:11px}
   .field label{display:block;font-size:14px;font-weight:700;color:var(--mut);margin:0 2px 5px}
   .input,select.input{width:100%;height:var(--tap);padding:0 13px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);color:var(--tx)}
@@ -1512,7 +1515,7 @@ function renderAdminMatches(){
       +'</div>'
       +'<div id="fxTourneys" style="display:'+(fxListOpen?"block":"none")+';margin-top:10px">'+fxTourneyListHtml()+'</div>'
     +'</div>'
-    +'<div style="display:flex;align-items:center;gap:22px;margin-top:10px;justify-content:center"><button class="winbtn" onclick="fxLoadSelected()">🔄 טעינת משחקים ידנית</button><label style="display:flex;align-items:center;gap:8px;font-weight:700;cursor:pointer;user-select:none;font-size:13px;white-space:nowrap"><input type="checkbox" id="fxAuto" '+(!(S.autocfg&&S.autocfg.newgames&&S.autocfg.newgames.on===false)?"checked":"")+' onchange="fxAutoToggle(this.checked)" style="width:18px;height:18px;accent-color:var(--pitch)"> טעינת משחקים אוטומטית</label></div>'
+    +'<div class="fxbtnrow"><button class="winbtn" onclick="fxLoadSelected()">🔄 טעינת משחקים ידנית</button><label><input type="checkbox" id="fxAuto" '+(!(S.autocfg&&S.autocfg.newgames&&S.autocfg.newgames.on===false)?"checked":"")+' onchange="fxAutoToggle(this.checked)" style="width:18px;height:18px;accent-color:var(--pitch)"> טעינת משחקים אוטומטית</label></div>'
     +'<div id="fillMsg" class="tiny" style="margin-top:8px;text-align:center;font-weight:700"></div>'
     +'<div id="fxRes" style="margin-top:10px"></div></div>';
   var list=S.matches.filter(function(m){return !m.hidden && !adminExpired(m);});
