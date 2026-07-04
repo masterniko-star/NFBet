@@ -317,6 +317,8 @@ async function collectLeagueCands(slug, have, dbg) {
       const r = await fetch(url);
       if (r.ok) {
         const j = await r.json(); const events = (j && j.events) || []; ev = events.length;
+        const jl = (j && j.leagues && j.leagues[0]) || {}, jlogos = (jl.logos || []);
+        const logo = (((jlogos.filter((x) => x.rel && x.rel.indexOf("default") >= 0)[0]) || jlogos[0] || {}).href) || "";
         for (const e of events) {
           const st = (e.status && e.status.type) || {}; if (st.state !== "pre") continue;
           const fx = "espn" + e.id; if (have.has(fx)) continue;
@@ -326,7 +328,7 @@ async function collectLeagueCands(slug, have, dbg) {
           const ta = (h && h.team && h.team.displayName) || "", tb = (a && a.team && a.team.displayName) || "";
           if (!ta || !tb) continue;
           const stage = ((e.competitions && e.competitions[0] && e.competitions[0].notes && e.competitions[0].notes[0] && (e.competitions[0].notes[0].headline || e.competitions[0].notes[0].text)) || (e.season && e.season.slug) || "");
-          out.push({ fx, fxLeague: slug, teamA: ta, teamB: tb, dateISO: e.date, when: new Date(e.date).getTime(), drawOK: detectDrawOK(slug, stage) });
+          out.push({ fx, fxLeague: slug, teamA: ta, teamB: tb, dateISO: e.date, when: new Date(e.date).getTime(), drawOK: detectDrawOK(slug, stage), logo });
         }
       } else { try { await slog("WARN", "espn", "ESPN " + slug + " HTTP " + r.status); } catch (_) {} }
     } catch (e) { try { await slog("WARN", "espn", "ESPN " + slug + " fail: " + ((e && e.message) || e)); } catch (_) {} }
@@ -370,7 +372,7 @@ export async function topUp(matches, want, leagues) {
   for (const c of pick) {
     const id = "m" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
     const ord = o++;
-    const rec = { round: "R32", teamA: c.teamA, teamB: c.teamB, slot: "", dt: fmtIsrael(c.dateISO), order: ord, fx: c.fx, fxLeague: c.fxLeague, settled: false, winner: null, drawOK: !!c.drawOK, t: Date.now() };
+    const rec = { round: "R32", teamA: c.teamA, teamB: c.teamB, slot: "", dt: fmtIsrael(c.dateISO), order: ord, fx: c.fx, fxLeague: c.fxLeague, logo: c.logo || "", settled: false, winner: null, drawOK: !!c.drawOK, t: Date.now() };
     await fbPut("/matches/" + id, rec);
     matches.push({ id, ...rec }); have.add(c.fx); added++;
     dbg.added.push(c.teamA + "-" + c.teamB + "@" + rec.dt + " #" + ord);

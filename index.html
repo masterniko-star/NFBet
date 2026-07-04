@@ -141,6 +141,7 @@
   .fxli{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:9px;cursor:pointer;border:1px solid transparent}
   .fxli.live{background:color-mix(in srgb,var(--pitch) 12%,transparent);border-color:color-mix(in srgb,var(--pitch) 40%,transparent)}
   .fxnum{flex:0 0 auto;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--pitch);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .fxemblem{height:28px;max-width:52px;object-fit:contain;vertical-align:middle;display:inline-block}
   .round-h{display:flex;align-items:center;gap:8px;margin:18px 2px 9px;font-size:14.5px;font-weight:800;color:var(--mut)}
   .round-h .ln{flex:1;height:1px;background:var(--line)}
   .m-head{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer}
@@ -1053,7 +1054,7 @@ function renderBetView(){
     var gameOver=!!(m.dt&&!isNaN(clkStart)&&(m.settled||Date.now()>=clkStart+CLK_DUR));
     var lockHtml=(locked&&!gameOver)?'<span style="color:var(--red);font-weight:800;white-space:nowrap">🔒 ההימור נסגר</span>':'';
     var clockHtml=liveClockHtml(m,'font-size:14px',false); /* реальное время матча (ESPN) с иконкой ⏱ — как на доске; fallback на расчётный */
-    var scoreHtml=liveScoreHtml(m,'font-size:19px;line-height:1.1'); /* תוצאה חיה במרכז — בדיוק כמו בלוח ההימורים */
+    var scoreHtml=liveScoreHtml(m,'font-size:19px;line-height:1.1')||tourneyEmblemHtml(m); /* תוצאה חיה במרכז; לפני הפתיחה — סמל הטורניר */
     var rightMeta=lockHtml||dateHtml; /* אחרי שריקת הפתיחה — התג 🔒 ההימור נסגר תופס את מקום התאריך */
     if(rightMeta||clockHtml||scoreHtml) h+='<div class="round betmeta" style="display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:8px;margin-bottom:4px;font-size:13px;font-weight:700;color:var(--mut);direction:ltr"><span style="justify-self:start">'+clockHtml+'</span><span style="justify-self:center">'+scoreHtml+'</span><span style="justify-self:end;display:flex;align-items:center;gap:8px;direction:rtl">'+rightMeta+'</span></div>';
     h+='<div class="round betmeta projrow" style="display:flex;align-items:center;justify-content:flex-start;min-height:20px;margin-bottom:8px;font-size:13px;font-weight:700;color:var(--mut)">'+(projInner||'')+'</div>';
@@ -1144,6 +1145,10 @@ function liveClockHtml(m,style,board){var lv=m&&m.live;
    Показываем ТОЛЬКО реальный счёт из ESPN-live (a/b), пока данные свежие (≤ LIVE_TTL = 4 мин).
    До первых реальных данных — ничего. Короткое пропадание (≤4 мин) держит последний счёт; дольше —
    счёт исчезает (см. tickClocks .livescore). a = teamA (слева), b = teamB (справа), по центру строки, чёрный. */
+function tourneyEmblemHtml(m){ // сэмбл турнира в центре блока ставки — пока нет живого счёта
+  if(!m||m.settled||!m.logo)return "";
+  return '<img class="fxemblem" src="'+esc(m.logo)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">';
+}
 function liveScoreHtml(m,style){
   if(!m||!m.dt||m.settled)return "";
   var lv=m.live;
@@ -2153,14 +2158,19 @@ function fxEventsUrl(slug){
   var d0=new Date(),d1=new Date(Date.now()+75*864e5);
   return "https://site.api.espn.com/apis/site/v2/sports/soccer/"+encodeURIComponent(slug)+"/scoreboard?limit=300&dates="+fxYMD(d0)+"-"+fxYMD(d1);
 }
+function fxLeagueLogo(j){ // логотип лиги из ответа ESPN scoreboard (default-версия)
+  var L=(j&&j.leagues&&j.leagues[0])||{},lg=(L.logos||[]);
+  return (((lg.filter(function(x){return x.rel&&x.rel.indexOf("default")>=0;})[0])||lg[0]||{}).href)||"";
+}
 function fxNormEspn(j,slug){
+  var logo=fxLeagueLogo(j);
   return ((j&&j.events)||[]).map(function(e){
     var comp=(e.competitions&&e.competitions[0])||{},cs=comp.competitors||[],home=null,away=null;
     cs.forEach(function(c){if(c.homeAway==="home")home=c;else if(c.homeAway==="away")away=c;});
     if(!home)home=cs[0]; if(!away)away=cs[1];
     var st=((e.status&&e.status.type)||{});
     var nm=function(c){return (c&&c.team&&(c.team.displayName||c.team.shortDisplayName||c.team.name))||"";};
-    return {id:e.id,date:e.date,home:nm(home),away:nm(away),state:st.state||"",note:e.name||"",slug:slug,stage:((comp.notes&&comp.notes[0]&&(comp.notes[0].headline||comp.notes[0].text))||(e.season&&e.season.slug)||""),fxid:"espn"+e.id};
+    return {id:e.id,date:e.date,home:nm(home),away:nm(away),state:st.state||"",note:e.name||"",slug:slug,stage:((comp.notes&&comp.notes[0]&&(comp.notes[0].headline||comp.notes[0].text))||(e.season&&e.season.slug)||""),fxid:"espn"+e.id,logo:logo};
   });
 }
 function fxNorm365(j,slug){
@@ -2170,7 +2180,7 @@ function fxNorm365(j,slug){
     var ended=(Number(g.statusGroup)===4)||/ended|finished|final|הסתיים|גמר/i.test(txt);
     var t=new Date(g.startTime).getTime();
     var state=ended?"post":((isFinite(t)&&t>Date.now())?"pre":"in");
-    return {id:String(g.id),date:g.startTime,home:String(hc.name||""),away:String(aw.name||""),state:state,note:"",slug:slug,stage:"",fxid:"365"+g.id};
+    return {id:String(g.id),date:g.startTime,home:String(hc.name||""),away:String(aw.name||""),state:state,note:"",slug:slug,stage:"",fxid:"365"+g.id,logo:""};
   }).filter(function(g){return g.id&&g.home&&g.away;});
 }
 function fetchFxEvents(slug){
@@ -2233,7 +2243,7 @@ function aAddSelectedFixtures(){
     var g=fxData[Number(ch.getAttribute("data-i"))]; if(!g)return;
     var id=uid();
     var sl=(g.slug||fxSlug||"");var is365=sl.indexOf("365:")===0;
-    ups[id]={round:"R32",teamA:(g.home||""),teamB:(g.away||""),slot:(g.note||""),dt:fxLocal(g.date),order:o++,fx:(is365?"365":"espn")+g.id,fxLeague:sl,settled:false,winner:null,drawOK:(is365?true:detectDrawOK(sl,g.stage)),t:Date.now()+o};
+    ups[id]={round:"R32",teamA:(g.home||""),teamB:(g.away||""),slot:(g.note||""),dt:fxLocal(g.date),order:o++,fx:(is365?"365":"espn")+g.id,fxLeague:sl,logo:(g.logo||""),settled:false,winner:null,drawOK:(is365?true:detectDrawOK(sl,g.stage)),t:Date.now()+o};
     n++;
   });
   if(!n)return;
