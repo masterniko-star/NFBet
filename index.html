@@ -1060,7 +1060,7 @@ function renderBetView(){
         var winTxt=(winNet>0?"+":"")+fmt(winNet)+" "+cur();var loseTxt="−"+fmt(b.stake)+" "+cur();
         info='<span style="white-space:nowrap">זכיה <b class="net '+(winNet>0?"pos":"zero")+'">'+winTxt+'</b> · הפסד <b class="net neg">'+loseTxt+'</b></span>';
       }
-      projInner='<span style="display:inline-flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-start">'+info+poolTxt+'</span>';
+      projInner=info+poolTxt;
     }
     var dateHtml=m.dt?'<span dir="ltr" style="white-space:nowrap">'+esc(fmtDate(m.dt))+'</span>':'';
     var clkStart=m.dt?ilWallTs(m.dt):NaN;
@@ -1070,7 +1070,7 @@ function renderBetView(){
     var scoreHtml=liveScoreHtml(m,'font-size:19px;line-height:1.1')||tourneyEmblemHtml(m); /* תוצאה חיה במרכז; לפני הפתיחה — סמל הטורניר */
     var rightMeta=lockHtml||dateHtml; /* אחרי שריקת הפתיחה — התג 🔒 ההימור נסגר תופס את מקום התאריך */
     if(rightMeta||clockHtml||scoreHtml) h+='<div class="round betmeta" style="display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:8px;margin-bottom:4px;font-size:13px;font-weight:700;color:var(--mut);direction:ltr"><span style="justify-self:start">'+clockHtml+'</span><span style="justify-self:center">'+scoreHtml+'</span><span style="justify-self:end;display:flex;align-items:center;gap:8px;direction:rtl">'+rightMeta+'</span></div>';
-    h+='<div class="round betmeta projrow" style="display:flex;align-items:center;justify-content:flex-start;min-height:20px;margin-bottom:8px;font-size:13px;font-weight:700;color:var(--mut)">'+(projInner||'')+'</div>';
+    h+='<div class="round betmeta projrow" style="display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:20px;margin-bottom:8px;font-size:13px;font-weight:700;color:var(--mut)">'+(projInner||'')+'</div>';
     var ctrlOff=locked;var dis=ctrlOff?" disabled":"";
     var stakeInput='<input id="st-'+m.id+'" class="stval num" type="text" value="'+sv+'" readonly tabindex="-1" style="grid-column:1;grid-row:1">';
     var stakeCtrl=dOK
