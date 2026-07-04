@@ -26,17 +26,13 @@ ok(A.sandbox.hmToMin('0:05')===5&&A.sandbox.hmToMin('3:30')===210&&A.sandbox.hmT
 ok(A.sandbox.hmToMin('24:00')===null&&A.sandbox.hmToMin('3:60')===null,'hmToMin rejects invalid');
 ok(A.sandbox.minToHm(5)==='00:05'&&A.sandbox.minToHm(210)==='03:30'&&A.sandbox.minToHm(930)==='15:30','minToHm formats');
 
-console.log('\n===== settings UI renders two dashboards =====');
+console.log('\n===== settings: legacy auto sections removed =====');
 A.sandbox.MODE='admin';A.sandbox.renderSettings();
 const h=A.mainHTML();
-has(h,'בדיקת תוצאות','results dashboard title');
-has(h,'טעינת משחקים','newgames dashboard title');
-has(h,'id="ac_results_on"','results on/off toggle');
-has(h,'id="ac_newgames_on"','newgames on/off toggle');
-has(h,'id="acAfter_results"','results offset editor');
-has(h,'בדיקת תוצאות + 5','newgames panel shows derived (results+5) note');
-ok(h.indexOf('id="acTimes_newgames"')<0,'newgames has NO independent times editor (derived from results+5)');
-has(h,'acDashSave','save buttons');
+ok(h.indexOf('אוטומציה')<0,'automation section removed from settings');
+ok(h.indexOf('id="ac_results_on"')<0,'old results toggle removed from settings');
+ok(h.indexOf('id="ac_newgames_on"')<0,'old newgames toggle removed from settings');
+ok(h.indexOf('id="acAfter_results"')<0,'old offset editor removed from settings');
 ok(J(A.sandbox.ac2.results.after)===J([180,5]),'ac2.results.after seeded from config');
 ok(J(A.sandbox.ac2.newgames.times)===J(['20:00']),'ac2.newgames.times seeded');
 

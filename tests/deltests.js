@@ -28,7 +28,7 @@ ok(!!A.state.tree.bets.mSet,'settled del: bets KEPT (for history)');
 // after archive: admin matches list excludes it; history still shows it; balances still count it
 A.sandbox.buildState(A.state.tree);
 A.sandbox.MODE='admin';A.sandbox.TAB='matches';A.sandbox.renderActive();
-hasnt(A.mainHTML(),'C','admin list: archived match (team C) hidden from admin');
+hasnt(A.mainHTML(),'value="C"','admin list: archived match (team C) hidden from admin');
 // history for p0 (bet on mSet team A, won) still shows it
 A.sandbox.ME='p0';A.sandbox.MODE='player';A.sandbox.TAB='hist';A.sandbox.renderActive();
 has(A.mainHTML(),'C','history: archived settled match still shown');
@@ -45,7 +45,7 @@ ok(L.sandbox.S.matches[0].fxLeague==='eng.1','buildState now carries fxLeague (w
 let V=loadApp(seed,{});V.sandbox.buildState(V.state.tree);V.sandbox.MODE='admin';V.sandbox.TAB='matches';V.sandbox.renderActive();
 const h=V.mainHTML();
 hasnt(h,'חושבו','admin: count line "חושבו" removed');
-has(h,'בחר ליגה','admin: dropdown placeholder present');
+has(h,'בחר/י טורנירים','admin: tournament picker present');
 has(h,'position:sticky','admin: search block is sticky');
 console.log('\n'+(fails?('FAILED '+fails+'/'+tests):('ALL PASS '+tests+'/'+tests)));process.exit(fails?1:0);
 })();

@@ -78,6 +78,8 @@
   .btn.danger{background:transparent;color:var(--red);border:1.5px solid color-mix(in srgb,var(--red) 35%,transparent)}
   .btn.sm{height:38px;padding:0 12px;font-size:15.5px;border-radius:10px}
   .btn[disabled]{opacity:.45;pointer-events:none}
+  .winbtn{display:inline-flex;align-items:center;justify-content:center;gap:5px;height:30px;padding:0 12px;font-size:13px;font-weight:600;border-radius:5px;border:1px solid #d1d1d1;background:#fbfbfb;color:#1a1a1a;cursor:pointer;font-family:inherit}
+  .winbtn:hover{background:#f5f5f5}.winbtn:active{background:#ededed}
   .field{margin-bottom:11px}
   .field label{display:block;font-size:14px;font-weight:700;color:var(--mut);margin:0 2px 5px}
   .input,select.input{width:100%;height:var(--tap);padding:0 13px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);color:var(--tx)}
@@ -116,9 +118,9 @@
   .p-fill{flex:1 1 auto;min-width:0}
   .addinfo{font-size:12.5px;color:var(--mut2);padding:11px 14px;border-bottom:1px solid var(--blue);line-height:1.45}
   .addrow{display:flex;align-items:center;gap:9px;justify-content:flex-start}
-  .addrow .bf{direction:ltr;width:96px;height:26px;border:1px solid var(--blue);border-radius:8px;padding:0 8px;font-size:14px;font-weight:700;font-family:inherit;background:var(--bg);color:var(--ink);text-align:center}
-  .addrow .bf:focus{outline:none;border-color:var(--pitch)}
-  .addrow .bf.bf-warn{border-color:var(--red)!important;background:rgba(214,69,69,.07);box-shadow:0 0 0 3px rgba(214,69,69,.16);animation:bfWarnPulse 1s ease-in-out infinite}
+  .p-collrow .bf{direction:ltr;width:96px;height:26px;border:1px solid var(--blue);border-radius:8px;padding:0 8px;font-size:14px;font-weight:700;font-family:inherit;background:var(--bg);color:var(--ink);text-align:center}
+  .p-collrow .bf:focus{outline:none;border-color:var(--pitch)}
+  .p-collrow .bf.bf-warn{border-color:var(--red)!important;background:rgba(214,69,69,.07);box-shadow:0 0 0 3px rgba(214,69,69,.16);animation:bfWarnPulse 1s ease-in-out infinite}
   @keyframes bfWarnPulse{0%,100%{box-shadow:0 0 0 3px rgba(214,69,69,.16)}50%{box-shadow:0 0 0 3px rgba(214,69,69,.34)}}
   .addrow .bf-apply{height:26px;padding:0 14px;border:0;border-radius:8px;background:var(--pitch);color:#fff;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap}
   .addrow .bf-apply:active{filter:brightness(.93)}
@@ -133,28 +135,40 @@
   .pkey:active{filter:brightness(.95)}
   .prestore{flex:0 0 auto;background:color-mix(in srgb,var(--gold) 14%,transparent);border:1px solid var(--gold);color:#946b00;cursor:pointer;font-size:12.5px;font-weight:800;line-height:1;padding:5px 10px;border-radius:8px;white-space:nowrap;font-family:inherit}
   .prestore:active{filter:brightness(.95)}
-  .mdraw{width:100%;margin-top:10px;height:38px;border-radius:10px;border:1.5px dashed var(--line);background:transparent;color:var(--mut);font-weight:700;font-size:13.5px;cursor:pointer}
+  .p-collrow{display:flex;align-items:center;gap:11px}
+  .pnametog{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:7px;background:none;border:0;padding:0;cursor:pointer;color:inherit;font-family:inherit;text-align:right}
+  .pnametog .pnm{font-weight:900;font-size:15px;line-height:1.15;min-width:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .pchev{flex:0 0 auto;font-size:11px;color:var(--mut)}
+  .demotag{flex:0 0 auto;background:color-mix(in srgb,var(--gold) 14%,transparent);border:1px solid var(--gold);color:#946b00;border-radius:8px;padding:4px 9px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap}
+  .pexp{margin-top:4px;padding-top:10px;border-top:1px dashed var(--line)}
+  .pexprow{display:flex;align-items:center;gap:9px;justify-content:space-between}
+  .mdraw{width:100%;margin-top:6px;height:30px;border-radius:10px;border:1.5px dashed var(--line);background:transparent;color:var(--mut);font-weight:700;font-size:13.5px;cursor:pointer}
   .mdraw.on{border-style:solid;border-color:var(--gold);background:color-mix(in srgb,var(--gold) 18%,transparent);color:var(--tx)}
   .mdraw:disabled{opacity:.45;cursor:default}
   .checkbox{width:24px;height:24px;border-radius:7px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;color:#fff;background:var(--card)}
   .checkbox.on{background:var(--pitch);border-color:var(--pitch)}
+  .fxli{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:9px;cursor:pointer;border:1px solid transparent}
+  .fxli.live{background:color-mix(in srgb,var(--pitch) 12%,transparent);border-color:color-mix(in srgb,var(--pitch) 40%,transparent)}
+  .fxnum{flex:0 0 auto;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--pitch);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .fxemblem{height:28px;max-width:52px;object-fit:contain;vertical-align:middle;display:inline-block}
   .round-h{display:flex;align-items:center;gap:8px;margin:18px 2px 9px;font-size:14.5px;font-weight:800;color:var(--mut)}
   .round-h .ln{flex:1;height:1px;background:var(--line)}
   .m-head{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer}
   .teams{font-weight:800;font-size:17px}.teams .x{color:var(--mut2);font-weight:700;margin:0 7px}
-  .mcard{cursor:default;position:relative}
-  .mteams{display:grid;grid-template-columns:1fr auto 1fr;direction:ltr;align-items:start}
+  .mcard{cursor:default;position:relative;border-color:var(--blue);padding-top:8px;padding-bottom:8px}
+  .mcard.locked{padding-top:5px;padding-bottom:5px}
+  .mteams{display:grid;grid-template-columns:1fr auto 1fr;direction:ltr;align-items:start;margin-top:14px}
   .mteam{text-align:center;min-width:0;padding:0 10px}
   .mchkrow{display:flex;align-items:center;gap:10px;min-height:30px}
-  .mtop{position:relative;display:flex;align-items:center;min-height:30px;margin-bottom:5px}
+  .mtop{position:relative;display:flex;align-items:center;min-height:22px;margin-bottom:1px}
   .mchk{position:absolute;top:50%;transform:translateY(-50%);width:22px;height:22px;accent-color:var(--pitch);cursor:pointer;margin:0}
   .mchk.a{right:0}.mchk.b{left:0}
   .mchk.x{position:static;transform:none;accent-color:var(--gold)}
   .mdrawcol{padding:0 2px}
   .mtopc{justify-content:center}
-  .mbtnrow{display:flex;gap:8px;margin-top:10px}
-  .mbtnrow .mdraw{width:auto;margin-top:0;flex:1 1 0;min-width:0;white-space:normal;line-height:1.2;height:auto;min-height:38px;padding:6px 6px}
-  .mbtnrow .mhalf{flex:2}.mbtnrow .mhalf2{flex:3}
+  .mbtnrow{display:flex;gap:8px;margin-top:6px}
+  .mbtnrow .mdraw{width:auto;margin-top:0;flex:1 1 0;min-width:0;white-space:normal;line-height:1.2;height:auto;min-height:30px;padding:5px 6px;border:1px solid var(--blue)}
+  .mbtnrow .mhalf{flex:1}.mbtnrow .mhalf2{flex:1}
   .mlockst{text-align:center;margin-top:12px;font-size:13px;font-weight:800;color:var(--mut)}
   .mname{flex:1;min-width:0;text-align:center;font-weight:800;font-size:18px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--tx);padding:3px 4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .mname:focus{outline:none;border-color:var(--line);background:var(--bg)}
@@ -164,8 +178,8 @@
   .mteams .mteam:last-child .mname{text-align:right;padding-left:26px}
   .mcnt{font-size:13px;color:var(--mut2);font-weight:700}
   .mauto{color:#b8860b;font-weight:800;font-size:11.5px}
-  .mamt{font-size:15px;font-weight:800;color:var(--tx);margin-top:1px}
-  .m-date{text-align:center;font-size:13px;color:var(--mut2);font-weight:700;margin-top:9px}
+  .mamt{font-size:15px;font-weight:800;color:var(--tx);margin-top:0}
+  .m-date{text-align:center;font-size:13px;color:var(--ink);font-weight:700;margin-top:4px}
   .pool-legend b{color:var(--tx)}
   .lb-row{display:flex;align-items:center;gap:11px;padding:11px 13px;border-bottom:1px solid var(--line)}
   .lb-row:last-child{border-bottom:none}
@@ -173,9 +187,9 @@
   .lb-stats{font-size:13.5px;color:var(--mut);margin-top:1px}.lb-bal{font-weight:800;font-size:18px}.endcol{text-align:left}
   .me-row{background:color-mix(in srgb,var(--gold) 10%,transparent)}
   .row-y{background:color-mix(in srgb,var(--gold) 10%,transparent)}
-  .betcard{position:relative}
+  .betcard{position:relative;border-color:var(--blue)}
   .betrow{display:grid;grid-template-columns:60px 1fr;grid-template-rows:36px 36px;gap:6px;align-items:stretch}
-  .betrow .pk{min-width:0;height:100%;border:1.5px solid var(--line);border-radius:11px;background:var(--card);color:var(--tx);font-weight:800;font-size:14px;padding:0 12px;display:flex;align-items:center;justify-content:flex-start;gap:8px}
+  .betrow .pk{min-width:0;height:100%;border:1.5px solid var(--blue);border-radius:11px;background:var(--card);color:var(--tx);font-weight:800;font-size:14px;padding:0 12px;display:flex;align-items:center;justify-content:flex-start;gap:8px}
   .betrow .pk .tnum{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;font-size:12px;font-weight:800;line-height:1}
   .betrow .pk .tnm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
   .betrow .pk .tnsp{flex:0 0 20px}
@@ -187,9 +201,9 @@
   .betrow .stakein{min-width:0;height:50px;border:1.5px solid var(--line);border-radius:11px;background:var(--card);color:var(--tx);text-align:center;font-size:16px;font-weight:700;padding:0 2px}
   .betrow .stakein:focus{outline:none;border-color:var(--ink2)}
   .betrow .sendbtn{height:50px;padding:0;border-radius:11px;font-size:14px}
-  .betrow .stval{width:100%;min-width:0;height:100%;border:1.5px solid var(--line);border-radius:9px;text-align:center;font-size:17px;font-weight:700;background:var(--card);color:var(--tx);padding:0;pointer-events:none;cursor:default}
+  .betrow .stval{width:100%;min-width:0;height:100%;border:1.5px solid var(--blue);border-radius:9px;text-align:center;font-size:17px;font-weight:700;background:var(--card);color:var(--tx);padding:0;pointer-events:none;cursor:default}
   .betrow .stval:focus{outline:none;border-color:var(--ink2)}
-  .betrow .strow{width:100%;min-width:0;height:100%;border:1.5px solid var(--line);border-radius:9px;background:var(--card);color:var(--tx);font-size:13px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .betrow .strow{width:100%;min-width:0;height:100%;border:1.5px solid var(--blue);border-radius:9px;background:var(--card);color:var(--tx);font-size:13px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer}
   .betrow .strow:active{background:var(--bg)}
   .betrow .strowpair{display:flex;gap:4px;min-width:0}
   .betrow .strowpair .strow{flex:1}
@@ -251,6 +265,9 @@
   .lb:last-child .bt{border-bottom:1px solid #5b9bd5;border-bottom-left-radius:6px;border-bottom-right-radius:6px}
   .lb .bt .cur{margin-inline-start:2px}
   .lb.me-row{border-radius:10px}
+  .lbexp{grid-column:1/-1;padding:6px 10px 12px;background:color-mix(in srgb,var(--blue) 6%,transparent);border-bottom:1px solid var(--line);cursor:pointer}
+  .lbchart{position:relative;width:100%;height:76px}
+  .lb .nm{cursor:pointer}
   .copyrow{display:flex;gap:6px;align-items:stretch;margin-top:6px}
   .copyrow .input{flex:1}
   .copy-ic{flex:0 0 auto;width:46px;display:flex;align-items:center;justify-content:center;font-size:17px;padding:0;cursor:pointer}
@@ -512,14 +529,15 @@ try{if(typeof window!=="undefined"&&window.addEventListener){
 }}catch(e){}
 
 function setConn(ok){var d=$("#conn"); if(d) d.classList.toggle("off",!ok);}
+function acNgExtra(c){c=c||{};var want=Math.round(Number(c.want));if(!(want>=1))want=3;var leagues=Array.isArray(c.leagues)?c.leagues.filter(function(s){return typeof s==="string"&&!!s;}):[];return {want:want,leagues:leagues};}
 function acMig(ac){
   ac=ac||{};
   function clean(c,defOn,defAfter,defTimes){c=c||{};var on=(c.on===undefined&&c.enabled===undefined)?defOn:!!(c.on!==undefined?c.on:c.enabled);var after=(Array.isArray(c.after)?c.after:defAfter).map(function(x){return Math.round(Number(x));}).filter(function(x){return isFinite(x)&&x>=0;});var times=(Array.isArray(c.times)?c.times:defTimes).filter(function(t){return acParse(t)!=null;});return {on:on,after:after,times:times,last:Number(c.last)||0};}
-  if(ac.results||ac.newgames)return {results:clean(ac.results,true,[180],[]),newgames:clean(ac.newgames,true,[210],AC_DEF_TIMES.slice())};
+  if(ac.results||ac.newgames)return {results:clean(ac.results,true,[180],[]),newgames:Object.assign(clean(ac.newgames,true,[210],AC_DEF_TIMES.slice()),acNgExtra(ac.newgames))};
   var oldTimes=Array.isArray(ac.times)?ac.times.filter(function(t){return acParse(t)!=null;}):[];
   var oldEnabled=(ac.enabled===undefined)?true:!!ac.enabled;
   var add35=(ac.add35===undefined)?true:!!ac.add35;
-  return {results:{on:true,after:[180],times:[],last:Number(ac.lastFill)||0},newgames:{on:true,after:add35?[210]:[],times:oldEnabled?(oldTimes.length?oldTimes:AC_DEF_TIMES.slice()):[],last:Number(ac.lastAdd)||Number(ac.srvLast)||0}};
+  return {results:{on:true,after:[180],times:[],last:Number(ac.lastFill)||0},newgames:Object.assign({on:true,after:add35?[210]:[],times:oldEnabled?(oldTimes.length?oldTimes:AC_DEF_TIMES.slice()):[],last:Number(ac.lastAdd)||Number(ac.srvLast)||0},acNgExtra(ac))};
 }
 function buildState(t){
   t=t||{};_cmCache={};
@@ -625,6 +643,7 @@ window.addEventListener("popstate",function(){if(sheetOpen)closeSheet(true);});
 
 /* ============================================================ RENDER ============================================================ */
 var TAB=(MODE==="admin")?"players":"bet";
+var _fxLastTab=null; // отслеживаем вход на вкладку "משחקים" для пробы доступности турниров
 /* ---------- urgent-info popup (owner only: admin + Niko's game account) ---------- */
 var _noticeOpen=false,_noticeShownIds=[];
 function isOwnerView(){if(typeof MODE!=="undefined"&&MODE==="admin")return adminAuthed();var p=me();return !!(p&&isSuperAdmin(p.name));}
@@ -685,6 +704,7 @@ function renderActive(){
   if(MODE==="admin"){
     if(!adminAuthed()){ $("#nav").innerHTML=""; renderAdminLogin(); return; }
     renderNav([["players","👥","משתתפים"],["matches","⚽","משחקים"],["settings","⚙️","הגדרות"]]);
+    if(TAB==="matches"&&_fxLastTab!=="matches")fxAvail=null; _fxLastTab=TAB; // перепроба доступности при входе на вкладку
     var v={players:renderAdminPlayers,matches:renderAdminMatches,settings:renderSettings}[TAB]||renderAdminPlayers; v(); }
   else { if(!me()){ renderIdentify(); $("#nav").innerHTML=""; return; }
     renderNav([["bet","🎰","להמר"],["board","🏆","לוח ההימורים"],["all","💰","טבלה"],["chat","💬","צ'אט"],["hist","🧾","היסטוריה"],["help","❓","עזרה"]]);
@@ -1040,17 +1060,17 @@ function renderBetView(){
         var winTxt=(winNet>0?"+":"")+fmt(winNet)+" "+cur();var loseTxt="−"+fmt(b.stake)+" "+cur();
         info='<span style="white-space:nowrap">זכיה <b class="net '+(winNet>0?"pos":"zero")+'">'+winTxt+'</b> · הפסד <b class="net neg">'+loseTxt+'</b></span>';
       }
-      projInner='<span style="display:inline-flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-start">'+info+poolTxt+'</span>';
+      projInner=info+poolTxt;
     }
     var dateHtml=m.dt?'<span dir="ltr" style="white-space:nowrap">'+esc(fmtDate(m.dt))+'</span>':'';
     var clkStart=m.dt?ilWallTs(m.dt):NaN;
     var gameOver=!!(m.dt&&!isNaN(clkStart)&&(m.settled||Date.now()>=clkStart+CLK_DUR));
     var lockHtml=(locked&&!gameOver)?'<span style="color:var(--red);font-weight:800;white-space:nowrap">🔒 ההימור נסגר</span>':'';
     var clockHtml=liveClockHtml(m,'font-size:14px',false); /* реальное время матча (ESPN) с иконкой ⏱ — как на доске; fallback на расчётный */
-    var scoreHtml=liveScoreHtml(m,'font-size:19px;line-height:1.1'); /* תוצאה חיה במרכז — בדיוק כמו בלוח ההימורים */
+    var scoreHtml=liveScoreHtml(m,'font-size:19px;line-height:1.1')||tourneyEmblemHtml(m); /* תוצאה חיה במרכז; לפני הפתיחה — סמל הטורניר */
     var rightMeta=lockHtml||dateHtml; /* אחרי שריקת הפתיחה — התג 🔒 ההימור נסגר תופס את מקום התאריך */
     if(rightMeta||clockHtml||scoreHtml) h+='<div class="round betmeta" style="display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:8px;margin-bottom:4px;font-size:13px;font-weight:700;color:var(--mut);direction:ltr"><span style="justify-self:start">'+clockHtml+'</span><span style="justify-self:center">'+scoreHtml+'</span><span style="justify-self:end;display:flex;align-items:center;gap:8px;direction:rtl">'+rightMeta+'</span></div>';
-    h+='<div class="round betmeta projrow" style="display:flex;align-items:center;justify-content:flex-start;min-height:20px;margin-bottom:8px;font-size:13px;font-weight:700;color:var(--mut)">'+(projInner||'')+'</div>';
+    h+='<div class="round betmeta projrow" style="display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:20px;margin-bottom:8px;font-size:13px;font-weight:700;color:var(--mut)">'+(projInner||'')+'</div>';
     var ctrlOff=locked;var dis=ctrlOff?" disabled":"";
     var stakeInput='<input id="st-'+m.id+'" class="stval num" type="text" value="'+sv+'" readonly tabindex="-1" style="grid-column:1;grid-row:1">';
     var stakeCtrl=dOK
@@ -1138,6 +1158,10 @@ function liveClockHtml(m,style,board){var lv=m&&m.live;
    Показываем ТОЛЬКО реальный счёт из ESPN-live (a/b), пока данные свежие (≤ LIVE_TTL = 4 мин).
    До первых реальных данных — ничего. Короткое пропадание (≤4 мин) держит последний счёт; дольше —
    счёт исчезает (см. tickClocks .livescore). a = teamA (слева), b = teamB (справа), по центру строки, чёрный. */
+function tourneyEmblemHtml(m){ // сэмбл турнира в центре блока ставки — пока нет живого счёта
+  if(!m||m.settled||!m.logo)return "";
+  return '<img class="fxemblem" src="'+esc(m.logo)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">';
+}
 function liveScoreHtml(m,style){
   if(!m||!m.dt||m.settled)return "";
   var lv=m.live;
@@ -1189,7 +1213,7 @@ function renderBoardView(){
       var coef=b.team==="A"?c.coefA:(b.team==="B"?c.coefB:c.coefX);var net=coef?(b.stake*coef-b.stake):0;
       var otherSum=c.pool-(b.team==="A"?c.sumA:(b.team==="B"?c.sumB:c.sumX));var hasOpp=otherSum>0;
       var pickNum=b.team==="A"?"1":(b.team==="B"?"2":"X");var zc=(ri%2===0)?" row-y":"";ri++;
-      var _nmCol=_liveOn?(b.team===_lead?"var(--pitch-d)":"var(--red)"):"";
+      var _nmCol=(_liveOn&&(_lead!=="X"||dOK))?(b.team===_lead?"var(--pitch-d)":"var(--red)"):"";
       return '<div class="brow'+zc+(p&&pl.id===p.id?" me-row":"")+'"><span class="bname" dir="rtl"'+(_nmCol?' style="color:'+_nmCol+'"':'')+'>'+esc(pl.name)+'</span>'+
         '<span class="bpick num">'+pickNum+'</span>'+
         '<span class="num">'+fmt(b.stake)+'</span>'+
@@ -1211,8 +1235,39 @@ function renderBoardView(){
 var ALLVIEW_ASADMIN=(function(){try{return localStorage.getItem("allview_asadmin")!=="0";}catch(e){return true;}})();
 function allViewToggle(){ALLVIEW_ASADMIN=!ALLVIEW_ASADMIN;try{localStorage.setItem("allview_asadmin",ALLVIEW_ASADMIN?"1":"0");}catch(e){}renderHeaderViewToggle();renderAllView();}
 window.allViewToggle=allViewToggle;
+var lbOpen={};
+function lbToggle(id){lbOpen[id]=!lbOpen[id];var e=document.getElementById("lbx-"+id);if(e)e.style.display=lbOpen[id]?"block":"none";}
+window.lbToggle=lbToggle;
+function balSeriesPts(pid){
+  var evs=[];
+  var cl=(S.cashlog||{})[pid]||{};
+  Object.keys(cl).forEach(function(k){var e=cl[k]||{};var ts=Number(e.ts)||0;var am=Number(e.amount)||0;
+    if(e.type==="out")evs.push({t:ts,d:-am});else if(e.type==="zero")evs.push({t:ts,z:true});else evs.push({t:ts,d:am});});
+  S.matches.forEach(function(m){if(!m.settled)return;var b=(m.bets||{})[pid];if(!b)return;var st=Number(b.stake)||0;var pay=(calcMatch(m).payouts[pid]||0);var t=m.dt?Date.parse(m.dt):NaN;if(!isFinite(t))t=Number(m.t)||0;evs.push({t:t,d:pay-st});});
+  evs.sort(function(a,b){return a.t-b.t;});
+  var bal=0,pts=[];evs.forEach(function(e){if(e.z)bal=0;else bal+=e.d;pts.push(Math.round(bal*100)/100);});
+  return pts;
+}
+function balSparkHtml(pid){
+  var pts=balSeriesPts(pid);
+  if(pts.length<2)return '<div class="tiny muted" style="text-align:center;padding:26px 0">אין מספיק נתונים לגרף</div>';
+  var min=Math.min.apply(null,pts),max=Math.max.apply(null,pts),n=pts.length;
+  var W=320,H=76,pl=6,pr=6,pt=6,pb=6;
+  var xf=function(i){return pl+(n===1?0:i/(n-1))*(W-pl-pr);};
+  var yf=function(v){return (max===min)?(pt+(H-pt-pb)/2):(pt+(1-(v-min)/(max-min))*(H-pt-pb));};
+  var dp=pts.map(function(v,i){return (i?"L":"M")+xf(i).toFixed(1)+" "+yf(v).toFixed(1);}).join(" ");
+  var area=dp+" L"+xf(n-1).toFixed(1)+" "+(H-pb).toFixed(1)+" L"+xf(0).toFixed(1)+" "+(H-pb).toFixed(1)+" Z";
+  var col=pts[n-1]>=pts[0]?"#178a4c":"#d64545";
+  var iMax=pts.indexOf(max),iMin=pts.indexOf(min);
+  var pctX=function(i){return (xf(i)/W*100).toFixed(1);},pctY=function(v){return (yf(v)/H*100).toFixed(1);};
+  var dot=function(v,i){return '<span style="position:absolute;left:'+pctX(i)+'%;top:'+pctY(v)+'%;transform:translate(-50%,-50%);width:6px;height:6px;border-radius:50%;background:'+col+'"></span>';};
+  var lab=function(v,i,above){return '<span dir="ltr" style="position:absolute;left:'+pctX(i)+'%;top:'+pctY(v)+'%;transform:translate(-50%,'+(above?"-135%":"35%")+');font-size:10px;font-weight:800;color:var(--tx);white-space:nowrap;font-variant-numeric:tabular-nums;pointer-events:none">'+fmt(v)+' '+cur()+'</span>';};
+  var marks=(max===min)?(dot(max,iMax)+lab(max,iMax,true)):(dot(max,iMax)+dot(min,iMin)+lab(max,iMax,true)+lab(min,iMin,false));
+  return '<div class="lbchart"><svg style="width:100%;height:100%;display:block" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none"><path d="'+area+'" fill="'+col+'" fill-opacity="0.09" stroke="none"/><path d="'+dp+'" fill="none" stroke="'+col+'" stroke-width="1.6" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/></svg>'+marks+'</div>';
+}
 function renderAllView(){
   var rk=ranking();
+  try{if(ME&&!localStorage.getItem("lbFirstSeen")){lbOpen[ME]=true;localStorage.setItem("lbFirstSeen","1");}}catch(e){}
   var hasBet={};S.matches.forEach(function(m){if(!m.settled){var bb=m.bets||{};for(var pid in bb){if(bb[pid])hasBet[pid]=1;}}});
   var own=isOwnerView()&&ALLVIEW_ASADMIN;
   var rows=rk.map(function(e,idx){
@@ -1223,7 +1278,7 @@ function renderAllView(){
     var withdrawn=wdOf(e.p);
     return '<div class="lb'+zc+meCls+'">'+
       '<span class="rk"'+(e.p.feePaid?' style="color:var(--tx)"':'')+'>'+medal+'</span>'+
-      '<span class="nm">'+(function(){var raw=(e.p.name||"").trim();var unpaid=!e.p.feePaid;var wrap=function(s){return unpaid?'<span class="unpaidName">'+s+'</span>':s;};
+      '<span class="nm" onclick="lbToggle(\''+e.p.id+'\')">'+(function(){var raw=(e.p.name||"").trim();var unpaid=!e.p.feePaid;var wrap=function(s){return unpaid?'<span class="unpaidName">'+s+'</span>':s;};
         if(own){var parts=raw.split(/\s+/);var first=esc(parts.shift()||"");var last=esc(parts.join(" "));return '<span class="nmtxt" dir="rtl">'+wrap(first)+'</span>'+(last?'<span class="nmtxt" dir="rtl">'+wrap(last)+'</span>':'');}
         var nm=esc(raw.length>18?raw.slice(0,18)+'…':raw);return '<span class="nmtxt" dir="rtl">'+wrap(nm)+'</span>';})()+'</span>'+
       '<span class="gp"></span>'+
@@ -1231,7 +1286,8 @@ function renderAllView(){
       '<span class="gp"></span>'+
       '<span class="bt" style="color:'+bc+'">'+fmt(tot)+'<span class="cur">'+cur()+'</span></span>'+
       '<span class="bx" style="color:'+bc+'">'+(hasBet[e.p.id]?(fmt(rbal)+'+'+fmt(e.s.pending)+' '):'')+'</span>'+
-      '</div>';
+      '</div>'+
+      '<div class="lbexp" id="lbx-'+e.p.id+'" onclick="lbToggle(\''+e.p.id+'\')"'+(lbOpen[e.p.id]?'':' style="display:none"')+'>'+balSparkHtml(e.p.id)+'</div>';
   }).join("");
   var inHand=0,inBets=0;rk.forEach(function(e){inHand+=e.s.balance;inBets+=e.s.pending;});var poolTotal=inHand+inBets;
   var sumCell=function(lbl,val,col){return '<div style="min-width:0;text-align:center"><div class="tiny muted" style="font-weight:700;white-space:nowrap">'+lbl+'</div><div class="num" style="font-size:16px;font-weight:800;color:'+col+';white-space:nowrap">'+fmt(Math.round(val))+' '+cur()+'</div></div>';};
@@ -1278,33 +1334,45 @@ function renderHistView(){
   }).join("");
   var st=statsFor(p.id);var bal=st.balance;var deposited=depOf(p);var withdrawn=wdOf(p);
   var BK=Number(S.meta.bank)||0; var balCol=bal>BK?"var(--pitch-d)":(bal<BK?"var(--red)":"var(--tx)");
-  var stakedBlock='<div><div class="tiny muted" style="font-weight:700">בהימור</div><div class="num" style="font-size:22px;font-weight:800;color:var(--tx)">'+fmt1(st.pending)+' '+cur()+'</div></div>';
-  var header='<div class="card card-p" style="margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px">'+
-    stakedBlock+
-    '<div style="text-align:center"><div class="tiny muted" style="font-weight:700">הפקדה</div><div style="font-size:22px;font-weight:800;color:var(--pitch-d);white-space:nowrap" dir="ltr"><span style="font-size:16px;vertical-align:2px">📥</span> '+fmt1(deposited)+' '+cur()+'</div>'+(withdrawn>0.001?('<div style="font-size:12.5px;font-weight:800;color:var(--red);white-space:nowrap;margin-top:2px" dir="ltr"><span style="font-size:12.5px">📤</span> '+fmt1(withdrawn)+' '+cur()+'</div>'):'')+'</div>'+
-    '<div style="text-align:left"><div class="tiny muted" style="font-weight:700">יתרה</div><div class="num" style="font-size:22px;font-weight:800;color:'+balCol+'">'+fmt1(bal)+' '+cur()+'</div></div>'+
-    '</div>';
+  var tot=bal+st.pending;var totCol=tot>BK?"var(--pitch-d)":(tot<BK?"var(--red)":"var(--tx)");
+  var depCell='<div style="text-align:center"><div class="tiny muted" style="font-weight:700">הפקדה</div><div style="font-size:22px;font-weight:800;color:var(--pitch-d);white-space:nowrap" dir="ltr"><span style="font-size:16px;vertical-align:2px">📥</span> '+fmt1(deposited)+' '+cur()+'</div>'+(withdrawn>0.001?('<div style="font-size:12.5px;font-weight:800;color:var(--red);white-space:nowrap;margin-top:2px" dir="ltr"><span style="font-size:12.5px">📤</span> '+fmt1(withdrawn)+' '+cur()+'</div>'):'')+'</div>';
+  var stakedCell='<div style="text-align:center"><div class="tiny muted" style="font-weight:700">בהימור</div><div class="num" style="font-size:22px;font-weight:800;color:var(--tx)">'+fmt1(st.pending)+' '+cur()+'</div></div>';
+  var totCell='<div style="text-align:left"><div style="display:inline-flex;align-items:center;gap:9px;direction:ltr">'+
+    '<div style="text-align:center"><div class="num" style="font-size:22px;font-weight:800;color:'+totCol+';line-height:1.05">'+fmt1(tot)+' '+cur()+'</div><div class="tiny muted" style="font-size:9.5px;font-weight:700;margin-top:2px">סה"כ</div></div>'+
+    '<div style="display:flex;flex-direction:column;gap:3px;text-align:center;border-inline-start:1.5px solid #5b9bd5;padding-inline-start:9px">'+
+      '<div><div class="num" style="font-size:12px;font-weight:800;color:var(--tx);line-height:1.05">'+fmt1(bal)+'</div><div class="tiny muted" style="font-size:9.5px;font-weight:700">בלנס</div></div>'+
+      '<div><div class="num" style="font-size:12px;font-weight:800;color:var(--tx);line-height:1.05">'+fmt1(st.pending)+'</div><div class="tiny muted" style="font-size:9.5px;font-weight:700">בהימור</div></div>'+
+    '</div>'+
+  '</div></div>';
+  var header='<div class="card card-p" style="margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px">'+depCell+stakedCell+totCell+'</div>';
   $("#main").innerHTML='<section class="view active">'+header+(items||'<div class="card"><div class="empty"><div class="em-ic">🧾</div>עדיין לא הימרת על אף משחק.</div></div>')+'</section>';
 }
 
 /* ---------- ADMIN: players ---------- */
+var pOpen={};
+function aPToggle(id){pOpen[id]=!pOpen[id];var e=document.getElementById("pexp-"+id);if(e)e.style.display=pOpen[id]?"block":"none";var c=document.getElementById("pchev-"+id);if(c)c.textContent=pOpen[id]?"▲":"▼";}
+window.aPToggle=aPToggle;
 function renderAdminPlayers(){
   if(!seedOpeningCash._done&&MODE==="admin"){seedOpeningCash._done=true;seedOpeningCash();}
   var list= !S.players.length?'<div class="empty"><div class="em-ic">👥</div>אין משתתפים.</div>':
      S.players.slice().sort(function(a,b){return ((a.feePaid?1:0)-(b.feePaid?1:0))||String(a.name||"").localeCompare(String(b.name||""),"he");}).map(function(p,i){
+      var open=!!pOpen[p.id];
+      var feeCell=p.feePaid
+        ? '<div class="fee" onclick="aToggleFee(\''+p.id+'\')"><div class="checkbox on">✓</div><span>שולם</span></div>'
+        : '<button class="demotag" onclick="aToggleFee(\''+p.id+'\')" title="לחצ/י לסימון תשלום (עם סכום בשדה)">מצב דמו</button>';
       return '<div class="p-item'+(i%2===0?' row-y':'')+'">'+
-        '<div class="p-top">'+
-          '<div class="pname" dir="rtl"><button class="pkey" onclick="aPwSheet(\''+p.id+'\')" title="שינוי או איפוס סיסמה">🔑</button>&nbsp;&nbsp;'+esc(p.name)+(p.phone?' <span class="tiny muted" dir="ltr">'+esc(p.phone)+'</span>':"")+'</div>'+
-          '<span class="p-fill"></span>'+
-          '<button class="prestore" onclick="aRestoreSheet(\''+p.id+'\')" title="שחזור יתרה לתאריך">החזר</button>'+
-          '<button class="pdel" onclick="aDelPlayer(\''+p.id+'\')" title="מחק משתתף">🗑</button>'+
-        '</div>'+
-        '<div class="addrow">'+
+        '<div class="p-collrow">'+
+          '<button class="pnametog" onclick="aPToggle(\''+p.id+'\')" dir="rtl"><span class="pchev" id="pchev-'+p.id+'">'+(open?'▲':'▼')+'</span><span class="pnm">'+esc(p.name)+(p.phone?' <span class="tiny muted" dir="ltr">'+esc(p.phone)+'</span>':"")+'</span></button>'+
           '<input class="bf" id="bf-'+p.id+'" type="number" step="1" dir="ltr" placeholder="סכום" autocomplete="off" oninput="amtClr(\''+p.id+'\')">'+
-          '<span class="p-fill"></span>'+
-          '<div class="fee" onclick="aToggleFee(\''+p.id+'\')"><div class="checkbox '+(p.feePaid?"on":"")+'">'+(p.feePaid?"✓":"")+'</div><span>שולם</span></div>'+
-          '<span class="p-fill"></span>'+
-          '<button class="bf-apply" onclick="aApply(\''+p.id+'\')">החל</button>'+
+          feeCell+
+        '</div>'+
+        '<div class="pexp" id="pexp-'+p.id+'" style="display:'+(open?'block':'none')+'">'+
+          '<div class="pexprow">'+
+            '<button class="pkey" onclick="aPwSheet(\''+p.id+'\')" title="שינוי או איפוס סיסמה">🔑</button>'+
+            '<button class="winbtn" onclick="aApply(\''+p.id+'\')">החל</button>'+
+            '<button class="prestore" onclick="aRestoreSheet(\''+p.id+'\')" title="שחזור יתרה לתאריך">שחזור בלנס</button>'+
+          '</div>'+
+          '<button class="btn block danger" style="margin-top:12px" onclick="aDelPlayer(\''+p.id+'\')">מחק משתתף</button>'+
         '</div>'+
       '</div>';
      }).join("");
@@ -1382,29 +1450,46 @@ function scrollAdminToFirstUnfinished(){try{
   un.sort(function(a,b){return((a.order||0)-(b.order||0))||((a.t||0)-(b.t||0));});
   var el=document.getElementById("amc-"+un[0].id);if(!el){window.scrollTo({top:0});return;}
   var off=0,hdr=$("header");if(hdr)off+=hdr.offsetHeight||0;
-  var fxc=document.getElementById("fxSelect");if(fxc){var cc=fxc.closest(".card");if(cc)off+=cc.offsetHeight||0;}
+  var fxc=document.getElementById("fxCard");if(fxc)off+=fxc.offsetHeight||0;
   var y=el.getBoundingClientRect().top+window.scrollY-off-8;
   window.scrollTo({top:Math.max(0,y),behavior:"smooth"});
 }catch(e){}}
+function fxAutoToggle(on){fbUpd("/autocfg/newgames",{on:!!on}).then(refresh).then(function(){toast(on?"טעינה אוטומטית מופעלת":"טעינה אוטומטית כבויה");}).catch(function(){toast("שגיאה, נסה/י שוב");});}
+window.fxAutoToggle=fxAutoToggle;
 function renderAdminMatches(){
-  var fxCard='<div class="card card-p" style="margin-bottom:12px;position:sticky;top:0;z-index:20"><select id="fxSelect" onchange="fxSelectGo(this.value)" class="input" dir="rtl" style="width:100%;height:auto;min-height:0;margin:0;font-weight:800;padding:2px 10px;line-height:1.4">'+fxSelectOptions()+'</select><div style="display:flex;gap:10px;margin-top:9px;justify-content:center"><button class="btn pitch" onclick="fxReloadSel()" style="height:38px;padding:0 18px;font-size:13.5px;font-weight:800">🔄 טען משחקים</button><button class="btn" onclick="aFillResults()" style="height:38px;padding:0 18px;font-size:13.5px;font-weight:800">✅ מלא תוצאות</button></div><div id="fillMsg" class="tiny" style="margin-top:8px;text-align:center;font-weight:700"></div><div id="fxRes" style="margin-top:10px"></div></div>';
+  fxSelInit();
+  if(fxAvail===null&&!fxAvailBusy)fxProbeAvailability();
+  var fxCard='<div id="fxCard" class="card card-p" style="margin-bottom:12px;position:sticky;top:0;z-index:20">'
+    +'<div class="fxpanel">'
+      +'<div style="display:flex;align-items:flex-start;gap:10px">'
+        +'<button class="panel-h" onclick="fxListToggle()" style="flex:1;min-width:0;display:flex;align-items:flex-start;gap:8px;justify-content:space-between">'
+          +'<span style="flex:1;min-width:0"><span class="panel-t" style="font-size:15px">בחר/י טורנירים</span><span id="fxListSel" style="display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+fxSelNames()+'</span></span>'
+          +'<span id="fxListChev" class="panel-chev" style="padding-top:5px">'+(fxListOpen?"▲":"▼")+'</span>'
+        +'</button>'
+        +'<div style="flex:0 0 auto;display:flex;align-items:center;gap:6px;padding-top:1px"><label class="tiny muted" for="fxCount" style="white-space:nowrap;font-weight:700;line-height:1.15;text-align:center">מס׳ משחקים<br>מכל טורניר</label><input type="number" id="fxCount" class="input sm" min="1" max="20" step="1" value="'+fxCountLoad()+'" dir="ltr" style="width:56px;text-align:center;padding:0 6px;height:22px;font-size:15px;font-weight:700;box-sizing:border-box" onchange="fxCountChange(this.value)"></div>'
+      +'</div>'
+      +'<div id="fxTourneys" style="display:'+(fxListOpen?"block":"none")+';margin-top:10px">'+fxTourneyListHtml()+'</div>'
+    +'</div>'
+    +'<div style="display:flex;align-items:center;gap:10px;margin-top:10px;justify-content:center"><button class="winbtn" onclick="fxLoadSelected()">🔄 טען משחקים</button><label style="display:flex;align-items:center;gap:8px;font-weight:700;cursor:pointer;user-select:none;font-size:13px;white-space:nowrap"><input type="checkbox" id="fxAuto" '+(!(S.autocfg&&S.autocfg.newgames&&S.autocfg.newgames.on===false)?"checked":"")+' onchange="fxAutoToggle(this.checked)" style="width:18px;height:18px;accent-color:var(--pitch)"> טעינת אוטומטית</label></div>'
+    +'<div id="fillMsg" class="tiny" style="margin-top:8px;text-align:center;font-weight:700"></div>'
+    +'<div id="fxRes" style="margin-top:10px"></div></div>';
   var list=S.matches.filter(function(m){return !m.hidden && !adminExpired(m);});
   list.sort(function(a,b){return ((b.settled?1:0)-(a.settled?1:0))||((a.order||0)-(b.order||0))||((a.t||0)-(b.t||0));});
   var html="";
   if(!list.length){ html='<div class="empty"><div class="em-ic">⚽</div>אין משחקים.<br>צור משחקים בהגדרות או הוסף משחק.</div><button class="btn block pitch" onclick="aAddMatch()">＋ הוסף משחק</button>'; }
   else { list.forEach(function(m){html+=matchCard(m);}); html+='<button class="btn block ghost" onclick="aAddMatch()" style="margin-top:10px">＋ הוסף משחק</button>'; }
   $("#main").innerHTML='<section class="view active">'+fxCard+html+'</section>';
-  try{var hdr=$("header"),fc=$("#fxSelect");if(fc&&hdr){var cc=fc.closest(".card");if(cc)cc.style.top=((hdr.offsetHeight||0))+"px";}}catch(e){}
+  try{var hdr=$("header"),cc=$("#fxCard");if(cc&&hdr){cc.style.top=((hdr.offsetHeight||0))+"px";}}catch(e){}
 }
 function matchCard(m){var c=calcMatch(m);var bb=m.bets||{};var nA=0,nB=0,aA=0,aB=0;for(var k in bb){if(bb[k].team==="A"){nA++;if(bb[k].auto)aA++;}else if(bb[k].team==="B"){nB++;if(bb[k].auto)aB++;}}var canS=!!(m.teamA&&m.teamB);var dOK=!!m.drawOK;var locked=!!m.settled;var dis=(canS&&!locked)?"":" disabled";var ro=locked?" readonly":"";
   var col=function(side,name,n,sum,na){var color=m.settled?(m.winner===side?"var(--pitch-d)":((m.winner==="X"||m.winner==="VOID")?"":"var(--red)")):"";var ck=(m.settled&&m.winner===side)?" checked":"";
-    return '<div class="mteam"><div class="mtop"><input class="mname" dir="auto" value="'+esc(name)+'" placeholder="'+(side==="A"?"קבוצה א׳":"קבוצה ב׳")+'"'+(color?' style="color:'+color+'"':'')+ro+' onchange="aSetTeam(\''+m.id+'\',\''+side+'\',this.value)"><input class="mchk '+(side==="A"?"a":"b")+'" type="checkbox"'+ck+dis+' onchange="aSettle(\''+m.id+'\',\''+side+'\')"></div><div class="mcnt" dir="auto">'+n+' ניחשו'+(na>0?' <span class="mauto">('+na+'🤖)</span>':'')+'</div><div class="mamt num">'+fmt(sum)+' '+cur()+'</div></div>';};
+    return '<div class="mteam"><div class="mtop"><input class="mname" dir="auto" value="'+esc(name)+'" placeholder="'+(side==="A"?"קבוצה א׳":"קבוצה ב׳")+'"'+(color?' style="color:'+color+'"':'')+ro+' onchange="aSetTeam(\''+m.id+'\',\''+side+'\',this.value)"><input class="mchk '+(side==="A"?"a":"b")+'" type="checkbox"'+ck+dis+' onchange="aSettle(\''+m.id+'\',\''+side+'\')"></div>'+(locked?('<div class="mcnt" dir="auto">'+n+' ניחשו'+(na>0?' <span class="mauto">('+na+'🤖)</span>':'')+'</div><div class="mamt num">'+fmt(sum)+' '+cur()+'</div>'):'')+'</div>';};
   var xck=(m.settled&&m.winner==="X")?" checked":"";var xcolor=(m.settled&&m.winner==="X")?"var(--pitch-d)":"";
-  var drawCol='<div class="mteam mdrawcol">'+(dOK?('<div class="mtop mtopc"><input class="mchk x" type="checkbox"'+xck+dis+' onchange="aSettle(\''+m.id+'\',\'X\')"></div><div class="mcnt"'+(xcolor?' style="color:'+xcolor+'"':'')+'>תיקו</div><div class="mamt num">'+fmt(c.sumX)+' '+cur()+'</div>'):'<div class="mtop mtopc"></div>')+'</div>';
+  var drawCol='<div class="mteam mdrawcol">'+(dOK?('<div class="mtop mtopc"><input class="mchk x" type="checkbox"'+xck+dis+' onchange="aSettle(\''+m.id+'\',\'X\')"></div><div class="mcnt"'+(xcolor?' style="color:'+xcolor+'"':'')+'>תיקו</div>'+(locked?('<div class="mamt num">'+fmt(c.sumX)+' '+cur()+'</div>'):'')):'<div class="mtop mtopc"></div>')+'</div>';
   var sub=m.dt?esc(fmtDate(m.dt)):((m.slot&&!canS)?esc(m.slot):"");
   var dateLine=sub?'<div class="m-date">'+sub+'</div>':'';
   var bottom;
-  if(locked){var st=(m.winner==="VOID")?"↩ בוטל — הכסף הוחזר לכולם":"✓ התוצאה סומנה והקופה חולקה";bottom='<div class="mlockst">'+st+'</div><button class="mdraw" onclick="aUnlock(\''+m.id+'\')">🔓 שנה תוצאה</button>';}
+  if(locked){var st=(m.winner==="VOID")?"↩ בוטל — הכסף הוחזר לכולם":"";bottom=(st?'<div class="mlockst">'+st+'</div>':'')+'<button class="mdraw" onclick="aUnlock(\''+m.id+'\')">🔓 שנה תוצאה</button>';}
   else if(canS){bottom='<div class="mbtnrow"><button class="mdraw mhalf" onclick="aSettle(\''+m.id+'\',\'VOID\')">ביטול · החזר קופה</button><button class="mdraw mhalf2" onclick="aSetDraw(\''+m.id+'\','+(dOK?"false":"true")+')">'+(dOK?"לבטל תיקו במשחק הזה":"להוסיף תיקו")+'</button></div>';}
   else {bottom='';}
   return '<div class="card card-p mcard'+(locked?" locked":"")+'" id="amc-'+m.id+'"><button class="xbtn" style="color:var(--red)" onclick="aDelMatch(\''+m.id+'\')">×</button>'+(m.t?'<span class="madd">'+esc(shortDT(m.t))+'</span>':'')+'<div class="mteams">'+col("A",m.teamA||"",nA,c.sumA,aA)+drawCol+col("B",m.teamB||"",nB,c.sumB,aB)+'</div>'+dateLine+bottom+'</div>';
@@ -1615,8 +1700,6 @@ function renderSettings(){
     '</div>'+
     '<button class="btn block pitch" style="margin-top:4px" onclick="aSaveCfg()">שמור</button>';
   var cfgBody=linkBody+betSizeBody;
-  var dashRes='<div class="card card-p"><button onclick="acDashToggle(\'results\')" class="panel-h"><div class="panel-top"><span class="panel-t">✅&nbsp;&nbsp;בדיקת תוצאות</span><span id="acChev_results" class="panel-chev">'+(ac2Open.results?"▲":"▼")+'</span></div><div class="panel-status"><span class="tiny muted">'+acDashStatus('results')+'</span></div></button><div id="acBody_results" style="display:'+(ac2Open.results?"block":"none")+';margin-top:14px">'+autoDashBody('results')+'</div></div>';
-  var dashNg='<div class="card card-p"><button onclick="acDashToggle(\'newgames\')" class="panel-h"><div class="panel-top"><span class="panel-t">📥&nbsp;&nbsp;טעינת משחקים</span><span id="acChev_newgames" class="panel-chev">'+(ac2Open.newgames?"▲":"▼")+'</span></div><div class="panel-status"><span class="tiny muted">'+acDashStatus('newgames')+'</span></div></button><div id="acBody_newgames" style="display:'+(ac2Open.newgames?"block":"none")+';margin-top:14px">'+autoDashBody('newgames')+'</div></div>';
   var logBody=
     logSub('logmain','📒&nbsp;רשומות מכשיר','<span id="logMini"></span>',
       '<div id="logSummary" class="tiny" style="margin-bottom:8px"></div>'+
@@ -1633,7 +1716,7 @@ function renderSettings(){
   var resetBody='<button class="btn block danger" onclick="aReset()">איפוס הטורניר</button>';
   var usageBody='<div id="usageBox"><div class="tiny muted">פתח/י לחישוב…</div></div>';
   var loginsBody='<div id="loginsBox"><div class="tiny muted">פתח/י לצפייה…</div></div>';
-  $("#main").innerHTML='<section class="view active"><div class="section-h" style="align-items:center"><h2>הגדרות</h2><button class="btn sm" onclick="goPlay()">⚽&nbsp;מעבר למשחק</button></div>'+panelCard("cfg","⚙️&nbsp;&nbsp;הגדרות הטורניר","",cfgBody)+panelCard("security","👮&nbsp;&nbsp;ניהול ואבטחה",(adminLockOn()?"🔒":""),adminSecBody())+panelCard("stats","📊&nbsp;&nbsp;סטטיסטיקה",'<span id="statsMini"></span>',statsBody())+dashRes+dashNg+panelCard("usage","💡&nbsp;&nbsp;שימוש",'<span id="usageMini"></span>',usageBody)+panelCard("logins","👤&nbsp;&nbsp;כניסות משתתפים","",loginsBody)+panelCard("log","📒&nbsp;&nbsp;יומן אירועים","",logBody)+panelCard("integrity","🔍&nbsp;&nbsp;בדיקת תקינות",'<span id="intgMini"></span>',integrityBody())+panelCard("reset","איפוס","",resetBody)+'<div class="empty tiny" style="padding:10px">מחובר ל: '+esc(DB)+'</div></section>';
+  $("#main").innerHTML='<section class="view active"><div class="section-h" style="align-items:center"><h2>הגדרות</h2><button class="btn sm" onclick="goPlay()">⚽&nbsp;מעבר למשחק</button></div>'+panelCard("cfg","⚙️&nbsp;&nbsp;הגדרות הטורניר","",cfgBody)+panelCard("security","👮&nbsp;&nbsp;ניהול ואבטחה",(adminLockOn()?"🔒":""),adminSecBody())+panelCard("stats","📊&nbsp;&nbsp;סטטיסטיקה",'<span id="statsMini"></span>',statsBody())+panelCard("usage","💡&nbsp;&nbsp;שימוש",'<span id="usageMini"></span>',usageBody)+panelCard("logins","👤&nbsp;&nbsp;כניסות משתתפים","",loginsBody)+panelCard("log","📒&nbsp;&nbsp;יומן אירועים","",logBody)+panelCard("integrity","🔍&nbsp;&nbsp;בדיקת תקינות",'<span id="intgMini"></span>',integrityBody())+panelCard("reset","איפוס","",resetBody)+'<div class="empty tiny" style="padding:10px">מחובר ל: '+esc(DB)+'</div></section>';
   try{renderUsage();}catch(e){}
   acDashInit();logRender();diagLoad();try{fitRefund();}catch(e){}try{statsMiniUpdate();}catch(e){}
 }
@@ -1873,7 +1956,7 @@ function autoDashBody(kind){
       '<div class="tiny muted" style="margin-bottom:8px;line-height:1.5">⏱️ הזמנים נגזרים אוטומטית מ-<strong>בדיקת תוצאות + 5 דקות</strong> (גם דקות וגם שעות קבועות). לשינוי הזמנים — ערוך/י את "בדיקת תוצאות".</div>'+
       '<div style="background:#f4f7f5;border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:14px;direction:ltr;text-align:left;font-weight:800">'+esc(prev)+'</div>'+
       '<button class="btn block" onclick="acDashSave(\'newgames\')">שמור</button>'+
-      '<div class="tiny muted" style="margin-top:8px">משחקים חדשים נטענים 5 דקות אחרי בדיקת התוצאות. תמיד נשמרים עד 3 משחקים פתוחים.</div>';
+      '<div class="tiny muted" style="margin-top:8px">משחקים חדשים נטענים 5 דקות אחרי בדיקת התוצאות. תמיד נשמרים עד '+fxCountLoad()+' משחקים פתוחים.</div>';
   }
   var hint='אחרי שמשחק התחיל — לבדוק תוצאה';
   return '<label style="display:flex;align-items:center;gap:8px;margin-bottom:14px;font-weight:700"><input type="checkbox" id="'+onId+'" '+(c.on?'checked':'')+' style="width:18px;height:18px;accent-color:var(--pitch)"> מופעל</label>'+
@@ -1884,7 +1967,7 @@ function autoDashBody(kind){
     '<div id="acTimes_'+kind+'" style="margin-bottom:8px;display:flex;flex-wrap:wrap;gap:8px"></div>'+
     '<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px"><input class="input" id="acTimesNew_'+kind+'" type="time" dir="ltr" value="08:00" style="flex:1"><button class="btn pitch" style="flex:0 0 auto;padding:0 14px" onclick="acTimesAdd(\''+kind+'\')">＋ הוסף</button></div>'+
     '<button class="btn block" onclick="acDashSave(\''+kind+'\')">שמור</button>'+
-    '<div class="tiny muted" style="margin-top:8px">'+(kind==='results'?'תוצאות מתעדכנות בכל אחד מהזמנים שלמעלה (אחרי תחילת המשחק או בשעה קבועה).':'משחקים חדשים נטענים בכל אחד מהזמנים שלמעלה. תמיד נשמרים עד 3 משחקים פתוחים.')+'</div>';
+    '<div class="tiny muted" style="margin-top:8px">'+(kind==='results'?'תוצאות מתעדכנות בכל אחד מהזמנים שלמעלה (אחרי תחילת המשחק או בשעה קבועה).':'משחקים חדשים נטענים בכל אחד מהזמנים שלמעלה. תמיד נשמרים עד '+fxCountLoad()+' משחקים פתוחים.')+'</div>';
 }
 function acRenderAfter(kind){var el=$("#acAfter_"+kind);if(!el)return;var arr=ac2[kind].after;if(!arr.length){el.innerHTML='<div class="tiny muted" style="padding:4px 0">לא מוגדר.</div>';return;}el.innerHTML=arr.map(function(min,i){return '<div style="display:flex;align-items:center;gap:6px;flex:1 1 44%;min-width:140px"><input class="input" type="number" dir="ltr" value="'+min+'" min="1" step="5" inputmode="numeric" onchange="acAfterEdit(\''+kind+'\','+i+',this.value)" style="flex:1;min-width:0"><button class="btn ghost" style="padding:2px 12px;flex:0 0 auto" onclick="acAfterDel(\''+kind+'\','+i+')">✕</button></div>';}).join("");}
 function acRenderTimes2(kind){var el=$("#acTimes_"+kind);if(!el)return;var arr=ac2[kind].times;if(!arr.length){el.innerHTML='<div class="tiny muted" style="padding:4px 0">אין שעות.</div>';return;}el.innerHTML=arr.map(function(t,i){return '<div style="display:flex;align-items:center;gap:6px;flex:1 1 44%;min-width:140px"><input class="input" type="time" dir="ltr" value="'+esc(t)+'" onchange="acTimesEdit(\''+kind+'\','+i+',this.value)" style="flex:1;min-width:0"><button class="btn ghost" style="padding:2px 12px;flex:0 0 auto" onclick="acTimesDel(\''+kind+'\','+i+')">✕</button></div>';}).join("");}
@@ -1956,6 +2039,11 @@ function aLoadFixtures(){
   }).catch(function(){toast("הטעינה נכשלה — בדוק/י אינטרנט ונסה/י שוב");});
 }
 var fxData=[],fxBusy=false,fxSlug="";
+var fxAvail=null;      // null = ещё не проверяли в эту сессию вкладки; {} slug->bool после пробы
+var fxAvailRaw={};     // slug -> нормализованные события (кэш пробы, переиспользуется при "טען")
+var fxAvailBusy=false; // защита от повторного запуска пробы
+var fxSelOrder=null;   // упорядоченный массив выбранных слагов (порядок кликов = приоритет)
+var fxListOpen=false;  // раскрыт ли чеклист турниров (по умолчанию свёрнут, как панели в הגדרות)
 var FXSUG=[
  {en:"World Cup",he:"מונדיאל (גביע העולם)",slug:"fifa.world",k:["world cup","fifa world cup","mondial","מונדיאל","גביע העולם","чемпионат мира","кубок мира","мундиаль","copa mundial","coupe du monde"]},
  {en:"Champions League",he:"ליגת האלופות",slug:"uefa.champions",k:["champions league","uefa champions league","ucl","ליגת האלופות","лига чемпионов","лч"]},
@@ -1994,23 +2082,100 @@ function fxFmtDate(iso){var L=fxLocal(iso);return L?L.replace("T"," "):"";}
 // TOP_FX: highest-rated tournaments shown when the fixtures search box is empty (priority order; results are sorted by soonest date anyway).
 var TOP_FX=["fifa.world","uefa.champions","eng.1","esp.1","ita.1","ger.1","fra.1","uefa.europa"];
 function fxSlugHe(slug){for(var i=0;i<FXSUG.length;i++){if(FXSUG[i].slug===slug)return FXSUG[i].he;}return slug;}
-function fxSelectOptions(){
-  var sel="";try{sel=localStorage.getItem("fxslug")||"";}catch(e){}
-  var opt=function(a){return '<option value="'+esc(a.slug)+'"'+(a.slug===sel?' selected':'')+'>'+esc(a.he)+'</option>';};
-  var isr=FXSUG.filter(function(a){return a.slug.indexOf("365:")===0;});
-  var rest=FXSUG.filter(function(a){return a.slug.indexOf("365:")!==0;});
-  return '<option value=""'+(sel?'':' selected')+'>📋 בחר ליגה / טורניר…</option>'+isr.map(opt).join('')+rest.map(opt).join('');
+/* ---------- выбор турниров: упорядоченный мультивыбор (порядок = приоритет добора) ---------- */
+function fxSelInit(){
+  if(fxSelOrder)return;
+  var valid={};FXSUG.forEach(function(a){valid[a.slug]=1;});
+  var src=null;
+  try{var lg=S.autocfg&&S.autocfg.newgames&&S.autocfg.newgames.leagues;if(Array.isArray(lg)&&lg.length)src=lg;}catch(e){}
+  if(!src){try{var raw=localStorage.getItem("fxslugs");if(raw!=null){var arr=JSON.parse(raw);if(Array.isArray(arr))src=arr;}}catch(e){}}
+  if(!src){try{var old=localStorage.getItem("fxslug");if(old)src=[old];}catch(e){}}
+  var seen={};
+  fxSelOrder=(src||[]).filter(function(s){return valid[s]&&!seen[s]&&(seen[s]=1);});
 }
-function fxSelectGo(slug){
-  if(!slug)return;
-  var sug=null;for(var i=0;i<FXSUG.length;i++){if(FXSUG[i].slug===slug){sug=FXSUG[i];break;}}
-  try{localStorage.setItem("fxq",(sug&&sug.he)||slug);localStorage.setItem("fxslug",slug);}catch(e){}
-  if(slug.indexOf("365:")===0){load365Games(slug.slice(4));return;}
-  loadFxGames({slug:slug,name:(sug?sug.en:slug)});
+function fxSelSave(){
+  try{localStorage.setItem("fxslugs",JSON.stringify(fxSelOrder));}catch(e){}
+  try{fbUpd("/autocfg/newgames",{leagues:fxSelOrder});}catch(e){}
 }
-window.fxSelectGo=fxSelectGo;
-function fxReloadSel(){var s=$("#fxSelect");var v=s?s.value:"";if(v)fxSelectGo(v);else{var r=$("#fxRes");if(r)r.innerHTML='<div class="tiny muted">בחר/י ליגה מהרשימה.</div>';}}
-window.fxReloadSel=fxReloadSel;
+function fxPanelSync(){var c=$("#fxTourneys");if(c)c.innerHTML=fxTourneyListHtml();var s=$("#fxListSel");if(s)s.innerHTML=fxSelNames();}
+function fxToggleOne(slug){
+  fxSelInit();
+  var i=fxSelOrder.indexOf(slug);
+  if(i>=0)fxSelOrder.splice(i,1); else fxSelOrder.push(slug); // добавляемый — в конец (наименьший приоритет)
+  fxSelSave();
+  fxPanelSync();
+}
+function fxToggleAll(){
+  fxSelInit();
+  var allOn=FXSUG.length>0&&FXSUG.every(function(a){return fxSelOrder.indexOf(a.slug)>=0;});
+  fxSelOrder=allOn?[]:FXSUG.map(function(a){return a.slug;});
+  fxSelSave();
+  fxPanelSync();
+}
+window.fxToggleOne=fxToggleOne;window.fxToggleAll=fxToggleAll;
+// имена выбранных турниров (для свёрнутого заголовка панели), в порядке приоритета
+function fxSelNames(){
+  fxSelInit();
+  if(!fxSelOrder.length)return '<span class="tiny muted">לא נבחרו טורנירים</span>';
+  return '<span class="tiny" style="color:var(--pitch-d);font-weight:700;direction:rtl;line-height:1.4">'+fxSelOrder.map(function(s){return esc(fxSlugHe(s));}).join(' · ')+'</span>';
+}
+function fxListToggle(){
+  fxListOpen=!fxListOpen;
+  var b=$("#fxTourneys");if(b)b.style.display=fxListOpen?"block":"none";
+  var ch=$("#fxListChev");if(ch)ch.textContent=fxListOpen?"▲":"▼";
+}
+window.fxListToggle=fxListToggle;
+function fxTourneyListHtml(){
+  fxSelInit();
+  var allOn=FXSUG.length>0&&FXSUG.every(function(a){return fxSelOrder.indexOf(a.slug)>=0;});
+  var loading=(fxAvail===null)?'<div class="tiny muted" style="text-align:center;padding:4px 0 8px">🔄 בודק אילו טורנירים פעילים…</div>':'';
+  var head='<div class="row" style="justify-content:flex-end;margin-bottom:6px"><div class="row" style="gap:6px;cursor:pointer" onclick="fxToggleAll()"><div class="checkbox '+(allOn?"on":"")+'" style="width:20px;height:20px;font-size:14px">'+(allOn?"✓":"")+'</div><span class="tiny muted">בחר הכל</span></div></div>';
+  var rows=FXSUG.map(function(a){
+    var pos=fxSelOrder.indexOf(a.slug), on=pos>=0, live=!!(fxAvail&&fxAvail[a.slug]===true);
+    var badge=on?'<span class="fxnum">'+(pos+1)+'</span>':'';
+    return '<div class="fxli'+(live?' live':'')+'" onclick="fxToggleOne(\''+a.slug+'\')"><div class="checkbox '+(on?"on":"")+'" style="width:22px;height:22px;font-size:14px">'+(on?"✓":"")+'</div>'+badge
+      +'<span class="tiny" style="flex:1;font-weight:'+(live?'800':'600')+'" dir="rtl">'+esc(a.he)+(live?' <span style="color:var(--pitch-d)">●</span>':'')+'</span></div>';
+  }).join("");
+  return head+loading+'<div style="max-height:240px;overflow-y:auto">'+rows+'</div>';
+}
+function fxLoadSelected(){
+  fxSelInit();
+  var res=$("#fxRes"); if(!res)return;
+  var slugs=fxSelOrder.slice();
+  if(!slugs.length){res.innerHTML='<div class="tiny muted">בחר/י לפחות טורניר אחד מהרשימה.</div>';return;}
+  var n=fxCountLoad();
+  fxBusy=true; fxSlug=""; res.innerHTML='<div class="tiny muted">טוען משחקים…</div>';
+  var have=fxHaveMap(); // пересчитан на момент клика — покрывает добавления с момента пробы
+  var jobs=slugs.map(function(slug){
+    var cached=fxAvailRaw[slug]; // переиспользуем сырые события пробы, если уже пришли
+    var p=(cached!=null)?Promise.resolve(cached):fetchFxEvents(slug).catch(function(){return [];});
+    return p.then(function(evs){return fxTopN(evs,have,n).pick;});
+  });
+  Promise.all(jobs).then(function(arrs){
+    var all=[],seen={};
+    arrs.forEach(function(a){a.forEach(function(g){if(!seen[g.fxid]){seen[g.fxid]=1;all.push(g);}});}); // порядок = приоритет турниров
+    if(!all.length){res.innerHTML='<div class="tiny" style="color:var(--mut);font-weight:700">לא נמצאו משחקים קרובים בטורנירים שנבחרו.</div><button class="btn block ghost" style="margin-top:8px" onclick="aFxCancel()">סגור</button>';return;}
+    fxData=all;
+    res.innerHTML='<div class="tiny muted" style="margin-bottom:6px">'+all.length+' משחקים מ-'+slugs.length+' טורנירים. בטל/י סימון למה שלא רוצים:</div>'+fxRowsHtml(all,true)+'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn pitch" style="flex:1" onclick="aAddSelectedFixtures()">＋ הוסף את המסומנים</button><button class="btn ghost" style="flex:0 0 auto" onclick="aFxCancel()">בטל</button></div>';
+  }).catch(function(e){res.innerHTML='<div class="tiny" style="color:var(--red);font-weight:700">החיפוש נכשל (רשת/CORS).</div>';});
+}
+window.fxLoadSelected=fxLoadSelected;
+function fxProbeAvailability(){
+  if(fxAvailBusy)return;
+  fxAvailBusy=true; fxBusy=true;
+  var jobs=FXSUG.map(function(a){
+    return fetchFxEvents(a.slug).then(function(evs){
+      fxAvailRaw[a.slug]=evs;
+      var lim=Date.now()+864e5; // зелёная подсветка только если есть игра в ближайшие 24 часа
+      return {slug:a.slug, ok:evs.some(function(g){if(g.state!=="pre")return false;var t=new Date(g.date).getTime();return isFinite(t)&&t>=Date.now()&&t<=lim;})};
+    }).catch(function(){ fxAvailRaw[a.slug]=null; return {slug:a.slug, ok:false}; });
+  });
+  Promise.all(jobs).then(function(results){
+    var map={}; results.forEach(function(r){map[r.slug]=r.ok;});
+    fxAvail=map; fxAvailBusy=false; fxBusy=false;
+    var c=$("#fxTourneys"); if(c)c.innerHTML=fxTourneyListHtml();
+  }).catch(function(){ fxAvailBusy=false; fxBusy=false; });
+}
 function aSearchFixtures(){
   var q=(($("#fxQ")||{}).value||"").trim();
   var res=$("#fxRes"); if(!res)return;
@@ -2029,108 +2194,106 @@ function espnGet(url){
     .catch(function(e){logWarn("espn","proxy 1 נכשל — proxy 2");return viaProxy("https://api.allorigins.win/raw?url="+encodeURIComponent(url));})
     .catch(function(e){logErr("espn","כל הניסיונות ל-ESPN נכשלו: "+((e&&e.message)||e),{url:String(url).slice(0,160)});throw e;});
 }
-function loadFxGames(lg){
-  var res=$("#fxRes"); if(!res)return;
-  var disp=fxHe(lg.name)||esc(lg.name);
-  fxBusy=true; fxSlug=lg.slug||""; res.innerHTML='<div class="tiny muted">טוען משחקים: '+disp+'…</div>';
+/* ---------- количество игр (сколько грузить с турнира / держать в корзине) ---------- */
+function fxCountLoad(){
+  var v=null;
+  try{var w=S.autocfg&&S.autocfg.newgames&&S.autocfg.newgames.want;if(w!=null&&isFinite(+w))v=+w;}catch(e){}
+  if(v==null){try{var s=localStorage.getItem("fxcount");if(s&&isFinite(+s))v=+s;}catch(e){}}
+  if(v==null)v=3;
+  return Math.max(1,Math.round(v));
+}
+function fxCountChange(v){
+  var n=Math.max(1,Math.min(20,Math.round(Number(v)||3)));
+  try{localStorage.setItem("fxcount",String(n));}catch(e){}
+  try{fbUpd("/autocfg/newgames",{want:n});}catch(e){}
+  var el=$("#fxCount");if(el)el.value=n;
+}
+window.fxCountChange=fxCountChange;
+/* ---------- общий фетчер событий турнира (ESPN + 365scores) ---------- */
+function fxEventsUrl(slug){
+  if(slug.indexOf("365:")===0){
+    var comp=slug.slice(4)||"42";
+    return "https://webws.365scores.com/web/games/?appTypeId=5&langId=2&timezoneName=Asia/Jerusalem&userCountryId=6&competitions="+encodeURIComponent(comp);
+  }
   var d0=new Date(),d1=new Date(Date.now()+75*864e5);
-  var url="https://site.api.espn.com/apis/site/v2/sports/soccer/"+encodeURIComponent(lg.slug)+"/scoreboard?limit=300&dates="+fxYMD(d0)+"-"+fxYMD(d1);
-  espnGet(url).then(function(j){
-    var evs=(j&&j.events)||[];
-    var games=evs.map(function(e){
-      var comp=(e.competitions&&e.competitions[0])||{},cs=comp.competitors||[],home=null,away=null;
-      cs.forEach(function(c){if(c.homeAway==="home")home=c;else if(c.homeAway==="away")away=c;});
-      if(!home)home=cs[0]; if(!away)away=cs[1];
-      var st=((e.status&&e.status.type)||{});
-      var nm=function(c){return (c&&c.team&&(c.team.displayName||c.team.shortDisplayName||c.team.name))||"";};
-      return {id:e.id,date:e.date,home:nm(home),away:nm(away),state:st.state||"",note:e.name||"",slug:lg.slug,stage:((comp.notes&&comp.notes[0]&&(comp.notes[0].headline||comp.notes[0].text))||(e.season&&e.season.slug)||"")};
-    });
-    var have={};S.matches.forEach(function(m){if(m.fx)have[m.fx]=1;});
-    var fresh=games.filter(function(g){return !have["espn"+g.id];}); // skip games already in the list
-    var up=fresh.filter(function(g){return g.state==="pre";});
-    up.sort(function(a,b){return String(a.date||"").localeCompare(String(b.date||""));});
-    var pick=up.slice(0,3);
-    if(!pick.length){var nc=fresh.filter(function(g){return g.state!=="post";});nc.sort(function(a,b){return String(a.date||"").localeCompare(String(b.date||""));});pick=nc.slice(0,3);}
-    if(!pick.length){
-      var someAdded=games.some(function(g){return have["espn"+g.id];});
-      res.innerHTML='<div class="tiny" style="color:var(--mut);font-weight:700;margin-bottom:2px">'+(someAdded?"כל המשחקים הקרובים כבר נוספו ✓":("לא נמצאו משחקים קרובים ל"+disp+"."))+'</div>'+(someAdded?"":'<div class="tiny muted" style="direction:ltr;text-align:left">diag: espn='+esc(lg.slug)+' events='+evs.length+'</div>')+'<button class="btn block ghost" style="margin-top:8px" onclick="aFxCancel()">סגור</button>';
-      return;
-    }
-    fxData=pick;
-    var rows=pick.map(function(g,i){
-      var tm=((g.home||"")+(g.away?(" — "+g.away):"")).trim()||g.note||("משחק "+(i+1));
-      var dd=fxFmtDate(g.date);
-      return '<label style="display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px"><input type="checkbox" class="fxc" data-i="'+i+'" checked style="accent-color:var(--pitch);width:18px;height:18px;flex:0 0 auto"><span dir="auto" style="flex:1">'+esc(tm)+'<br><span class="tiny muted">'+esc(dd)+'</span></span></label>';
-    }).join("");
-    res.innerHTML='<div class="tiny muted" style="margin-bottom:6px">'+disp+' — '+pick.length+' המשחקים הקרובים. בטל/י סימון למה שלא רוצים:</div>'+rows+'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn pitch" style="flex:1" onclick="aAddSelectedFixtures()">＋ הוסף את המסומנים</button><button class="btn ghost" style="flex:0 0 auto" onclick="aFxCancel()">בטל</button></div>';
-  }).catch(function(e){res.innerHTML='<div class="tiny" style="color:var(--red);font-weight:700">החיפוש נכשל (רשת/CORS).</div><div class="tiny muted" style="direction:ltr;text-align:left">'+esc(String((e&&e.message)||e))+'</div>';});
+  return "https://site.api.espn.com/apis/site/v2/sports/soccer/"+encodeURIComponent(slug)+"/scoreboard?limit=300&dates="+fxYMD(d0)+"-"+fxYMD(d1);
 }
-function load365Games(comp){
-  comp=comp||"42";
+function fxLeagueLogo(j){ // логотип лиги из ответа ESPN scoreboard (default-версия)
+  var L=(j&&j.leagues&&j.leagues[0])||{},lg=(L.logos||[]);
+  return (((lg.filter(function(x){return x.rel&&x.rel.indexOf("default")>=0;})[0])||lg[0]||{}).href)||"";
+}
+function fxNormEspn(j,slug){
+  var logo=fxLeagueLogo(j);
+  return ((j&&j.events)||[]).map(function(e){
+    var comp=(e.competitions&&e.competitions[0])||{},cs=comp.competitors||[],home=null,away=null;
+    cs.forEach(function(c){if(c.homeAway==="home")home=c;else if(c.homeAway==="away")away=c;});
+    if(!home)home=cs[0]; if(!away)away=cs[1];
+    var st=((e.status&&e.status.type)||{});
+    var nm=function(c){return (c&&c.team&&(c.team.displayName||c.team.shortDisplayName||c.team.name))||"";};
+    return {id:e.id,date:e.date,home:nm(home),away:nm(away),state:st.state||"",note:e.name||"",slug:slug,stage:((comp.notes&&comp.notes[0]&&(comp.notes[0].headline||comp.notes[0].text))||(e.season&&e.season.slug)||""),fxid:"espn"+e.id,logo:logo};
+  });
+}
+function fxNorm365(j,slug){
+  return ((j&&j.games)||[]).map(function(g){
+    var hc=g.homeCompetitor||{},aw=g.awayCompetitor||{};
+    var txt=String(g.shortStatusText||g.statusText||"");
+    var ended=(Number(g.statusGroup)===4)||/ended|finished|final|הסתיים|גמר/i.test(txt);
+    var t=new Date(g.startTime).getTime();
+    var state=ended?"post":((isFinite(t)&&t>Date.now())?"pre":"in");
+    return {id:String(g.id),date:g.startTime,home:String(hc.name||""),away:String(aw.name||""),state:state,note:"",slug:slug,stage:"",fxid:"365"+g.id,logo:""};
+  }).filter(function(g){return g.id&&g.home&&g.away;});
+}
+function fetchFxEvents(slug){
+  var is365=slug.indexOf("365:")===0;
+  return espnGet(fxEventsUrl(slug)).then(function(j){return is365?fxNorm365(j,slug):fxNormEspn(j,slug);});
+}
+function fxHaveMap(){var have={};S.matches.forEach(function(m){if(m.fx)have[m.fx]=1;});return have;}
+function fxTopN(evs,have,n){
+  var fresh=evs.filter(function(g){return !have[g.fxid];});
+  var up=fresh.filter(function(g){return g.state==="pre";});
+  up.sort(function(a,b){return String(a.date||"").localeCompare(String(b.date||""));});
+  var pick=up.slice(0,n);
+  if(!pick.length){var nc=fresh.filter(function(g){return g.state!=="post";});nc.sort(function(a,b){return String(a.date||"").localeCompare(String(b.date||""));});pick=nc.slice(0,n);}
+  return {pick:pick, someAdded:evs.some(function(g){return have[g.fxid];})};
+}
+function fxRowsHtml(list,showSlug){
+  return list.map(function(g,i){
+    var tm=((g.home||"")+(g.away?(" — "+g.away):"")).trim()||g.note||("משחק "+(i+1));
+    var sub=(showSlug?(esc(fxSlugHe(g.slug))+' · '):'')+esc(fxFmtDate(g.date));
+    return '<label style="display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px"><input type="checkbox" class="fxc" data-i="'+i+'" checked style="accent-color:var(--pitch);width:18px;height:18px;flex:0 0 auto"><span dir="auto" style="flex:1">'+esc(tm)+'<br><span class="tiny muted">'+sub+'</span></span></label>';
+  }).join("");
+}
+function fxLoadOne(slug,dispName,count){
   var res=$("#fxRes"); if(!res)return;
-  fxBusy=true; fxSlug="365:"+comp; res.innerHTML='<div class="tiny muted">טוען משחקים: ליגת העל…</div>';
-  var url="https://webws.365scores.com/web/games/?appTypeId=5&langId=2&timezoneName=Asia/Jerusalem&userCountryId=6&competitions="+encodeURIComponent(comp);
-  return espnGet(url).then(function(j){
-    var games=((j&&j.games)||[]).map(function(g){
-      var hc=g.homeCompetitor||{},aw=g.awayCompetitor||{};
-      var txt=String(g.shortStatusText||g.statusText||"");
-      var ended=(Number(g.statusGroup)===4)||/ended|finished|final|הסתיים|גמר/i.test(txt);
-      var t=new Date(g.startTime).getTime();
-      var state=ended?"post":((isFinite(t)&&t>Date.now())?"pre":"in");
-      return {id:String(g.id),date:g.startTime,home:String(hc.name||""),away:String(aw.name||""),state:state,note:"",slug:"365:"+comp,stage:""};
-    }).filter(function(g){return g.id&&g.home&&g.away;});
-    var have={};S.matches.forEach(function(m){if(m.fx)have[m.fx]=1;});
-    var fresh=games.filter(function(g){return !have["365"+g.id];});
-    var up=fresh.filter(function(g){return g.state==="pre";});
-    up.sort(function(a,b){return String(a.date||"").localeCompare(String(b.date||""));});
-    var pick=up.slice(0,3);
-    if(!pick.length){var nc=fresh.filter(function(g){return g.state!=="post";});nc.sort(function(a,b){return String(a.date||"").localeCompare(String(b.date||""));});pick=nc.slice(0,3);}
-    if(!pick.length){
-      var someAdded=games.some(function(g){return have["365"+g.id];});
-      res.innerHTML='<div class="tiny" style="color:var(--mut);font-weight:700;margin-bottom:2px">'+(someAdded?"כל המשחקים הקרובים כבר נוספו ✓":"לא נמצאו משחקים קרובים בליגת העל.")+'</div>'+(someAdded?"":'<div class="tiny muted" style="direction:ltr;text-align:left">diag: 365 comp='+esc(comp)+' games='+games.length+'</div>')+'<button class="btn block ghost" style="margin-top:8px" onclick="aFxCancel()">סגור</button>';
+  var n=count||fxCountLoad();
+  fxBusy=true; fxSlug=slug; res.innerHTML='<div class="tiny muted">טוען משחקים: '+esc(dispName)+'…</div>';
+  return fetchFxEvents(slug).then(function(evs){
+    var r=fxTopN(evs,fxHaveMap(),n);
+    if(!r.pick.length){
+      res.innerHTML='<div class="tiny" style="color:var(--mut);font-weight:700;margin-bottom:2px">'+(r.someAdded?"כל המשחקים הקרובים כבר נוספו ✓":("לא נמצאו משחקים קרובים ל"+esc(dispName)+"."))+'</div>'+(r.someAdded?"":'<div class="tiny muted" style="direction:ltr;text-align:left">diag: slug='+esc(slug)+' events='+evs.length+'</div>')+'<button class="btn block ghost" style="margin-top:8px" onclick="aFxCancel()">סגור</button>';
       return;
     }
-    fxData=pick;
-    var rows=pick.map(function(g,i){
-      var tm=((g.home||"")+(g.away?(" — "+g.away):"")).trim()||("משחק "+(i+1));
-      var dd=fxFmtDate(g.date);
-      return '<label style="display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px"><input type="checkbox" class="fxc" data-i="'+i+'" checked style="accent-color:var(--pitch);width:18px;height:18px;flex:0 0 auto"><span dir="auto" style="flex:1">'+esc(tm)+'<br><span class="tiny muted">'+esc(dd)+'</span></span></label>';
-    }).join("");
-    res.innerHTML='<div class="tiny muted" style="margin-bottom:6px">ליגת העל — '+pick.length+' המשחקים הקרובים. בטל/י סימון למה שלא רוצים:</div>'+rows+'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn pitch" style="flex:1" onclick="aAddSelectedFixtures()">＋ הוסף את המסומנים</button><button class="btn ghost" style="flex:0 0 auto" onclick="aFxCancel()">בטל</button></div>';
+    fxData=r.pick;
+    res.innerHTML='<div class="tiny muted" style="margin-bottom:6px">'+esc(dispName)+' — '+r.pick.length+' המשחקים הקרובים. בטל/י סימון למה שלא רוצים:</div>'+fxRowsHtml(r.pick,false)+'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn pitch" style="flex:1" onclick="aAddSelectedFixtures()">＋ הוסף את המסומנים</button><button class="btn ghost" style="flex:0 0 auto" onclick="aFxCancel()">בטל</button></div>';
   }).catch(function(e){res.innerHTML='<div class="tiny" style="color:var(--red);font-weight:700">החיפוש נכשל (רשת/CORS).</div><div class="tiny muted" style="direction:ltr;text-align:left">'+esc(String((e&&e.message)||e))+'</div>';});
 }
+function loadFxGames(lg,count){ return fxLoadOne(lg.slug, fxHe(lg.name)||lg.name, count); }
+function load365Games(comp,count){ comp=comp||"42"; return fxLoadOne("365:"+comp, "ליגת העל", count); }
 window.load365Games=load365Games;
 function loadTopFx(){
   var res=$("#fxRes"); if(!res)return;
   fxBusy=true; fxSlug=""; res.innerHTML='<div class="tiny muted">טוען משחקים מהטורנירים המובילים…</div>';
-  var dates=fxYMD(new Date())+"-"+fxYMD(new Date(Date.now()+75*864e5));
-  var jobs=TOP_FX.map(function(slug){
-    var url="https://site.api.espn.com/apis/site/v2/sports/soccer/"+encodeURIComponent(slug)+"/scoreboard?limit=300&dates="+dates;
-    return espnGet(url).then(function(j){
-      return ((j&&j.events)||[]).map(function(e){
-        var comp=(e.competitions&&e.competitions[0])||{},cs=comp.competitors||[],home=null,away=null;
-        cs.forEach(function(c){if(c.homeAway==="home")home=c;else if(c.homeAway==="away")away=c;});
-        if(!home)home=cs[0]; if(!away)away=cs[1];
-        var st=((e.status&&e.status.type)||{});
-        var nm=function(c){return (c&&c.team&&(c.team.displayName||c.team.shortDisplayName||c.team.name))||"";};
-        return {id:e.id,date:e.date,home:nm(home),away:nm(away),state:st.state||"",note:e.name||"",slug:slug,stage:((comp.notes&&comp.notes[0]&&(comp.notes[0].headline||comp.notes[0].text))||(e.season&&e.season.slug)||"")};
-      });
-    }).catch(function(){return [];});
-  });
+  var jobs=TOP_FX.map(function(slug){return fetchFxEvents(slug).catch(function(){return [];});});
   Promise.all(jobs).then(function(arrs){
     var all=[],seen={};
     arrs.forEach(function(a){a.forEach(function(g){if(g.id&&!seen[g.id]){seen[g.id]=1;all.push(g);}});});
-    var have={};S.matches.forEach(function(m){if(m.fx)have[m.fx]=1;});
-    var up=all.filter(function(g){return g.state==="pre"&&!have["espn"+g.id];});
+    var have=fxHaveMap();
+    var up=all.filter(function(g){return g.state==="pre"&&!have[g.fxid];});
     up.sort(function(a,b){return String(a.date||"").localeCompare(String(b.date||""));});
     var pick=up.slice(0,8);
     if(!pick.length){res.innerHTML='<div class="tiny" style="color:var(--mut);font-weight:700;margin-bottom:2px">לא נמצאו משחקים קרובים בטורנירים המובילים.</div><div class="tiny muted">אפשר להקליד שם טורניר ספציפי בשורת החיפוש.</div><button class="btn block ghost" style="margin-top:8px" onclick="aFxCancel()">סגור</button>';return;}
     fxData=pick;
-    var rows=pick.map(function(g,i){
-      var tm=((g.home||"")+(g.away?(" — "+g.away):"")).trim()||g.note||("משחק "+(i+1));
-      return '<label style="display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px"><input type="checkbox" class="fxc" data-i="'+i+'" checked style="accent-color:var(--pitch);width:18px;height:18px;flex:0 0 auto"><span dir="auto" style="flex:1">'+esc(tm)+'<br><span class="tiny muted">'+esc(fxSlugHe(g.slug))+' · '+esc(fxFmtDate(g.date))+'</span></span></label>';
-    }).join("");
-    res.innerHTML='<div class="tiny muted" style="margin-bottom:6px">הטורנירים המובילים — '+pick.length+' המשחקים הקרובים. בטל/י סימון למה שלא רוצים:</div>'+rows+'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn pitch" style="flex:1" onclick="aAddSelectedFixtures()">＋ הוסף את המסומנים</button><button class="btn ghost" style="flex:0 0 auto" onclick="aFxCancel()">בטל</button></div>';
+    res.innerHTML='<div class="tiny muted" style="margin-bottom:6px">הטורנירים המובילים — '+pick.length+' המשחקים הקרובים. בטל/י סימון למה שלא רוצים:</div>'+fxRowsHtml(pick,true)+'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn pitch" style="flex:1" onclick="aAddSelectedFixtures()">＋ הוסף את המסומנים</button><button class="btn ghost" style="flex:0 0 auto" onclick="aFxCancel()">בטל</button></div>';
   }).catch(function(e){res.innerHTML='<div class="tiny" style="color:var(--red);font-weight:700">החיפוש נכשל (רשת/CORS).</div><div class="tiny muted" style="direction:ltr;text-align:left">'+esc(String((e&&e.message)||e))+'</div>';});
 }
 function aAddSelectedFixtures(){
@@ -2140,7 +2303,7 @@ function aAddSelectedFixtures(){
     var g=fxData[Number(ch.getAttribute("data-i"))]; if(!g)return;
     var id=uid();
     var sl=(g.slug||fxSlug||"");var is365=sl.indexOf("365:")===0;
-    ups[id]={round:"R32",teamA:(g.home||""),teamB:(g.away||""),slot:(g.note||""),dt:fxLocal(g.date),order:o++,fx:(is365?"365":"espn")+g.id,fxLeague:sl,settled:false,winner:null,drawOK:(is365?true:detectDrawOK(sl,g.stage)),t:Date.now()+o};
+    ups[id]={round:"R32",teamA:(g.home||""),teamB:(g.away||""),slot:(g.note||""),dt:fxLocal(g.date),order:o++,fx:(is365?"365":"espn")+g.id,fxLeague:sl,logo:(g.logo||""),settled:false,winner:null,drawOK:(is365?true:detectDrawOK(sl,g.stage)),t:Date.now()+o};
     n++;
   });
   if(!n)return;

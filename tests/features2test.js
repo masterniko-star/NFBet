@@ -7,7 +7,7 @@ const tick=()=>new Promise(r=>setTimeout(r,25));
 
 (async function(){
 
-// ---------- 1. League dropdown renders with all main leagues + free text input ----------
+// ---------- 1. Tournament checklist renders with all main leagues + select-all ----------
 {
   const A=loadApp({meta:{bank:100},players:{},matches:{},bets:{}},{hash:'#ctrl7'});
   A.sandbox.MODE='admin';
@@ -15,44 +15,47 @@ const tick=()=>new Promise(r=>setTimeout(r,25));
   await tick();
   A.sandbox.renderAdminMatches();
   const h=A.mainHTML();
-  ok(h.indexOf('id="fxSelect"')>=0,'dropdown present');
-  ok(h.indexOf('fxSelectGo(this.value)')>=0,'dropdown wired to fxSelectGo');
-  ok(h.indexOf('id="fxQ"')<0,'free-text input merged into dropdown (removed)');
-  ok(h.indexOf('fxReloadSel()')>=0,'reload button (טען) present');
-  // main leagues in options
-  ok(h.indexOf('value="365:42"')>=0,'option: Israeli league (365:42)');
-  ok(h.indexOf('value="eng.1"')>=0,'option: English Premier League');
-  ok(h.indexOf('value="esp.1"')>=0,'option: Spanish La Liga');
-  ok(h.indexOf('value="ita.1"')>=0,'option: Italian Serie A');
-  ok(h.indexOf('value="ger.1"')>=0,'option: German Bundesliga');
-  ok(h.indexOf('value="fra.1"')>=0,'option: French Ligue 1');
-  ok(h.indexOf('value="fifa.world"')>=0,'option: World Cup');
-  ok(h.indexOf('value="uefa.champions"')>=0,'option: Champions League');
+  ok(h.indexOf('id="fxTourneys"')>=0,'tournament checklist present');
+  ok(h.indexOf('fxLoadSelected()')>=0,'load button wired to fxLoadSelected');
+  ok(h.indexOf('fxToggleAll()')>=0,'select-all control present');
+  ok(h.indexOf('id="fxCount"')>=0,'games-count field present');
+  ok(h.indexOf('fxCountChange(this.value)')>=0,'count field wired to fxCountChange');
+  ok(h.indexOf('id="fxQ"')<0,'no free-text input');
+  ok(h.indexOf('id="fxSelect"')<0,'old single-select dropdown removed');
+  // main leagues as checklist rows
+  ok(h.indexOf("fxToggleOne('365:42')")>=0,'row: Israeli league (365:42)');
+  ok(h.indexOf("fxToggleOne('eng.1')")>=0,'row: English Premier League');
+  ok(h.indexOf("fxToggleOne('esp.1')")>=0,'row: Spanish La Liga');
+  ok(h.indexOf("fxToggleOne('ita.1')")>=0,'row: Italian Serie A');
+  ok(h.indexOf("fxToggleOne('ger.1')")>=0,'row: German Bundesliga');
+  ok(h.indexOf("fxToggleOne('fra.1')")>=0,'row: French Ligue 1');
+  ok(h.indexOf("fxToggleOne('fifa.world')")>=0,'row: World Cup');
+  ok(h.indexOf("fxToggleOne('uefa.champions')")>=0,'row: Champions League');
   ok(h.indexOf('ליגת העל')>=0,'Hebrew label ליגת העל present');
-  // placeholder
-  ok(h.indexOf('בחר ליגה')>=0,'placeholder option present');
-  // Israeli league appears before the rest (prominent)
-  const iIsr=h.indexOf('value="365:42"'), iEpl=h.indexOf('value="eng.1"');
-  ok(iIsr>=0&&iEpl>=0&&iIsr<iEpl,'Israeli league listed before EPL (prominent first)');
+  // Israeli league appears before EPL in the list
+  const iIsr=h.indexOf("fxToggleOne('365:42')"), iEpl=h.indexOf("fxToggleOne('eng.1')");
+  ok(iIsr>=0&&iEpl>=0&&iIsr<iEpl,'Israeli league listed before EPL');
 }
 
-// ---------- 2. fxSelectGo routes 365 vs ESPN correctly ----------
+// ---------- 2. multi-select: toggle + load routes 365 correctly, persists ordered selection ----------
 {
   const future=new Date(Date.now()+3*864e5).toISOString();
   const s365={games:[{id:5001,startTime:future,statusGroup:1,homeCompetitor:{name:'מכבי חיפה'},awayCompetitor:{name:'בית"ר ירושלים'}}]};
   const A=loadApp({meta:{bank:100},players:{},matches:{},bets:{}},{hash:'#ctrl7',s365});
   A.sandbox.MODE='admin'; A.sandbox.refresh(); await tick();
   A.sandbox.renderAdminMatches();
-  // pick Israeli league -> 365 path (fxSlug set synchronously)
-  A.sandbox.fxSelectGo('365:42');
-  ok(A.sandbox.fxSlug==='365:42','fxSelectGo(365:42) -> 365 path (fxSlug=365:42)');
+  // select Israeli league, then load
+  A.sandbox.fxToggleOne('365:42');
+  A.sandbox.fxLoadSelected();
   await tick();
-  ok(A.q('#fxRes').innerHTML.indexOf('מכבי חיפה')>=0,'365 league loaded Hebrew games via dropdown');
-  // pick EPL -> ESPN path
-  A.sandbox.fxSelectGo('eng.1');
-  ok(A.sandbox.fxSlug==='eng.1','fxSelectGo(eng.1) -> ESPN path (fxSlug=eng.1)');
-  // dropdown persists the selection so it stays shown after re-render
-  ok(A.sandbox.localStorage.getItem('fxslug')==='eng.1','fxSelectGo persists selected league (fxslug)');
+  ok(A.q('#fxRes').innerHTML.indexOf('מכבי חיפה')>=0,'selected 365 league loaded Hebrew games');
+  // ordered selection persisted to fxslugs (JSON array)
+  const saved=A.sandbox.localStorage.getItem('fxslugs');
+  ok(saved&&saved.indexOf('365:42')>=0,'selection persisted to fxslugs');
+  // toggle off removes it
+  A.sandbox.fxToggleOne('365:42');
+  const saved2=A.sandbox.localStorage.getItem('fxslugs');
+  ok(saved2&&saved2.indexOf('365:42')<0,'unchecking removes league from fxslugs');
 }
 
 // ---------- 3. Table columns: 2-line name + deposited(📥)/withdrawn(📤)/balance(💰) ----------

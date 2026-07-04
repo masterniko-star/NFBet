@@ -87,19 +87,10 @@ const tick=()=>new Promise(r=>setTimeout(r,25));
   await tick();
   A.sandbox.renderSettings();
   const h=A.mainHTML();
-  ok(h.indexOf('בדיקת תוצאות')>=0,'settings renders results dashboard title');
-  ok(h.indexOf('טעינת משחקים')>=0,'settings renders newgames dashboard title');
-  ok(h.indexOf('id="ac_results_on"')>=0,'results on/off checkbox present');
-  ok(h.indexOf('id="ac_newgames_on"')>=0,'newgames on/off checkbox present');
-  ok(h.indexOf('acDashSave(\'results\')')>=0||h.indexOf('acDashSave("results")')>=0,'results save wired');
-  ok(h.indexOf('id="acAfter_results"')>=0,'results offset editor div present');
-  ok(h.indexOf('בדיקת תוצאות + 5')>=0,'newgames panel shows derived (results+5) note instead of own editor');
-  ok(h.indexOf('id="acTimes_newgames"')<0,'newgames has NO independent times editor (derived)');
-  // results editor chips render via acDashInit
-  const after=A.q('#acAfter_results').innerHTML;
-  ok(after.indexOf('180')>=0,'results offset chip shows 180 as minutes');
-  // newgames preview = results +5 (185 ד׳ · 08:05)
-  ok(h.indexOf('185')>=0&&h.indexOf('08:05')>=0,'newgames preview = results offsets/times +5');
+  ok(h.indexOf('אוטומציה')<0,'automation section removed from settings');
+  ok(h.indexOf('id="ac_results_on"')<0,'old results toggle removed from settings');
+  ok(h.indexOf('id="ac_newgames_on"')<0,'old newgames toggle removed from settings');
+  ok(h.indexOf('id="acAfter_results"')<0,'old offset editor removed from settings');
 }
 
 // ---------- 5. acDashSave writes /autocfg/<kind> with on/after/times, preserves last ----------
@@ -186,7 +177,7 @@ const tick=()=>new Promise(r=>setTimeout(r,25));
   // expected canonical new shape
   eq(Object.keys(cm).sort(),['newgames','results'],'acMig produces {results,newgames}');
   eq(Object.keys(cm.results).sort(),['after','last','on','times'],'results has on/after/times/last');
-  eq(Object.keys(cm.newgames).sort(),['after','last','on','times'],'newgames has on/after/times/last');
+  eq(Object.keys(cm.newgames).sort(),['after','last','leagues','on','times','want'],'newgames has on/after/times/last + want/leagues');
 }
 
 // ---------- 9. aFillResults settles an ended 365 match (manual fill, bug #1 fix) ----------
@@ -222,7 +213,7 @@ const tick=()=>new Promise(r=>setTimeout(r,25));
   eq(m.winner,'X','aFillResults 365 draw winner=X (1-1, drawOK)');
 }
 
-// ---------- 11. renderAdminMatches: league dropdown includes Israeli league (routes to 365) ----------
+// ---------- 11. renderAdminMatches: tournament checklist includes Israeli league (routes to 365) ----------
 {
   const A=loadApp({meta:{bank:100},players:{},matches:{},bets:{}},{hash:'#ctrl7'});
   A.sandbox.MODE='admin';
@@ -230,10 +221,10 @@ const tick=()=>new Promise(r=>setTimeout(r,25));
   await tick();
   A.sandbox.renderAdminMatches();
   const h=A.mainHTML();
-  ok(h.indexOf('id="fxSelect"')>=0,'admin matches view has league dropdown');
-  ok(h.indexOf('value="365:42"')>=0,'dropdown has Israeli league option (365:42)');
-  ok(h.indexOf('ליגת העל')>=0,'dropdown labeled ליגת העל');
-  ok(typeof A.sandbox.load365Games==='function','load365Games still available (used by dropdown/search)');
+  ok(h.indexOf('id="fxTourneys"')>=0,'admin matches view has tournament checklist');
+  ok(h.indexOf("fxToggleOne('365:42')")>=0,'checklist has Israeli league row (365:42)');
+  ok(h.indexOf('ליגת העל')>=0,'checklist row labeled ליגת העל');
+  ok(typeof A.sandbox.load365Games==='function','load365Games still available (compat wrapper)');
 }
 
 console.log('\n'+(fail===0?'✅':'❌')+' dash365test: '+pass+' passed, '+fail+' failed');

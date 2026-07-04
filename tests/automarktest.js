@@ -26,7 +26,7 @@ const seed2={meta:{bank:100,cur:'\u20aa'},players:{p1:{name:'A',feePaid:true,dep
 const B=loadApp(seed2,{hash:'ctrl7'}); B.sandbox.buildState(B.state.tree);
 const html2=B.sandbox.matchCard(B.sandbox.S.matches.find(x=>x.id==='m1'));
 ok(!/🤖/.test(html2),'no auto marker when no auto-bets');
-ok(/1 ניחשו/.test(html2),'plain count still shown');
+ok(!/ניחשו/.test(html2),'upcoming (unsettled) card hides bettor count');
 
 console.log((fail?'❌':'✅')+' automarktest: '+pass+' passed, '+fail+' failed');
 process.exit(fail?1:0);

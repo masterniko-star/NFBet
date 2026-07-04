@@ -98,15 +98,26 @@ console.log('\n===== already 3 unsettled -> add 0 =====');
   ok(r.added===0,'3 unsettled already -> add 0');
 }
 
-console.log('\n===== AFTER-SLOT REFILL: settling frees a slot -> topUp same run (newgames OFF) =====');
+console.log('\n===== AFTER-SLOT REFILL: settling frees a slot -> topUp same run (newgames ON) =====');
 {
-  let st={tree:{autocfg:{results:{on:true,after:[180],times:[],last:0},newgames:{on:false}},meta:{bank:100},players:{},
+  let st={tree:{autocfg:{results:{on:true,after:[180],times:[],last:0},newgames:{on:true,last:0}},meta:{bank:100},players:{},
     matches:{done:Object.assign(mtch('d',-240,'500'),{drawOK:true}),fut1:mtch('1',600,'820'),fut2:mtch('2',700,'821')},bets:{}},
     espn:{events:[postEvt('500','H','A',true,false,'3','1'),preEvt('900','N1','N2',12)]}};
   globalThis.fetch=makeFetch(st);
   let r=await RC();
   ok(st.tree.matches.done.settled===true,'finished match settled');
-  ok(r.added===1,'freed slot refilled (added 1) though newgames off (got '+r.added+')');
+  ok(r.added===1,'freed slot refilled (added 1) when newgames on (got '+r.added+')');
+}
+
+console.log('\n===== AFTER-SLOT REFILL gated: settling with newgames OFF -> no refill =====');
+{
+  let st={tree:{autocfg:{results:{on:true,after:[180],times:[],last:0},newgames:{on:false,last:0}},meta:{bank:100},players:{},
+    matches:{done:Object.assign(mtch('d',-240,'503'),{drawOK:true}),fut1:mtch('1',600,'822'),fut2:mtch('2',700,'823')},bets:{}},
+    espn:{events:[postEvt('503','H','A',true,false,'3','1'),preEvt('900','N1','N2',12)]}};
+  globalThis.fetch=makeFetch(st);
+  let r=await RC();
+  ok(st.tree.matches.done.settled===true,'finished match still settled (results independent of newgames)');
+  ok(r.added===0,'newgames OFF -> freed slot NOT refilled (gated)');
 }
 
 console.log('\n===== 365scores: pull upcoming Israeli game (Hebrew names) =====');

@@ -29,11 +29,26 @@ console.log('\n===== participant row: field+החל money UI =====');
 {
   const A=loadApp(seed,{hash:'ctrl7'});A.sandbox.buildState(A.state.tree);A.sandbox.TAB='players';A.sandbox.renderActive();
   const main=(A.q('#main')||{}).innerHTML||'';
-  ok(/class="p-top"/.test(main)&&/class="addrow"/.test(main),'row = name line (p-top) + money line (addrow)');
-  ok(/class="bf"/.test(main)&&/id="bf-p1"/.test(main),'addrow has bf input field id=bf-{id}');
-  ok(/class="bf-apply"/.test(main)&&main.indexOf('החל')>=0,'addrow has החל apply button');
+  ok(/class="p-collrow"/.test(main)&&/id="pexp-p1"/.test(main),'row = collapsed row (p-collrow) + expandable card (pexp)');
+  ok(/class="bf"/.test(main)&&/id="bf-p1"/.test(main),'collapsed row has bf input field id=bf-{id}');
+  ok(main.indexOf('החל')>=0&&/aApply\('p1'\)/.test(main),'expanded card has החל apply button (aApply)');
   ok(!/am-step/.test(main)&&main.indexOf('הוסף ₪')<0,'old stepper [− + הוסף ₪] gone');
   ok((main.match(/הקלד סכום ולחץ/g)||[]).length===0,'addinfo instruction line removed');
+}
+
+console.log('\n===== participant row: aPToggle expand/collapse =====');
+{
+  const A=loadApp(seed,{hash:'ctrl7'});A.sandbox.buildState(A.state.tree);A.sandbox.TAB='players';A.sandbox.renderActive();
+  let main=(A.q('#main')||{}).innerHTML||'';
+  ok(/id="pexp-p1" style="display:none"/.test(main),'row starts collapsed (pexp hidden)');
+  ok(/id="pchev-p1">▼/.test(main),'chevron shows ▼ when closed');
+  A.sandbox.aPToggle('p1');
+  ok(A.sandbox.pOpen&&A.sandbox.pOpen.p1===true,'aPToggle flips pOpen state');
+  A.sandbox.renderActive();main=(A.q('#main')||{}).innerHTML||'';
+  ok(/id="pexp-p1" style="display:block"/.test(main),'re-render keeps row expanded (pOpen persists)');
+  ok(/id="pchev-p1">▲/.test(main),'chevron shows ▲ when open');
+  A.sandbox.aPToggle('p1');A.sandbox.renderActive();main=(A.q('#main')||{}).innerHTML||'';
+  ok(/id="pexp-p1" style="display:none"/.test(main),'second toggle collapses again');
 }
 
 console.log('\n===== money model: check=deposit, החל=±, uncheck=zero =====');

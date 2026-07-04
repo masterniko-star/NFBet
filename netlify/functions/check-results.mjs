@@ -297,25 +297,28 @@ function detectDrawOK(slug,stage){var t=(String(slug||"")+" "+String(stage||""))
   if(/round of|knockout|quarter|semi|\bfinal\b|play-?off|last 16|last 32|round-of|\br16\b|\br32\b|1\/8|1\/4|1\/2|playoff/.test(t))return false;
   if(/group|matchday|regular season|round \d|jornada|spieltag|giornata|\bleague\b|\bliga\b|premier|serie|bundesliga|ligue|eredivisie|\.1\b|\.2\b|\.3\b/.test(t))return true;
   return false;}
-export async function topUp(matches, want) {
-  want = want || 3;
-  const unsettled = matches.filter((m) => !m.settled && !m.hidden).length; // игры без результата (начавшиеся тоже считаются)
-  const need = want - unsettled;
-  const dbg = { unsettled, need: Math.max(0, need), perSrc: [], cands: 0, added: [] };
-  if (need <= 0) return { added: 0, dbg };
-  const have = new Set(matches.filter((m) => m.fx).map((m) => m.fx));
-  const espnSlugs = new Set(); const comps = new Set();
-  matches.forEach((m) => { const s = srcOf(m); if (s.type === "365") comps.add(s.comp); else if (s.slug) espnSlugs.add(s.slug); });
-  if (!espnSlugs.size && !comps.size) espnSlugs.add("fifa.world");
-  let cands = [];
-  const d0 = new Date(), d1 = new Date(Date.now() + 120 * 864e5);
-  for (const sl of espnSlugs) {
+// кандидаты одной лиги (ESPN slug или "365:comp"), отсортированные по дате, только предстоящие и ещё не добавленные
+async function collectLeagueCands(slug, have, dbg) {
+  const out = [];
+  if (String(slug).indexOf("365:") === 0) {
+    const cp = String(slug).slice(4) || ISR_COMP;
+    const games = await fetch365(cp);
+    for (const g of games) {
+      if (!g.upcoming) continue;
+      const fx = "365" + g.id; if (have.has(fx)) continue;
+      out.push({ fx, fxLeague: "365:" + cp, teamA: g.teamA, teamB: g.teamB, dateISO: g.dateISO, when: g.when, drawOK: true });
+    }
+    dbg.perSrc.push("365:" + cp + "=" + games.length);
+  } else {
     let ev = -1;
+    const d0 = new Date(), d1 = new Date(Date.now() + 120 * 864e5);
     try {
-      const url = ESPN + encodeURIComponent(sl) + "/scoreboard?limit=300&dates=" + ymdUTC(d0) + "-" + ymdUTC(d1);
+      const url = ESPN + encodeURIComponent(slug) + "/scoreboard?limit=300&dates=" + ymdUTC(d0) + "-" + ymdUTC(d1);
       const r = await fetch(url);
       if (r.ok) {
         const j = await r.json(); const events = (j && j.events) || []; ev = events.length;
+        const jl = (j && j.leagues && j.leagues[0]) || {}, jlogos = (jl.logos || []);
+        const logo = (((jlogos.filter((x) => x.rel && x.rel.indexOf("default") >= 0)[0]) || jlogos[0] || {}).href) || "";
         for (const e of events) {
           const st = (e.status && e.status.type) || {}; if (st.state !== "pre") continue;
           const fx = "espn" + e.id; if (have.has(fx)) continue;
@@ -325,31 +328,51 @@ export async function topUp(matches, want) {
           const ta = (h && h.team && h.team.displayName) || "", tb = (a && a.team && a.team.displayName) || "";
           if (!ta || !tb) continue;
           const stage = ((e.competitions && e.competitions[0] && e.competitions[0].notes && e.competitions[0].notes[0] && (e.competitions[0].notes[0].headline || e.competitions[0].notes[0].text)) || (e.season && e.season.slug) || "");
-          cands.push({ fx, fxLeague: sl, teamA: ta, teamB: tb, dateISO: e.date, when: new Date(e.date).getTime(), drawOK: detectDrawOK(sl, stage) });
+          out.push({ fx, fxLeague: slug, teamA: ta, teamB: tb, dateISO: e.date, when: new Date(e.date).getTime(), drawOK: detectDrawOK(slug, stage), logo });
         }
-      } else { try { await slog("WARN", "espn", "ESPN " + sl + " HTTP " + r.status); } catch (_) {} }
-    } catch (e) { try { await slog("WARN", "espn", "ESPN " + sl + " fail: " + ((e && e.message) || e)); } catch (_) {} }
-    dbg.perSrc.push(sl + "=" + (ev < 0 ? "ERR" : ev));
+      } else { try { await slog("WARN", "espn", "ESPN " + slug + " HTTP " + r.status); } catch (_) {} }
+    } catch (e) { try { await slog("WARN", "espn", "ESPN " + slug + " fail: " + ((e && e.message) || e)); } catch (_) {} }
+    dbg.perSrc.push(slug + "=" + (ev < 0 ? "ERR" : ev));
   }
-  for (const cp of comps) {
-    const games = await fetch365(cp);
-    for (const g of games) {
-      if (!g.upcoming) continue;
-      const fx = "365" + g.id; if (have.has(fx)) continue;
-      cands.push({ fx, fxLeague: "365:" + cp, teamA: g.teamA, teamB: g.teamB, dateISO: g.dateISO, when: g.when, drawOK: true });
+  out.sort((x, y) => x.when - y.when);
+  return out;
+}
+export async function topUp(matches, want, leagues) {
+  want = want || 3;
+  const unsettled = matches.filter((m) => !m.settled && !m.hidden).length; // игры без результата (начавшиеся тоже считаются)
+  const need = want - unsettled;
+  const dbg = { unsettled, need: Math.max(0, need), perSrc: [], cands: 0, added: [] };
+  if (need <= 0) return { added: 0, dbg };
+  const have = new Set(matches.filter((m) => m.fx).map((m) => m.fx));
+  // приоритетный режим: список выбранных турниров задан -> добираем до need суммарно, идя по турнирам по порядку
+  const prio = (Array.isArray(leagues) && leagues.length) ? leagues.slice() : null;
+  let pick = [];
+  if (prio) {
+    for (const sl of prio) {
+      if (pick.length >= need) break;
+      const lc = await collectLeagueCands(sl, have, dbg);
+      for (const c of lc) { if (pick.length >= need) break; pick.push(c); have.add(c.fx); }
     }
-    dbg.perSrc.push("365:" + cp + "=" + games.length);
+    dbg.cands = pick.length;
+  } else {
+    // старое поведение: источники берём из уже добавленных матчей, кандидаты сортируем глобально по дате
+    const espnSlugs = new Set(); const comps = new Set();
+    matches.forEach((m) => { const s = srcOf(m); if (s.type === "365") comps.add(s.comp); else if (s.slug) espnSlugs.add(s.slug); });
+    if (!espnSlugs.size && !comps.size) espnSlugs.add("fifa.world");
+    let cands = [];
+    for (const sl of espnSlugs) cands = cands.concat(await collectLeagueCands(sl, have, dbg));
+    for (const cp of comps) cands = cands.concat(await collectLeagueCands("365:" + cp, have, dbg));
+    const seen = new Set(); cands = cands.filter((c) => seen.has(c.fx) ? false : (seen.add(c.fx), true));
+    cands.sort((x, y) => x.when - y.when);
+    dbg.cands = cands.length;
+    pick = cands.slice(0, need);
   }
-  const seen = new Set(); cands = cands.filter((c) => seen.has(c.fx) ? false : (seen.add(c.fx), true));
-  cands.sort((x, y) => x.when - y.when);
-  dbg.cands = cands.length;
-  const pick = cands.slice(0, need);
   if (!pick.length) return { added: 0, dbg };
   let o = matches.reduce((mx, m) => Math.max(mx, Number(m.order) || 0), 0) + 1, added = 0;
   for (const c of pick) {
     const id = "m" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
     const ord = o++;
-    const rec = { round: "R32", teamA: c.teamA, teamB: c.teamB, slot: "", dt: fmtIsrael(c.dateISO), order: ord, fx: c.fx, fxLeague: c.fxLeague, settled: false, winner: null, drawOK: !!c.drawOK, t: Date.now() };
+    const rec = { round: "R32", teamA: c.teamA, teamB: c.teamB, slot: "", dt: fmtIsrael(c.dateISO), order: ord, fx: c.fx, fxLeague: c.fxLeague, logo: c.logo || "", settled: false, winner: null, drawOK: !!c.drawOK, t: Date.now() };
     await fbPut("/matches/" + id, rec);
     matches.push({ id, ...rec }); have.add(c.fx); added++;
     dbg.added.push(c.teamA + "-" + c.teamB + "@" + rec.dt + " #" + ord);
@@ -419,10 +442,11 @@ function cfgClean(c, defOn, defAfter, defTimes){
   times = times.filter((t) => acParse(t) != null);
   return { on, after, times, last: Number(c.last) || 0 };
 }
+function ngExtra(c){ c = c || {}; let want = Math.round(Number(c.want)); if (!(want >= 1)) want = 3; const leagues = Array.isArray(c.leagues) ? c.leagues.filter((s) => typeof s === "string" && !!s) : []; return { want, leagues }; }
 function migrateCfg(ac){
   ac = ac || {};
   if (ac.results || ac.newgames) {
-    return { results: cfgClean(ac.results, true, [180], []), newgames: cfgClean(ac.newgames, true, [210], AC_DEF_TIMES) };
+    return { results: cfgClean(ac.results, true, [180], []), newgames: { ...cfgClean(ac.newgames, true, [210], AC_DEF_TIMES), ...ngExtra(ac.newgames) } };
   }
   // старый формат {enabled, times, add35, lastFill, lastAdd} -> новый
   const oldTimes = Array.isArray(ac.times) ? ac.times.filter((t) => acParse(t) != null) : [];
@@ -430,7 +454,7 @@ function migrateCfg(ac){
   const add35 = (ac.add35 === undefined) ? true : !!ac.add35;
   return {
     results: { on: true, after: [180], times: [], last: Number(ac.lastFill) || 0 },
-    newgames: { on: true, after: add35 ? [210] : [], times: oldEnabled ? (oldTimes.length ? oldTimes : AC_DEF_TIMES.slice()) : [], last: Number(ac.lastAdd) || Number(ac.srvLast) || 0 },
+    newgames: { on: true, after: add35 ? [210] : [], times: oldEnabled ? (oldTimes.length ? oldTimes : AC_DEF_TIMES.slice()) : [], last: Number(ac.lastAdd) || Number(ac.srvLast) || 0, ...ngExtra(ac) },
   };
 }
 function dueByCfg(cfg, matches, now){
@@ -624,10 +648,11 @@ export async function runCheck() {
   // мало денег (free + открытые ставки < 1 ₪) -> авто-перевод в демо + уведомления (балансы уже учитывают свежие результаты)
   if (resultsDue) { try { await lowBalanceSweep(players, matches, bets, bank, now); } catch (e) { try { await slog("ERROR","demote","lowBalanceSweep: "+((e&&e.message)||e)); } catch(_){} } }
 
-  // новые игры: по расписанию ИЛИ если только что освободился слот (что-то сведено) — добираем до 3 несведённых
-  const runNew = newgamesDue || updated > 0 || endNgDue;
+  // новые игры: только при включённой автозагрузке (чекбокс newgames.on) — по расписанию, освобождению слота (сведено) или на конец+5
+  const autoLoad = !!(cfg.newgames && cfg.newgames.on);
+  const runNew = autoLoad && (newgamesDue || updated > 0 || endNgDue);
   let top = { added: 0, dbg: null };
-  if (runNew) { top = await topUp(matches, 3); }
+  if (runNew) { top = await topUp(matches, cfg.newgames.want || 3, cfg.newgames.leagues || []); }
 
   const patch = {};
   if (resultsDue) patch.results = { ...cfg.results, last: now };
