@@ -87,19 +87,12 @@ const tick=()=>new Promise(r=>setTimeout(r,25));
   await tick();
   A.sandbox.renderSettings();
   const h=A.mainHTML();
-  ok(h.indexOf('בדיקת תוצאות')>=0,'settings renders results dashboard title');
-  ok(h.indexOf('טעינת משחקים')>=0,'settings renders newgames dashboard title');
-  ok(h.indexOf('id="ac_results_on"')>=0,'results on/off checkbox present');
-  ok(h.indexOf('id="ac_newgames_on"')>=0,'newgames on/off checkbox present');
-  ok(h.indexOf('acDashSave(\'results\')')>=0||h.indexOf('acDashSave("results")')>=0,'results save wired');
-  ok(h.indexOf('id="acAfter_results"')>=0,'results offset editor div present');
-  ok(h.indexOf('בדיקת תוצאות + 5')>=0,'newgames panel shows derived (results+5) note instead of own editor');
-  ok(h.indexOf('id="acTimes_newgames"')<0,'newgames has NO independent times editor (derived)');
-  // results editor chips render via acDashInit
-  const after=A.q('#acAfter_results').innerHTML;
-  ok(after.indexOf('180')>=0,'results offset chip shows 180 as minutes');
-  // newgames preview = results +5 (185 ד׳ · 08:05)
-  ok(h.indexOf('185')>=0&&h.indexOf('08:05')>=0,'newgames preview = results offsets/times +5');
+  ok(h.indexOf('אוטומציה')>=0,'settings renders merged automation section');
+  ok(h.indexOf('הושבתו')>=0,'automation section marked deprecated');
+  ok(h.indexOf('טעינה אוטומטית של משחקים')>=0,'note points to matches-screen auto-load checkbox');
+  ok(h.indexOf('id="ac_results_on"')<0,'old results toggle removed from settings');
+  ok(h.indexOf('id="ac_newgames_on"')<0,'old newgames toggle removed from settings');
+  ok(h.indexOf('id="acAfter_results"')<0,'old offset editor removed from settings');
 }
 
 // ---------- 5. acDashSave writes /autocfg/<kind> with on/after/times, preserves last ----------
