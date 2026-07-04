@@ -118,9 +118,9 @@
   .p-fill{flex:1 1 auto;min-width:0}
   .addinfo{font-size:12.5px;color:var(--mut2);padding:11px 14px;border-bottom:1px solid var(--blue);line-height:1.45}
   .addrow{display:flex;align-items:center;gap:9px;justify-content:flex-start}
-  .addrow .bf{direction:ltr;width:96px;height:26px;border:1px solid var(--blue);border-radius:8px;padding:0 8px;font-size:14px;font-weight:700;font-family:inherit;background:var(--bg);color:var(--ink);text-align:center}
-  .addrow .bf:focus{outline:none;border-color:var(--pitch)}
-  .addrow .bf.bf-warn{border-color:var(--red)!important;background:rgba(214,69,69,.07);box-shadow:0 0 0 3px rgba(214,69,69,.16);animation:bfWarnPulse 1s ease-in-out infinite}
+  .p-collrow .bf{direction:ltr;width:96px;height:26px;border:1px solid var(--blue);border-radius:8px;padding:0 8px;font-size:14px;font-weight:700;font-family:inherit;background:var(--bg);color:var(--ink);text-align:center}
+  .p-collrow .bf:focus{outline:none;border-color:var(--pitch)}
+  .p-collrow .bf.bf-warn{border-color:var(--red)!important;background:rgba(214,69,69,.07);box-shadow:0 0 0 3px rgba(214,69,69,.16);animation:bfWarnPulse 1s ease-in-out infinite}
   @keyframes bfWarnPulse{0%,100%{box-shadow:0 0 0 3px rgba(214,69,69,.16)}50%{box-shadow:0 0 0 3px rgba(214,69,69,.34)}}
   .addrow .bf-apply{height:26px;padding:0 14px;border:0;border-radius:8px;background:var(--pitch);color:#fff;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap}
   .addrow .bf-apply:active{filter:brightness(.93)}
@@ -135,6 +135,13 @@
   .pkey:active{filter:brightness(.95)}
   .prestore{flex:0 0 auto;background:color-mix(in srgb,var(--gold) 14%,transparent);border:1px solid var(--gold);color:#946b00;cursor:pointer;font-size:12.5px;font-weight:800;line-height:1;padding:5px 10px;border-radius:8px;white-space:nowrap;font-family:inherit}
   .prestore:active{filter:brightness(.95)}
+  .p-collrow{display:flex;align-items:center;gap:11px}
+  .pnametog{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:7px;background:none;border:0;padding:0;cursor:pointer;color:inherit;font-family:inherit;text-align:right}
+  .pnametog .pnm{font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  .pchev{flex:0 0 auto;font-size:11px;color:var(--mut)}
+  .demotag{flex:0 0 auto;background:color-mix(in srgb,var(--gold) 14%,transparent);border:1px solid var(--gold);color:#946b00;border-radius:8px;padding:4px 9px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap}
+  .pexp{margin-top:4px;padding-top:10px;border-top:1px dashed var(--line)}
+  .pexprow{display:flex;align-items:center;gap:9px;justify-content:space-between}
   .mdraw{width:100%;margin-top:10px;height:38px;border-radius:10px;border:1.5px dashed var(--line);background:transparent;color:var(--mut);font-weight:700;font-size:13.5px;cursor:pointer}
   .mdraw.on{border-style:solid;border-color:var(--gold);background:color-mix(in srgb,var(--gold) 18%,transparent);color:var(--tx)}
   .mdraw:disabled{opacity:.45;cursor:default}
@@ -1302,23 +1309,30 @@ function renderHistView(){
 }
 
 /* ---------- ADMIN: players ---------- */
+var pOpen={};
+function aPToggle(id){pOpen[id]=!pOpen[id];var e=document.getElementById("pexp-"+id);if(e)e.style.display=pOpen[id]?"block":"none";var c=document.getElementById("pchev-"+id);if(c)c.textContent=pOpen[id]?"▲":"▼";}
+window.aPToggle=aPToggle;
 function renderAdminPlayers(){
   if(!seedOpeningCash._done&&MODE==="admin"){seedOpeningCash._done=true;seedOpeningCash();}
   var list= !S.players.length?'<div class="empty"><div class="em-ic">👥</div>אין משתתפים.</div>':
      S.players.slice().sort(function(a,b){return ((a.feePaid?1:0)-(b.feePaid?1:0))||String(a.name||"").localeCompare(String(b.name||""),"he");}).map(function(p,i){
+      var open=!!pOpen[p.id];
+      var feeCell=p.feePaid
+        ? '<div class="fee" onclick="aToggleFee(\''+p.id+'\')"><div class="checkbox on">✓</div><span>שולם</span></div>'
+        : '<button class="demotag" onclick="aToggleFee(\''+p.id+'\')" title="לחצ/י לסימון תשלום (עם סכום בשדה)">מצב דמו</button>';
       return '<div class="p-item'+(i%2===0?' row-y':'')+'">'+
-        '<div class="p-top">'+
-          '<div class="pname" dir="rtl"><button class="pkey" onclick="aPwSheet(\''+p.id+'\')" title="שינוי או איפוס סיסמה">🔑</button>&nbsp;&nbsp;'+esc(p.name)+(p.phone?' <span class="tiny muted" dir="ltr">'+esc(p.phone)+'</span>':"")+'</div>'+
-          '<span class="p-fill"></span>'+
-          '<button class="prestore" onclick="aRestoreSheet(\''+p.id+'\')" title="שחזור יתרה לתאריך">החזר</button>'+
-          '<button class="pdel" onclick="aDelPlayer(\''+p.id+'\')" title="מחק משתתף">🗑</button>'+
-        '</div>'+
-        '<div class="addrow">'+
+        '<div class="p-collrow">'+
+          '<button class="pnametog" onclick="aPToggle(\''+p.id+'\')" dir="rtl"><span class="pchev" id="pchev-'+p.id+'">'+(open?'▲':'▼')+'</span><span class="pnm">'+esc(p.name)+(p.phone?' <span class="tiny muted" dir="ltr">'+esc(p.phone)+'</span>':"")+'</span></button>'+
           '<input class="bf" id="bf-'+p.id+'" type="number" step="1" dir="ltr" placeholder="סכום" autocomplete="off" oninput="amtClr(\''+p.id+'\')">'+
-          '<span class="p-fill"></span>'+
-          '<div class="fee" onclick="aToggleFee(\''+p.id+'\')"><div class="checkbox '+(p.feePaid?"on":"")+'">'+(p.feePaid?"✓":"")+'</div><span>שולם</span></div>'+
-          '<span class="p-fill"></span>'+
-          '<button class="bf-apply" onclick="aApply(\''+p.id+'\')">החל</button>'+
+          feeCell+
+        '</div>'+
+        '<div class="pexp" id="pexp-'+p.id+'" style="display:'+(open?'block':'none')+'">'+
+          '<div class="pexprow">'+
+            '<button class="pkey" onclick="aPwSheet(\''+p.id+'\')" title="שינוי או איפוס סיסמה">🔑</button>'+
+            '<button class="winbtn" onclick="aApply(\''+p.id+'\')">החל</button>'+
+            '<button class="prestore" onclick="aRestoreSheet(\''+p.id+'\')" title="שחזור יתרה לתאריך">שחזור בלנס</button>'+
+          '</div>'+
+          '<button class="btn block danger" style="margin-top:12px" onclick="aDelPlayer(\''+p.id+'\')">מחק משתתף</button>'+
         '</div>'+
       '</div>';
      }).join("");
