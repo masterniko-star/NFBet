@@ -648,8 +648,9 @@ export async function runCheck() {
   // мало денег (free + открытые ставки < 1 ₪) -> авто-перевод в демо + уведомления (балансы уже учитывают свежие результаты)
   if (resultsDue) { try { await lowBalanceSweep(players, matches, bets, bank, now); } catch (e) { try { await slog("ERROR","demote","lowBalanceSweep: "+((e&&e.message)||e)); } catch(_){} } }
 
-  // новые игры: по расписанию ИЛИ если только что освободился слот (что-то сведено) — добираем до 3 несведённых
-  const runNew = newgamesDue || updated > 0 || endNgDue;
+  // новые игры: только при включённой автозагрузке (чекбокс newgames.on) — по расписанию, освобождению слота (сведено) или на конец+5
+  const autoLoad = !!(cfg.newgames && cfg.newgames.on);
+  const runNew = autoLoad && (newgamesDue || updated > 0 || endNgDue);
   let top = { added: 0, dbg: null };
   if (runNew) { top = await topUp(matches, cfg.newgames.want || 3, cfg.newgames.leagues || []); }
 
