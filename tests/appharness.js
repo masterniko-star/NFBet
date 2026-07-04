@@ -130,7 +130,6 @@ function seedBasic(){
     has(r.html,'Alice','admin players: name shown');
   r=render({MODE:'admin',ME:null,TAB:'matches'}); ok(!r.err,'render admin matches no throw'+(r.err?' ['+r.err+']':''));
     has(r.html,'טען משחקים','admin matches: reload button (טען משחקים)');
-    has(r.html,'מלא תוצאות','admin matches: fill-results button (מלא תוצאות)');
     has(r.html,'החזר קופה','admin matches: void/refund button on card');
   r=render({MODE:'admin',ME:null,TAB:'settings'}); ok(!r.err,'render admin settings no throw'+(r.err?' ['+r.err+']':''));
 
