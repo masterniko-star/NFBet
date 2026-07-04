@@ -1199,6 +1199,7 @@ function pStepLocal(mid,d){
 function pStepCommit(mid){
   var p=me();if(!p)return;
   var m=S.matches.find(function(x){return x.id===mid;});if(!m)return;
+  if(matchLocked(m)){var w=$("#pw-"+mid);if(w)w.textContent="ההימור נסגר — המשחק כבר התחיל.";return;} /* матч мог закрыться, пока палец был на ▲/▼ — после закрытия ставок никаких записей */
   var b=(m.bets||{})[p.id];var n=stakeOf[mid];
   if(b&&!m.settled){ Promise.all([fbSet("/bets/"+mid+"/"+p.id,{team:b.team,stake:n,t:Date.now()}),fbUpd("/players/"+p.id,{lastBet:Date.now()})]).then(refresh); } else { renderBetView(); }
 }
