@@ -1396,7 +1396,13 @@ function renderAdminMatches(){
   fxSelInit();
   if(fxAvail===null&&!fxAvailBusy)fxProbeAvailability();
   var fxCard='<div id="fxCard" class="card card-p" style="margin-bottom:12px;position:sticky;top:0;z-index:20">'
-    +'<div id="fxTourneys">'+fxTourneyListHtml()+'</div>'
+    +'<div class="fxpanel">'
+      +'<button class="panel-h" onclick="fxListToggle()" style="display:flex;align-items:flex-start;gap:8px;justify-content:space-between">'
+        +'<span style="flex:1;min-width:0"><span class="panel-t" style="font-size:15px">בחר/י טורנירים <span class="tiny muted" style="font-weight:600">(הסדר = עדיפות)</span></span><span id="fxListSel" style="display:block;margin-top:2px">'+fxSelNames()+'</span></span>'
+        +'<span id="fxListChev" class="panel-chev" style="padding-top:5px">'+(fxListOpen?"▲":"▼")+'</span>'
+      +'</button>'
+      +'<div id="fxTourneys" style="display:'+(fxListOpen?"block":"none")+';margin-top:10px">'+fxTourneyListHtml()+'</div>'
+    +'</div>'
     +'<div style="display:flex;align-items:center;gap:8px;margin-top:10px;justify-content:center"><label class="tiny muted" for="fxCount" style="white-space:nowrap;font-weight:700">מס׳ משחקים לכל טורניר</label><input type="number" id="fxCount" class="input sm" min="1" max="20" step="1" value="'+fxCountLoad()+'" dir="ltr" style="width:64px;text-align:center;padding:0 6px" onchange="fxCountChange(this.value)"></div>'
     +'<div style="display:flex;gap:10px;margin-top:10px;justify-content:center"><button class="btn pitch" onclick="fxLoadSelected()" style="height:38px;padding:0 18px;font-size:13.5px;font-weight:800">🔄 טען משחקים</button><button class="btn" onclick="aFillResults()" style="height:38px;padding:0 18px;font-size:13.5px;font-weight:800">✅ מלא תוצאות</button></div>'
     +'<div id="fillMsg" class="tiny" style="margin-top:8px;text-align:center;font-weight:700"></div>'
@@ -1973,6 +1979,7 @@ var fxAvail=null;      // null = ещё не проверяли в эту сес
 var fxAvailRaw={};     // slug -> нормализованные события (кэш пробы, переиспользуется при "טען")
 var fxAvailBusy=false; // защита от повторного запуска пробы
 var fxSelOrder=null;   // упорядоченный массив выбранных слагов (порядок кликов = приоритет)
+var fxListOpen=false;  // раскрыт ли чеклист турниров (по умолчанию свёрнут, как панели в הגדרות)
 var FXSUG=[
  {en:"World Cup",he:"מונדיאל (גביע העולם)",slug:"fifa.world",k:["world cup","fifa world cup","mondial","מונדיאל","גביע העולם","чемпионат мира","кубок мира","мундиаль","copa mundial","coupe du monde"]},
  {en:"Champions League",he:"ליגת האלופות",slug:"uefa.champions",k:["champions league","uefa champions league","ucl","ליגת האלופות","лига чемпионов","лч"]},
@@ -2026,27 +2033,39 @@ function fxSelSave(){
   try{localStorage.setItem("fxslugs",JSON.stringify(fxSelOrder));}catch(e){}
   try{fbUpd("/autocfg/newgames",{leagues:fxSelOrder});}catch(e){}
 }
+function fxPanelSync(){var c=$("#fxTourneys");if(c)c.innerHTML=fxTourneyListHtml();var s=$("#fxListSel");if(s)s.innerHTML=fxSelNames();}
 function fxToggleOne(slug){
   fxSelInit();
   var i=fxSelOrder.indexOf(slug);
   if(i>=0)fxSelOrder.splice(i,1); else fxSelOrder.push(slug); // добавляемый — в конец (наименьший приоритет)
   fxSelSave();
-  var c=$("#fxTourneys");if(c)c.innerHTML=fxTourneyListHtml();
+  fxPanelSync();
 }
 function fxToggleAll(){
   fxSelInit();
   var allOn=FXSUG.length>0&&FXSUG.every(function(a){return fxSelOrder.indexOf(a.slug)>=0;});
   fxSelOrder=allOn?[]:FXSUG.map(function(a){return a.slug;});
   fxSelSave();
-  var c=$("#fxTourneys");if(c)c.innerHTML=fxTourneyListHtml();
+  fxPanelSync();
 }
 window.fxToggleOne=fxToggleOne;window.fxToggleAll=fxToggleAll;
+// имена выбранных турниров (для свёрнутого заголовка панели), в порядке приоритета
+function fxSelNames(){
+  fxSelInit();
+  if(!fxSelOrder.length)return '<span class="tiny muted">לא נבחרו טורנירים</span>';
+  return '<span class="tiny" style="color:var(--pitch-d);font-weight:700;direction:rtl;line-height:1.4">'+fxSelOrder.map(function(s){return esc(fxSlugHe(s));}).join(' · ')+'</span>';
+}
+function fxListToggle(){
+  fxListOpen=!fxListOpen;
+  var b=$("#fxTourneys");if(b)b.style.display=fxListOpen?"block":"none";
+  var ch=$("#fxListChev");if(ch)ch.textContent=fxListOpen?"▲":"▼";
+}
+window.fxListToggle=fxListToggle;
 function fxTourneyListHtml(){
   fxSelInit();
   var allOn=FXSUG.length>0&&FXSUG.every(function(a){return fxSelOrder.indexOf(a.slug)>=0;});
   var loading=(fxAvail===null)?'<div class="tiny muted" style="text-align:center;padding:4px 0 8px">🔄 בודק אילו טורנירים פעילים…</div>':'';
-  var head='<div class="row" style="justify-content:space-between;margin-bottom:6px"><div class="tiny muted" style="font-weight:800">בחר/י טורנירים (הסדר = עדיפות)</div>'
-    +'<div class="row" style="gap:6px;cursor:pointer" onclick="fxToggleAll()"><div class="checkbox '+(allOn?"on":"")+'" style="width:20px;height:20px;font-size:14px">'+(allOn?"✓":"")+'</div><span class="tiny muted">בחר הכל</span></div></div>';
+  var head='<div class="row" style="justify-content:flex-end;margin-bottom:6px"><div class="row" style="gap:6px;cursor:pointer" onclick="fxToggleAll()"><div class="checkbox '+(allOn?"on":"")+'" style="width:20px;height:20px;font-size:14px">'+(allOn?"✓":"")+'</div><span class="tiny muted">בחר הכל</span></div></div>';
   var rows=FXSUG.map(function(a){
     var pos=fxSelOrder.indexOf(a.slug), on=pos>=0, live=!!(fxAvail&&fxAvail[a.slug]===true);
     var badge=on?'<span class="fxnum">'+(pos+1)+'</span>':'';
