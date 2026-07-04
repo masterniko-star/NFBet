@@ -1,7 +1,7 @@
 // fxautotest.js — чекбокс «טעינת משחקים אוטומטית» на экране משחקים (админка).
 // Проверяет: отрисовку по autocfg.newgames.on (включён/выключен/по умолчанию включён),
 // fxAutoToggle пишет ТОЛЬКО {on} PATCH-ем в /autocfg/newgames (after/times/last сохраняются,
-// results не трогается), чекбокс стоит в одном ряду с кнопкой «טען משחקים».
+// results не трогается), чекбокс стоит в одном ряду с кнопкой «טעינת משחקים ידנית».
 const {loadApp,flush}=require('./applib.js');
 let pass=0,fail=0;
 function ok(c,m){if(c){pass++;}else{fail++;console.log('  FAIL:',m);}}
@@ -19,7 +19,7 @@ let html=A.mainHTML();
 ok(/id="fxAuto" checked onchange="fxAutoToggle\(this\.checked\)"/.test(html),'newgames.on=true -> чекбокс отмечен');
 ok(html.indexOf('טעינת משחקים אוטומטית')>=0,'подпись טעינת משחקים אוטומטית на месте');
 const iBtn=html.indexOf('fxLoadSelected()'),iChk=html.indexOf('id="fxAuto"');
-ok(iBtn>=0&&iChk>iBtn&&html.slice(iBtn,iChk).indexOf('</div>')<0,'чекбокс в одном ряду с кнопкой טען משחקים');
+ok(iBtn>=0&&iChk>iBtn&&html.slice(iBtn,iChk).indexOf('</div>')<0,'чекбокс в одном ряду с кнопкой טעינת משחקים ידנית');
 
 console.log('===== fxAutoToggle(false): PATCH только on =====');
 A.sandbox.fxAutoToggle(false);await flush(30);
