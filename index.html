@@ -1299,12 +1299,17 @@ function renderHistView(){
   }).join("");
   var st=statsFor(p.id);var bal=st.balance;var deposited=depOf(p);var withdrawn=wdOf(p);
   var BK=Number(S.meta.bank)||0; var balCol=bal>BK?"var(--pitch-d)":(bal<BK?"var(--red)":"var(--tx)");
-  var stakedBlock='<div><div class="tiny muted" style="font-weight:700">בהימור</div><div class="num" style="font-size:22px;font-weight:800;color:var(--tx)">'+fmt1(st.pending)+' '+cur()+'</div></div>';
-  var header='<div class="card card-p" style="margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px">'+
-    stakedBlock+
-    '<div style="text-align:center"><div class="tiny muted" style="font-weight:700">הפקדה</div><div style="font-size:22px;font-weight:800;color:var(--pitch-d);white-space:nowrap" dir="ltr"><span style="font-size:16px;vertical-align:2px">📥</span> '+fmt1(deposited)+' '+cur()+'</div>'+(withdrawn>0.001?('<div style="font-size:12.5px;font-weight:800;color:var(--red);white-space:nowrap;margin-top:2px" dir="ltr"><span style="font-size:12.5px">📤</span> '+fmt1(withdrawn)+' '+cur()+'</div>'):'')+'</div>'+
-    '<div style="text-align:left"><div class="tiny muted" style="font-weight:700">יתרה</div><div class="num" style="font-size:22px;font-weight:800;color:'+balCol+'">'+fmt1(bal)+' '+cur()+'</div></div>'+
-    '</div>';
+  var tot=bal+st.pending;var totCol=tot>BK?"var(--pitch-d)":(tot<BK?"var(--red)":"var(--tx)");
+  var depCell='<div style="text-align:right"><div class="tiny muted" style="font-weight:700">הפקדה</div><div style="font-size:22px;font-weight:800;color:var(--pitch-d);white-space:nowrap" dir="ltr"><span style="font-size:16px;vertical-align:2px">📥</span> '+fmt1(deposited)+' '+cur()+'</div>'+(withdrawn>0.001?('<div style="font-size:12.5px;font-weight:800;color:var(--red);white-space:nowrap;margin-top:2px" dir="ltr"><span style="font-size:12.5px">📤</span> '+fmt1(withdrawn)+' '+cur()+'</div>'):'')+'</div>';
+  var stakedCell='<div style="text-align:center"><div class="tiny muted" style="font-weight:700">בהימור</div><div class="num" style="font-size:22px;font-weight:800;color:var(--tx)">'+fmt1(st.pending)+' '+cur()+'</div></div>';
+  var totCell='<div style="text-align:left"><div style="display:inline-flex;align-items:center;gap:9px;direction:ltr">'+
+    '<div style="text-align:center"><div class="num" style="font-size:22px;font-weight:800;color:'+totCol+';line-height:1.05">'+fmt1(tot)+' '+cur()+'</div><div class="tiny muted" style="font-size:9.5px;font-weight:700;margin-top:2px">סה"כ</div></div>'+
+    '<div style="display:flex;flex-direction:column;gap:3px;text-align:center;border-inline-start:1.5px solid #5b9bd5;padding-inline-start:9px">'+
+      '<div><div class="num" style="font-size:12px;font-weight:800;color:var(--tx);line-height:1.05">'+fmt1(bal)+'</div><div class="tiny muted" style="font-size:9.5px;font-weight:700">בלנס</div></div>'+
+      '<div><div class="num" style="font-size:12px;font-weight:800;color:var(--tx);line-height:1.05">'+fmt1(st.pending)+'</div><div class="tiny muted" style="font-size:9.5px;font-weight:700">בהימור</div></div>'+
+    '</div>'+
+  '</div></div>';
+  var header='<div class="card card-p" style="margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px">'+depCell+stakedCell+totCell+'</div>';
   $("#main").innerHTML='<section class="view active">'+header+(items||'<div class="card"><div class="empty"><div class="em-ic">🧾</div>עדיין לא הימרת על אף משחק.</div></div>')+'</section>';
 }
 
