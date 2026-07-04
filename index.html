@@ -1419,6 +1419,8 @@ function scrollAdminToFirstUnfinished(){try{
   var y=el.getBoundingClientRect().top+window.scrollY-off-8;
   window.scrollTo({top:Math.max(0,y),behavior:"smooth"});
 }catch(e){}}
+function fxAutoToggle(on){fbUpd("/autocfg/newgames",{on:!!on}).then(refresh).then(function(){toast(on?"טעינה אוטומטית מופעלת":"טעינה אוטומטית כבויה");}).catch(function(){toast("שגיאה, נסה/י שוב");});}
+window.fxAutoToggle=fxAutoToggle;
 function renderAdminMatches(){
   fxSelInit();
   if(fxAvail===null&&!fxAvailBusy)fxProbeAvailability();
@@ -1431,6 +1433,7 @@ function renderAdminMatches(){
       +'<div id="fxTourneys" style="display:'+(fxListOpen?"block":"none")+';margin-top:10px">'+fxTourneyListHtml()+'</div>'
     +'</div>'
     +'<div style="display:flex;align-items:center;gap:8px;margin-top:10px;justify-content:center;flex-wrap:wrap"><label class="tiny muted" for="fxCount" style="white-space:nowrap;font-weight:700">מס׳ משחקים</label><input type="number" id="fxCount" class="input sm" min="1" max="20" step="1" value="'+fxCountLoad()+'" dir="ltr" style="width:64px;text-align:center;padding:0 6px" onchange="fxCountChange(this.value)"><button class="winbtn" onclick="fxLoadSelected()">🔄 טען משחקים</button></div>'
+    +'<label style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;font-weight:700;cursor:pointer;user-select:none"><input type="checkbox" id="fxAuto" '+(!(S.autocfg&&S.autocfg.newgames&&S.autocfg.newgames.on===false)?"checked":"")+' onchange="fxAutoToggle(this.checked)" style="width:18px;height:18px;accent-color:var(--pitch)"> טעינה אוטומטית של משחקים</label>'
     +'<div id="fillMsg" class="tiny" style="margin-top:8px;text-align:center;font-weight:700"></div>'
     +'<div id="fxRes" style="margin-top:10px"></div></div>';
   var list=S.matches.filter(function(m){return !m.hidden && !adminExpired(m);});
