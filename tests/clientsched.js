@@ -26,12 +26,10 @@ ok(A.sandbox.hmToMin('0:05')===5&&A.sandbox.hmToMin('3:30')===210&&A.sandbox.hmT
 ok(A.sandbox.hmToMin('24:00')===null&&A.sandbox.hmToMin('3:60')===null,'hmToMin rejects invalid');
 ok(A.sandbox.minToHm(5)==='00:05'&&A.sandbox.minToHm(210)==='03:30'&&A.sandbox.minToHm(930)==='15:30','minToHm formats');
 
-console.log('\n===== settings: legacy auto panels merged into one inactive section =====');
+console.log('\n===== settings: legacy auto sections removed =====');
 A.sandbox.MODE='admin';A.sandbox.renderSettings();
 const h=A.mainHTML();
-has(h,'אוטומציה','merged automation section present');
-has(h,'הושבתו','automation section marked deprecated');
-has(h,'טעינה אוטומטית של משחקים','note points to matches-screen auto-load checkbox');
+ok(h.indexOf('אוטומציה')<0,'automation section removed from settings');
 ok(h.indexOf('id="ac_results_on"')<0,'old results toggle removed from settings');
 ok(h.indexOf('id="ac_newgames_on"')<0,'old newgames toggle removed from settings');
 ok(h.indexOf('id="acAfter_results"')<0,'old offset editor removed from settings');

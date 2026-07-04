@@ -1697,7 +1697,6 @@ function renderSettings(){
     '</div>'+
     '<button class="btn block pitch" style="margin-top:4px" onclick="aSaveCfg()">שמור</button>';
   var cfgBody=linkBody+betSizeBody;
-  var automationBody='<div class="tiny muted" style="line-height:1.6">טעינת המשחקים האוטומטית נשלטת עכשיו דרך תיבת הסימון <strong>"טעינה אוטומטית של משחקים"</strong> במסך המשחקים. בדיקת התוצאות רצה תמיד אוטומטית (סמוך לסיום המשחק).<br>הסעיפים הישנים "בדיקת תוצאות" ו-"טעינת משחקים" הושבתו ויוסרו בהמשך.</div>';
   var logBody=
     logSub('logmain','📒&nbsp;רשומות מכשיר','<span id="logMini"></span>',
       '<div id="logSummary" class="tiny" style="margin-bottom:8px"></div>'+
@@ -1714,7 +1713,7 @@ function renderSettings(){
   var resetBody='<button class="btn block danger" onclick="aReset()">איפוס הטורניר</button>';
   var usageBody='<div id="usageBox"><div class="tiny muted">פתח/י לחישוב…</div></div>';
   var loginsBody='<div id="loginsBox"><div class="tiny muted">פתח/י לצפייה…</div></div>';
-  $("#main").innerHTML='<section class="view active"><div class="section-h" style="align-items:center"><h2>הגדרות</h2><button class="btn sm" onclick="goPlay()">⚽&nbsp;מעבר למשחק</button></div>'+panelCard("cfg","⚙️&nbsp;&nbsp;הגדרות הטורניר","",cfgBody)+panelCard("security","👮&nbsp;&nbsp;ניהול ואבטחה",(adminLockOn()?"🔒":""),adminSecBody())+panelCard("stats","📊&nbsp;&nbsp;סטטיסטיקה",'<span id="statsMini"></span>',statsBody())+panelCard("automation","🔄&nbsp;&nbsp;אוטומציה (מיושן)","",automationBody)+panelCard("usage","💡&nbsp;&nbsp;שימוש",'<span id="usageMini"></span>',usageBody)+panelCard("logins","👤&nbsp;&nbsp;כניסות משתתפים","",loginsBody)+panelCard("log","📒&nbsp;&nbsp;יומן אירועים","",logBody)+panelCard("integrity","🔍&nbsp;&nbsp;בדיקת תקינות",'<span id="intgMini"></span>',integrityBody())+panelCard("reset","איפוס","",resetBody)+'<div class="empty tiny" style="padding:10px">מחובר ל: '+esc(DB)+'</div></section>';
+  $("#main").innerHTML='<section class="view active"><div class="section-h" style="align-items:center"><h2>הגדרות</h2><button class="btn sm" onclick="goPlay()">⚽&nbsp;מעבר למשחק</button></div>'+panelCard("cfg","⚙️&nbsp;&nbsp;הגדרות הטורניר","",cfgBody)+panelCard("security","👮&nbsp;&nbsp;ניהול ואבטחה",(adminLockOn()?"🔒":""),adminSecBody())+panelCard("stats","📊&nbsp;&nbsp;סטטיסטיקה",'<span id="statsMini"></span>',statsBody())+panelCard("usage","💡&nbsp;&nbsp;שימוש",'<span id="usageMini"></span>',usageBody)+panelCard("logins","👤&nbsp;&nbsp;כניסות משתתפים","",loginsBody)+panelCard("log","📒&nbsp;&nbsp;יומן אירועים","",logBody)+panelCard("integrity","🔍&nbsp;&nbsp;בדיקת תקינות",'<span id="intgMini"></span>',integrityBody())+panelCard("reset","איפוס","",resetBody)+'<div class="empty tiny" style="padding:10px">מחובר ל: '+esc(DB)+'</div></section>';
   try{renderUsage();}catch(e){}
   acDashInit();logRender();diagLoad();try{fitRefund();}catch(e){}try{statsMiniUpdate();}catch(e){}
 }
