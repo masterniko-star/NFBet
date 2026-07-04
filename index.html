@@ -265,6 +265,9 @@
   .lb:last-child .bt{border-bottom:1px solid #5b9bd5;border-bottom-left-radius:6px;border-bottom-right-radius:6px}
   .lb .bt .cur{margin-inline-start:2px}
   .lb.me-row{border-radius:10px}
+  .lbexp{grid-column:1/-1;padding:6px 10px 12px;background:color-mix(in srgb,var(--blue) 6%,transparent);border-bottom:1px solid var(--line)}
+  .lbchart{position:relative;width:100%;height:76px}
+  .lb .nm{cursor:pointer}
   .copyrow{display:flex;gap:6px;align-items:stretch;margin-top:6px}
   .copyrow .input{flex:1}
   .copy-ic{flex:0 0 auto;width:46px;display:flex;align-items:center;justify-content:center;font-size:17px;padding:0;cursor:pointer}
@@ -1232,6 +1235,36 @@ function renderBoardView(){
 var ALLVIEW_ASADMIN=(function(){try{return localStorage.getItem("allview_asadmin")!=="0";}catch(e){return true;}})();
 function allViewToggle(){ALLVIEW_ASADMIN=!ALLVIEW_ASADMIN;try{localStorage.setItem("allview_asadmin",ALLVIEW_ASADMIN?"1":"0");}catch(e){}renderHeaderViewToggle();renderAllView();}
 window.allViewToggle=allViewToggle;
+var lbOpen={};
+function lbToggle(id){lbOpen[id]=!lbOpen[id];var e=document.getElementById("lbx-"+id);if(e)e.style.display=lbOpen[id]?"block":"none";}
+window.lbToggle=lbToggle;
+function balSeriesPts(pid){
+  var evs=[];
+  var cl=(S.cashlog||{})[pid]||{};
+  Object.keys(cl).forEach(function(k){var e=cl[k]||{};var ts=Number(e.ts)||0;var am=Number(e.amount)||0;
+    if(e.type==="out")evs.push({t:ts,d:-am});else if(e.type==="zero")evs.push({t:ts,z:true});else evs.push({t:ts,d:am});});
+  S.matches.forEach(function(m){if(!m.settled)return;var b=(m.bets||{})[pid];if(!b)return;var st=Number(b.stake)||0;var pay=(calcMatch(m).payouts[pid]||0);var t=m.dt?Date.parse(m.dt):NaN;if(!isFinite(t))t=Number(m.t)||0;evs.push({t:t,d:pay-st});});
+  evs.sort(function(a,b){return a.t-b.t;});
+  var bal=0,pts=[];evs.forEach(function(e){if(e.z)bal=0;else bal+=e.d;pts.push(Math.round(bal*100)/100);});
+  return pts;
+}
+function balSparkHtml(pid){
+  var pts=balSeriesPts(pid);
+  if(pts.length<2)return '<div class="tiny muted" style="text-align:center;padding:26px 0">אין מספיק נתונים לגרף</div>';
+  var min=Math.min.apply(null,pts),max=Math.max.apply(null,pts),n=pts.length;
+  var W=320,H=76,pl=6,pr=6,pt=6,pb=6;
+  var xf=function(i){return pl+(n===1?0:i/(n-1))*(W-pl-pr);};
+  var yf=function(v){return (max===min)?(pt+(H-pt-pb)/2):(pt+(1-(v-min)/(max-min))*(H-pt-pb));};
+  var dp=pts.map(function(v,i){return (i?"L":"M")+xf(i).toFixed(1)+" "+yf(v).toFixed(1);}).join(" ");
+  var area=dp+" L"+xf(n-1).toFixed(1)+" "+(H-pb).toFixed(1)+" L"+xf(0).toFixed(1)+" "+(H-pb).toFixed(1)+" Z";
+  var col=pts[n-1]>=pts[0]?"#178a4c":"#d64545";
+  var iMax=pts.indexOf(max),iMin=pts.indexOf(min);
+  var pctX=function(i){return (xf(i)/W*100).toFixed(1);},pctY=function(v){return (yf(v)/H*100).toFixed(1);};
+  var dot=function(v,i){return '<span style="position:absolute;left:'+pctX(i)+'%;top:'+pctY(v)+'%;transform:translate(-50%,-50%);width:6px;height:6px;border-radius:50%;background:'+col+'"></span>';};
+  var lab=function(v,i,above){return '<span dir="ltr" style="position:absolute;left:'+pctX(i)+'%;top:'+pctY(v)+'%;transform:translate(-50%,'+(above?"-135%":"35%")+');font-size:10px;font-weight:800;color:var(--tx);white-space:nowrap;font-variant-numeric:tabular-nums;pointer-events:none">'+fmt(v)+' '+cur()+'</span>';};
+  var marks=(max===min)?(dot(max,iMax)+lab(max,iMax,true)):(dot(max,iMax)+dot(min,iMin)+lab(max,iMax,true)+lab(min,iMin,false));
+  return '<div class="lbchart"><svg style="width:100%;height:100%;display:block" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none"><path d="'+area+'" fill="'+col+'" fill-opacity="0.09" stroke="none"/><path d="'+dp+'" fill="none" stroke="'+col+'" stroke-width="1.6" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/></svg>'+marks+'</div>';
+}
 function renderAllView(){
   var rk=ranking();
   var hasBet={};S.matches.forEach(function(m){if(!m.settled){var bb=m.bets||{};for(var pid in bb){if(bb[pid])hasBet[pid]=1;}}});
@@ -1244,7 +1277,7 @@ function renderAllView(){
     var withdrawn=wdOf(e.p);
     return '<div class="lb'+zc+meCls+'">'+
       '<span class="rk"'+(e.p.feePaid?' style="color:var(--tx)"':'')+'>'+medal+'</span>'+
-      '<span class="nm">'+(function(){var raw=(e.p.name||"").trim();var unpaid=!e.p.feePaid;var wrap=function(s){return unpaid?'<span class="unpaidName">'+s+'</span>':s;};
+      '<span class="nm" onclick="lbToggle(\''+e.p.id+'\')">'+(function(){var raw=(e.p.name||"").trim();var unpaid=!e.p.feePaid;var wrap=function(s){return unpaid?'<span class="unpaidName">'+s+'</span>':s;};
         if(own){var parts=raw.split(/\s+/);var first=esc(parts.shift()||"");var last=esc(parts.join(" "));return '<span class="nmtxt" dir="rtl">'+wrap(first)+'</span>'+(last?'<span class="nmtxt" dir="rtl">'+wrap(last)+'</span>':'');}
         var nm=esc(raw.length>18?raw.slice(0,18)+'…':raw);return '<span class="nmtxt" dir="rtl">'+wrap(nm)+'</span>';})()+'</span>'+
       '<span class="gp"></span>'+
@@ -1252,7 +1285,8 @@ function renderAllView(){
       '<span class="gp"></span>'+
       '<span class="bt" style="color:'+bc+'">'+fmt(tot)+'<span class="cur">'+cur()+'</span></span>'+
       '<span class="bx" style="color:'+bc+'">'+(hasBet[e.p.id]?(fmt(rbal)+'+'+fmt(e.s.pending)+' '):'')+'</span>'+
-      '</div>';
+      '</div>'+
+      '<div class="lbexp" id="lbx-'+e.p.id+'"'+(lbOpen[e.p.id]?'':' style="display:none"')+'>'+balSparkHtml(e.p.id)+'</div>';
   }).join("");
   var inHand=0,inBets=0;rk.forEach(function(e){inHand+=e.s.balance;inBets+=e.s.pending;});var poolTotal=inHand+inBets;
   var sumCell=function(lbl,val,col){return '<div style="min-width:0;text-align:center"><div class="tiny muted" style="font-weight:700;white-space:nowrap">'+lbl+'</div><div class="num" style="font-size:16px;font-weight:800;color:'+col+';white-space:nowrap">'+fmt(Math.round(val))+' '+cur()+'</div></div>';};
