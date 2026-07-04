@@ -18,17 +18,29 @@ ok(box.indexOf('\u05e0\u05d5\u05e2\u05d4')>=0,'not-entered player "נועה" lis
 ok(box.indexOf('0\u00d7')>=0,'zero visits shown as 0x');
 ok(box.indexOf('\u05dc\u05d0 \u05e0\u05db\u05e0\u05e1\u05d5')>=0,'header still counts non-entrants ("לא נכנסו")');
 ok(box.indexOf('\u00d7')>=0,'entry-count "×" indicator present');
-// вход старше 24 часов: строка остаётся в списке, счётчик за 24ч = 0
+// вход больше суток назад: строка остаётся в списке, счётчик за сегодня = 0
 A.state.tree.seen.p2={t:Date.now()-25*36e5,c:4,f:1,n:'\u05e0\u05d5\u05e2\u05d4'};
 A.sandbox.renderLogins();await flush(60);
 const box2=(A.q('#loginsBox')||{}).innerHTML||'';
-ok(box2.indexOf('\u05e0\u05d5\u05e2\u05d4')>=0,'entry older than 24h still listed (with 0x)');
-ok(box2.indexOf('0\u00d7')>=0,'older-than-24h entry counted as 0x');
+ok(box2.indexOf('\u05e0\u05d5\u05e2\u05d4')>=0,'entry older than a day still listed (with 0x)');
+ok(box2.indexOf('0\u00d7')>=0,'entry not from today counted as 0x');
 ok(box2.indexOf('\u05d3\u05e0\u05d9')>=0,'fresh entry still listed');
-// 5 входов за последние 24 часа -> счётчик 5×
+// 5 входов сегодня -> счётчик 5x
 A.state.tree.seen.p1.h=[Date.now()-1e3,Date.now()-2e3,Date.now()-3e3,Date.now()-4e3,Date.now()-5e3];
 A.sandbox.renderLogins();await flush(60);
-ok(((A.q('#loginsBox')||{}).innerHTML||'').indexOf('5\u00d7')>=0,'5 visits in last 24h shown as 5x');
+ok(((A.q('#loginsBox')||{}).innerHTML||'').indexOf('5\u00d7')>=0,'5 visits today shown as 5x');
+
+// КАЛЕНДАРНЫЙ ДЕНЬ (не скользящее окно 24ч): вход вчера 23:00 (в пределах 24ч, но до сегодняшней полуночи) -> 0x
+const mid=A.sandbox.ilWallTs(A.sandbox.ilYMD(Date.now())+"T00:00"); // начало сегодняшних суток (Израиль)
+A.state.tree.seen.p2={t:mid-3600e3,c:9,f:1,n:'נועה',h:[mid-3600e3]};
+A.sandbox.renderLogins();await flush(60);
+const box3=(A.q('#loginsBox')||{}).innerHTML||'';
+ok(box3.indexOf('נועה')>=0,'yesterday-before-midnight entry still listed');
+ok(box3.indexOf('0×')>=0,'entry within 24h but before today midnight counts as 0x (calendar day, not rolling)');
+// вход сегодня 00:01 -> 1x
+A.state.tree.seen.p2.h=[mid+60e3];A.state.tree.seen.p2.t=mid+60e3;
+A.sandbox.renderLogins();await flush(60);
+ok(((A.q('#loginsBox')||{}).innerHTML||'').indexOf('1×')>=0,'entry after today midnight counts as 1x');
 
 console.log('\n===== switch account within one session re-marks both =====');
 // \u0431\u0430\u0433 \u0431\u044b\u043b: \u0433\u043b\u043e\u0431\u0430\u043b\u044c\u043d\u044b\u0439 \u0444\u043b\u0430\u0433 _enteredThisSession \u043d\u0435 \u0441\u0431\u0440\u0430\u0441\u044b\u0432\u0430\u043b\u0441\u044f \u043f\u0440\u0438 switchMe -> \u0432\u0442\u043e\u0440\u043e\u0439 \u0438\u0433\u0440\u043e\u043a \u043d\u0435 \u043f\u0438\u0441\u0430\u043b\u0441\u044f \u0432 /seen.
