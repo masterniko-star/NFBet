@@ -1429,7 +1429,7 @@ function matchCard(m){var c=calcMatch(m);var bb=m.bets||{};var nA=0,nB=0,aA=0,aB
   var sub=m.dt?esc(fmtDate(m.dt)):((m.slot&&!canS)?esc(m.slot):"");
   var dateLine=sub?'<div class="m-date">'+sub+'</div>':'';
   var bottom;
-  if(locked){var st=(m.winner==="VOID")?"↩ בוטל — הכסף הוחזר לכולם":"✓ התוצאה סומנה והקופה חולקה";bottom='<div class="mlockst">'+st+'</div><button class="mdraw" onclick="aUnlock(\''+m.id+'\')">🔓 שנה תוצאה</button>';}
+  if(locked){var st=(m.winner==="VOID")?"↩ בוטל — הכסף הוחזר לכולם":"";bottom=(st?'<div class="mlockst">'+st+'</div>':'')+'<button class="mdraw" onclick="aUnlock(\''+m.id+'\')">🔓 שנה תוצאה</button>';}
   else if(canS){bottom='<div class="mbtnrow"><button class="mdraw mhalf" onclick="aSettle(\''+m.id+'\',\'VOID\')">ביטול · החזר קופה</button><button class="mdraw mhalf2" onclick="aSetDraw(\''+m.id+'\','+(dOK?"false":"true")+')">'+(dOK?"לבטל תיקו במשחק הזה":"להוסיף תיקו")+'</button></div>';}
   else {bottom='';}
   return '<div class="card card-p mcard'+(locked?" locked":"")+'" id="amc-'+m.id+'"><button class="xbtn" style="color:var(--red)" onclick="aDelMatch(\''+m.id+'\')">×</button>'+(m.t?'<span class="madd">'+esc(shortDT(m.t))+'</span>':'')+'<div class="mteams">'+col("A",m.teamA||"",nA,c.sumA,aA)+drawCol+col("B",m.teamB||"",nB,c.sumB,aB)+'</div>'+dateLine+bottom+'</div>';
