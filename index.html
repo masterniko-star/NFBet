@@ -1503,7 +1503,7 @@ function renderAdminMatches(){
     +'<div class="fxpanel">'
       +'<div style="display:flex;align-items:flex-start;gap:10px">'
         +'<button class="panel-h" onclick="fxListToggle()" style="flex:1;min-width:0;display:flex;align-items:flex-start;gap:8px;justify-content:space-between">'
-          +'<span style="flex:1;min-width:0"><span class="panel-t" style="font-size:15px">בחר/י טורנירים</span><span id="fxListSel" style="display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+fxSelNames()+'</span></span>'
+          +'<span style="flex:1;min-width:0"><span class="panel-t" style="font-size:15px">בחר/י טורנירים</span><span id="fxListSel" style="display:block;margin-top:2px">'+fxSelNames()+'</span></span>'
           +'<span id="fxListChev" class="panel-chev" style="padding-top:5px">'+(fxListOpen?"▲":"▼")+'</span>'
         +'</button>'
         +'<div style="flex:0 0 auto;display:flex;align-items:center;gap:6px;padding-top:1px"><label class="tiny muted" for="fxCount" style="white-space:nowrap;font-weight:700;line-height:1.15;text-align:center">מס׳ משחקים<br>מכל טורניר</label><input type="number" id="fxCount" class="input sm" min="1" max="20" step="1" value="'+fxCountLoad()+'" dir="ltr" style="width:56px;text-align:center;padding:0 6px;height:22px;font-size:15px;font-weight:700;box-sizing:border-box" onchange="fxCountChange(this.value)"></div>'
@@ -2159,7 +2159,7 @@ window.fxToggleOne=fxToggleOne;window.fxToggleAll=fxToggleAll;
 function fxSelNames(){
   fxSelInit();
   if(!fxSelOrder.length)return '<span class="tiny muted">לא נבחרו טורנירים</span>';
-  return '<span class="tiny" style="color:var(--pitch-d);font-weight:700;direction:rtl;line-height:1.4">'+fxSelOrder.map(function(s){return esc(fxSlugHe(s));}).join(' · ')+'</span>';
+  return '<span class="tiny" style="color:var(--pitch-d);font-weight:700;direction:rtl;line-height:1.4">'+fxSelOrder.map(function(s){return esc(fxSlugHe(s));}).join('<br>')+'</span>';
 }
 function fxListToggle(){
   fxListOpen=!fxListOpen;
