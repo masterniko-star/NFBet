@@ -129,7 +129,7 @@ function seedBasic(){
   r=render({MODE:'admin',ME:null,TAB:'players'}); ok(!r.err,'render admin players no throw'+(r.err?' ['+r.err+']':''));
     has(r.html,'Alice','admin players: name shown');
   r=render({MODE:'admin',ME:null,TAB:'matches'}); ok(!r.err,'render admin matches no throw'+(r.err?' ['+r.err+']':''));
-    has(r.html,'טעינת משחקים ידנית','admin matches: manual load button (טעינת משחקים ידנית)');
+    has(r.html,'טעינה ידנית','admin matches: manual load button (טעינה ידנית)');
     has(r.html,'החזר קופה','admin matches: void/refund button on card');
   r=render({MODE:'admin',ME:null,TAB:'settings'}); ok(!r.err,'render admin settings no throw'+(r.err?' ['+r.err+']':''));
 
